@@ -2,13 +2,12 @@
   "version": "2.0.0",
   "tasks": [
     {
-      // Eine laufende Tray-Instanz sperrt die DLLs im bin-Ordner und würde einen Debug-Start
-      // per Pipe "schlucken" (Single Instance). Deshalb vor jedem Build beenden.
+      // Die laufende Tray-Instanz aus bin\Debug beendet der Build selbst (Target StopRunningInstance
+      // in EdgeProfileManager.csproj); sonst würde sie DLLs sperren und den Debug-Start per Pipe "schlucken".
       "label": "build",
       "type": "process",
       "command": "dotnet",
       "args": ["build", "${workspaceFolder}/src/EdgeProfileManager/EdgeProfileManager.csproj", "-p:GenerateFullPaths=true", "-consoleloggerparameters:NoSummary"],
-      "dependsOn": ["stop running instance"],
       "group": { "kind": "build", "isDefault": true },
       "problemMatcher": "$msCompile"
     },
@@ -18,14 +17,6 @@
       "command": "dotnet",
       "args": ["build", "${workspaceFolder}/tests/EdgeProfileManager.Tests/EdgeProfileManager.Tests.csproj", "-p:GenerateFullPaths=true", "-consoleloggerparameters:NoSummary"],
       "problemMatcher": "$msCompile"
-    },
-    {
-      "label": "stop running instance",
-      "type": "process",
-      "command": "cmd.exe",
-      "args": ["/d", "/c", "taskkill /IM EdgeProfileManager.exe /F >nul 2>&1 & exit /b 0"],
-      "presentation": { "reveal": "silent" },
-      "problemMatcher": []
     }
   ]
 }
