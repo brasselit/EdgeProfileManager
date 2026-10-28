@@ -36,13 +36,13 @@
   </ItemGroup>
 
   <!--
-    Eine laufende Tray-Instanz aus diesem Ausgabeordner sperrt die DLLs. Vor dem Kopieren beenden,
-    egal ob der Build aus VS Code, C# Dev Kit oder der Konsole kommt. Instanzen an anderen Orten
-    (z.B. eine installierte Release-Version) bleiben unberührt.
+    Eine laufende Tray-Instanz aus diesem Ausgabeordner sperrt die DLLs. Vor dem Löschen (Clean,
+    Rebuild) und vor dem Kopieren beenden, egal ob der Build aus VS Code, C# Dev Kit oder der
+    Konsole kommt. Instanzen an anderen Orten (z.B. eine installierte Release-Version) bleiben unberührt.
   -->
-  <Target Name="StopRunningInstance" BeforeTargets="_CopyFilesMarkedCopyLocal;CopyFilesToOutputDirectory"
+  <Target Name="StopRunningInstance" BeforeTargets="CoreClean;_CopyFilesMarkedCopyLocal;CopyFilesToOutputDirectory"
           Condition="'$(OS)' == 'Windows_NT' And '$(DesignTimeBuild)' != 'true' And Exists('$(TargetDir)$(TargetName).exe')">
-    <Exec Command="powershell.exe -NoProfile -NonInteractive -Command &quot;Get-Process '$(TargetName)' -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq '$(TargetDir)$(TargetName).exe' } | ForEach-Object { $_.Kill(); [void]$_.WaitForExit(5000) }&quot;"
+    <Exec Command="powershell.exe -NoProfile -NonInteractive -Command &quot;Get-Process '$(TargetName)' -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq '$(TargetDir)$(TargetName).exe' } | ForEach-Object { $_.Kill(); [void]$_.WaitForExit(5000) }; exit 0&quot;"
           ContinueOnError="true" StandardOutputImportance="low" />
   </Target>
 
