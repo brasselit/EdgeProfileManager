@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 using EdgeProfileManager.Core.Edge;
 
 namespace EdgeProfileManager;

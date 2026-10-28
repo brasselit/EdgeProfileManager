@@ -17,6 +17,27 @@ Ein Tray- und Taskbar-Tool, um Edge-Profile aller Channels (Stable, Beta, Dev, C
   - Änderungen an `config.json` werden sofort übernommen.
   - Neue oder umbenannte Edge-Profile werden erkannt, weil das Tool die `Local State`-Dateien überwacht.
 
+## Profilverwaltung (Phase 3)
+
+Tray-Menü › **Profile verwalten…** oder `EdgeProfileManager.exe --manage` öffnet ein Fenster mit den Profilen aller Instanzen in Spalten. Profilfarben werden dort als farbiger Balken angezeigt.
+
+| Aktion | Beschreibung |
+|---|---|
+| Öffnen | Profil starten oder zu dessen Fenster wechseln (auch per Doppelklick) |
+| Neues Profil | Name, E-Mail und optional ein PNG-Avatar; die E-Mail landet in `customer-profile.json` |
+| Umbenennen, Avatar | Wie im Script: Änderungen in `Preferences` und `Local State` |
+| **Farbe** | Setzt das Farbdesign des Profils (wie „Darstellung › Farbe“ in Edge) sowie die Avatar- und Hervorhebungsfarbe. Auswahl aus einer Palette oder frei. Die Farbe erscheint auch als Punkt am Profil-Icon im Tray-Menü. |
+| Übertragen | Kopieren in eine andere Instanz (neues oder vorhandenes Zielprofil) oder **geprüft verschieben**: Jede Datei wird mit SHA256 geprüft, die Quelle erst danach gelöscht. Verweise in `config.json` werden automatisch nachgeführt. Auch per Drag-and-drop zwischen den Spalten möglich; Strg erzwingt Kopieren. |
+| Backup, Wiederherstellen | ZIP mit `meta.json`, kompatibel zu den Backups des Scripts. Umfang: ausgewähltes Profil, aktive Instanz oder alle Instanzen. |
+| Profilordner, Löschen | Profilordner im Explorer öffnen bzw. Profil löschen und aus `Local State` austragen. Löschen erst nach Rückfrage. |
+
+Diese Optionen gelten für Backup, Restore und Übertragen:
+- **Nur lokale Daten**: überträgt Local Storage, IndexedDB usw. statt des ganzen Profils.
+- **Caches einschliessen**
+- **Quelle darf laufen**: erlaubt Backup oder Kopie bei geöffnetem Edge.
+
+Läuft eine betroffene Edge-Instanz, fragt das Tool nach, ob sie beendet werden soll. Es schliesst zuerst die Fenster regulär und beendet danach verbleibende Prozesse.
+
 ## Bauen und starten
 
 ```powershell
@@ -38,6 +59,7 @@ Danach von dort starten. Die Startmenü-Verknüpfung wird dabei automatisch auf 
 |---|---|
 | *(ohne Argumente)* | Profilmenü an der Maus anzeigen (startet bei Bedarf im Tray) |
 | `--background` | Nur im Tray starten (wird für Autostart verwendet) |
+| `--manage` | Verwaltungsfenster öffnen |
 | `--open "Stable/Profile 1" [--new-window]` | Profil aktivieren oder starten (wird von der Jump List verwendet) |
 | `--dump-windows` | Edge-Fenster mit erkanntem Profil, Desktop-Status und AUMID ausgeben |
 | `--reload`, `--exit` | Konfiguration neu laden bzw. Tray-Instanz beenden |
@@ -112,5 +134,5 @@ Das Testprojekt hat keine NuGet-Abhängigkeiten und bringt einen minimalen eigen
 
 ## Nächste Schritte
 
-- **Phase 3:** Profilverwaltung nach C# portieren (Backup/Restore, Neu, Umbenennen, Avatar, Löschen, Verschieben in andere Instanz …). Die Funktionsliste legen wir vorher gemeinsam fest.
+- **Phase 3:** erledigt (siehe Profilverwaltung).
 - **Phase 4:** Grafischer Editor für den Menübaum.

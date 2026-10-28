@@ -17,6 +17,8 @@ internal static partial class Native
     [DllImport("user32.dll")] public static extern bool BringWindowToTop(nint hwnd);
     [DllImport("user32.dll")] public static extern bool ShowWindow(nint hwnd, int cmd);
     [DllImport("user32.dll")] public static extern bool AllowSetForegroundWindow(int processId);
+    [DllImport("user32.dll")] public static extern bool PostMessage(nint hwnd, uint msg, nint wParam, nint lParam);
+    public const uint WM_CLOSE = 0x0010;
     [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(nint hwnd, out uint processId);
     [DllImport("user32.dll")] public static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool attach);
     [DllImport("kernel32.dll")] public static extern uint GetCurrentThreadId();

@@ -72,6 +72,27 @@ public static class MenuResolver
         return result;
     }
 
+    /// <summary>Ersetzt alle Verweise auf ein Profil, z.B. nach dem Verschieben in eine andere Instanz. Liefert die Anzahl.</summary>
+    public static int ReplaceProfileReference(AppConfig config, string oldKey, string newKey)
+    {
+        var count = 0;
+        Replace(config.Menu);
+        return count;
+
+        void Replace(IEnumerable<MenuEntry>? entries)
+        {
+            foreach (var entry in entries ?? [])
+            {
+                if (entry.Profile is not null && string.Equals(NormalizeReference(entry.Profile), oldKey, StringComparison.OrdinalIgnoreCase))
+                {
+                    entry.Profile = newKey;
+                    count++;
+                }
+                Replace(entry.Children);
+            }
+        }
+    }
+
     /// <summary>"stable/profile 1" → "Stable/Profile 1"; unbekannte Channels bleiben unverändert.</summary>
     public static string NormalizeReference(string reference)
     {

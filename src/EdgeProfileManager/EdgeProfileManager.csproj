@@ -21,6 +21,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- WinForms (Tray) und WPF (Fenster) teilen viele Typnamen; WinForms nur dort einbinden, wo es gebraucht wird. -->
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Include="Assets\app.ico" LogicalName="app.ico" />
     <!-- Optional: VirtualDesktopAccessor.dll für die Desktop-Zuordnung (siehe README). -->
     <None Include="..\..\lib\VirtualDesktopAccessor.dll" Condition="Exists('..\..\lib\VirtualDesktopAccessor.dll')">

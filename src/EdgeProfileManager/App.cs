@@ -3,6 +3,7 @@ using System.Windows;
 using EdgeProfileManager.Core.Config;
 using EdgeProfileManager.Core.Desktops;
 using EdgeProfileManager.Core.Edge;
+using EdgeProfileManager.Core.Management;
 using Application = System.Windows.Application;
 
 namespace EdgeProfileManager;
@@ -17,6 +18,7 @@ public sealed class App : Application
     private JumpListBuilder _jumpList = null!;
     private TrayIcon _tray = null!;
     private Timer? _profileDebounce;
+    private ManagementWindow? _managementWindow;
 
     public App(CommandLine initialCommand, SingleInstance instance)
     {
@@ -30,6 +32,8 @@ public sealed class App : Application
     public EdgeWindowFinder Finder { get; } = new();
     public IVirtualDesktopService Desktops { get; private set; } = new NullVirtualDesktopService();
     public ProfileLauncher Launcher { get; private set; } = null!;
+    public IEdgeProcessGuard Guard { get; private set; } = null!;
+    public ProfileManager Manager { get; private set; } = null!;
     public AppConfig Config { get; private set; } = new();
     public string ConfigPath => _configStore.Path;
     public IReadOnlyList<EdgeProfile> Profiles { get; private set; } = [];
@@ -51,6 +55,8 @@ public sealed class App : Application
         if (desktopError is not null) AppLog.Write(desktopError);
         Launcher = new ProfileLauncher(Environment, Discovery, Finder, Desktops);
         Launcher.Log += AppLog.Write;
+        Guard = new EdgeProcessGuard(Finder);
+        Manager = new ProfileManager(Environment, Guard, new RobocopyProfileCopier());
         _jumpList = new JumpListBuilder(Environment);
         _tray = new TrayIcon(this);
 
@@ -87,6 +93,9 @@ public sealed class App : Application
             case CommandKind.ShowMenu:
                 _tray.ShowMenu();
                 break;
+            case CommandKind.Manage:
+                ShowManagementWindow();
+                break;
             case CommandKind.Reload:
                 LoadConfig(initial: false);
                 break;
@@ -115,6 +124,34 @@ public sealed class App : Application
             AppLog.Write($"Öffnen von {key} fehlgeschlagen: {ex}");
             _tray.ShowError(ex.Message);
         }
+    }
+
+    public void ShowManagementWindow()
+    {
+        if (_managementWindow is null)
+        {
+            _managementWindow = new ManagementWindow(this);
+            _managementWindow.Closed += (_, _) => _managementWindow = null;
+            _managementWindow.Show();
+        }
+        if (_managementWindow.WindowState == WindowState.Minimized) _managementWindow.WindowState = WindowState.Normal;
+        _managementWindow.Activate();
+    }
+
+    /// <summary>Ändert die Konfiguration und speichert sie; der Datei-Watcher lädt sie danach neu.</summary>
+    public void UpdateConfig(Action<AppConfig> change)
+    {
+        change(Config);
+        _configStore.Save(Config);
+    }
+
+    /// <summary>Stellt Verweise in der Konfiguration um, z.B. nach dem Verschieben eines Profils.</summary>
+    public int ReplaceProfileReference(string oldKey, string newKey)
+    {
+        var count = 0;
+        UpdateConfig(c => count = MenuResolver.ReplaceProfileReference(c, oldKey, newKey));
+        RefreshProfiles();
+        return count;
     }
 
     /// <summary>Schlüssel der Profile, die aktuell mindestens ein Fenster haben.</summary>

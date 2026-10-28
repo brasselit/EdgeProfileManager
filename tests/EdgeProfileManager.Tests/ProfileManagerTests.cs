@@ -1,0 +1,210 @@
+using System.Text.Json.Nodes;
+using EdgeProfileManager.Core.Config;
+using EdgeProfileManager.Core.Edge;
+using EdgeProfileManager.Core.Management;
+
+namespace EdgeProfileManager.Tests;
+
+/// <summary>Port der Szenarien aus proprietary/EdgeProfile.Tests.ps1 (isoliert, ohne echte Edge-Profile).</summary>
+internal sealed class ProfileManagerTests : IDisposable
+{
+    private const string OnePixelPng = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a7WQAAAAASUVORK5CYII=";
+
+    private readonly FakeEdge _edge = new();
+    private readonly FakeGuard _guard = new();
+    private readonly TestCopier _copier = new();
+    private readonly ProfileManager _manager;
+
+    public ProfileManagerTests()
+    {
+        foreach (var channel in EdgeChannels.All)
+        {
+            var userData = _edge.Environment.UserDataDir(channel);
+            Directory.CreateDirectory(userData);
+            File.WriteAllText(Path.Combine(userData, "Local State"), """{"profile":{"info_cache":{},"profiles_order":["Default"]}}""");
+        }
+        _manager = new ProfileManager(_edge.Environment, _guard, _copier);
+    }
+
+    private string NewTestProfile(EdgeChannel channel, string folder)
+    {
+        var dir = _edge.AddProfile(channel, folder, "Test customer", customerUser: "test@example.invalid");
+        Directory.CreateDirectory(Path.Combine(dir, "Cache"));
+        File.WriteAllText(Path.Combine(dir, "Cache", "ignored.txt"), "cache");
+        File.WriteAllText(Path.Combine(dir, "Preferences"), """{"profile":{"name":"Test customer"}}""");
+        return dir;
+    }
+
+    private JsonNode LocalState(EdgeChannel channel) => ProfileDiscovery.ReadLocalState(_edge.Environment.UserDataDir(channel))!;
+
+    [Test]
+    public void CopyKeepsSourceAndExcludesCaches()
+    {
+        var source = NewTestProfile(EdgeChannel.Stable, "Profile 1");
+
+        var folder = _manager.Copy(EdgeChannel.Stable, EdgeChannel.Beta, "Profile 1", null, new TransferOptions());
+
+        var destination = Path.Combine(_edge.Environment.UserDataDir(EdgeChannel.Beta), folder);
+        Assert.True(Directory.Exists(source), "Quelle bleibt erhalten");
+        Assert.Equal(File.ReadAllText(Path.Combine(source, "Preferences")), File.ReadAllText(Path.Combine(destination, "Preferences")));
+        Assert.True(!File.Exists(Path.Combine(destination, "Cache", "ignored.txt")), "Caches standardmässig ausgeschlossen");
+        Assert.True(LocalState(EdgeChannel.Beta)["profile"]!["profiles_order"]!.AsArray().Any(n => (string?)n == folder), "profiles_order ergänzt");
+    }
+
+    [Test]
+    public void VerifiedMoveRemovesSourceOnlyAfterCopying()
+    {
+        var source = NewTestProfile(EdgeChannel.Stable, "Profile 1");
+
+        var folder = _manager.MoveVerified(EdgeChannel.Stable, EdgeChannel.Dev, "Profile 1", new TransferOptions());
+
+        Assert.True(!Directory.Exists(source), "Quelle gelöscht");
+        Assert.True(LocalState(EdgeChannel.Stable)["profile"]!["info_cache"]!["Profile 1"] is null, "Quelle ausgetragen");
+        Assert.True(LocalState(EdgeChannel.Dev)["profile"]!["info_cache"]![folder] is not null, "Ziel registriert");
+    }
+
+    [Test]
+    public void PartialOrLiveMovesAreRejected()
+    {
+        var source = NewTestProfile(EdgeChannel.Stable, "Profile 2");
+        Assert.Throws<InvalidOperationException>(() => _manager.MoveVerified(EdgeChannel.Stable, EdgeChannel.Beta, "Profile 2", new TransferOptions { LocalOnly = true }));
+        Assert.Throws<InvalidOperationException>(() => _manager.MoveVerified(EdgeChannel.Stable, EdgeChannel.Beta, "Profile 2", new TransferOptions { AllowRunningSource = true }));
+        Assert.True(Directory.Exists(source));
+    }
+
+    [Test]
+    public void IncludeCachesPreservesCacheFiles()
+    {
+        NewTestProfile(EdgeChannel.Stable, "Profile 2");
+        var folder = _manager.MoveVerified(EdgeChannel.Stable, EdgeChannel.Canary, "Profile 2", new TransferOptions { IncludeCaches = true });
+        Assert.True(File.Exists(Path.Combine(_edge.Environment.UserDataDir(EdgeChannel.Canary), folder, "Cache", "ignored.txt")));
+    }
+
+    [Test]
+    public void CorruptTargetNeverDeletesSource()
+    {
+        var source = NewTestProfile(EdgeChannel.Stable, "Profile 3");
+        _copier.AfterCopy = destination => File.WriteAllText(Path.Combine(destination, "Preferences"), "corrupted");
+
+        var error = Catch(() => _manager.MoveVerified(EdgeChannel.Stable, EdgeChannel.Beta, "Profile 3", new TransferOptions()));
+
+        Assert.True(error?.Message.Contains("Prüfung fehlgeschlagen") == true, error?.Message ?? "kein Fehler");
+        Assert.True(Directory.Exists(source));
+    }
+
+    [Test]
+    public void FailedCopyNeverDeletesSource()
+    {
+        var source = NewTestProfile(EdgeChannel.Stable, "Profile 4");
+        _copier.Fail = true;
+
+        var error = Catch(() => _manager.MoveVerified(EdgeChannel.Stable, EdgeChannel.Beta, "Profile 4", new TransferOptions()));
+
+        Assert.Equal("Simulated copy failure", error?.Message);
+        Assert.True(Directory.Exists(source));
+    }
+
+    [Test]
+    public void RunningEdgeIsReportedWithChannel()
+    {
+        NewTestProfile(EdgeChannel.Stable, "Profile 1");
+        _guard.Running.Add(EdgeChannel.Beta);
+
+        var error = Catch(() => _manager.Copy(EdgeChannel.Stable, EdgeChannel.Beta, "Profile 1", null, new TransferOptions()));
+
+        Assert.Equal(EdgeChannel.Beta, Assert.IsType<EdgeRunningException>(error).Channel);
+    }
+
+    [Test]
+    public void CreateRenameAvatarColorBackupRestore()
+    {
+        var created = _manager.Create(EdgeChannel.Dev, "Created test", "new@example.invalid");
+        Assert.Equal("new@example.invalid", created.User);
+        Assert.Equal("Profile 1", created.Folder);
+        Assert.Throws<InvalidOperationException>(() => _manager.Create(EdgeChannel.Dev, "Created test", "x@example.invalid"));
+
+        _manager.Rename(EdgeChannel.Dev, created.Folder, "Renamed test");
+        Assert.Equal("Renamed test", _manager.GetProfile(EdgeChannel.Dev, created.Folder).Name);
+
+        var avatar = Path.Combine(_edge.Root, "avatar.png");
+        File.WriteAllBytes(avatar, Convert.FromBase64String(OnePixelPng));
+        _manager.SetAvatar(EdgeChannel.Dev, created.Folder, avatar);
+        Assert.True(File.Exists(Path.Combine(created.Path, "Google Profile Picture.png")), "Avatar kopiert");
+
+        _manager.SetColor(EdgeChannel.Dev, created.Folder, 0x1E90FF);
+        Assert.Equal(0x1E90FF, _manager.GetProfile(EdgeChannel.Dev, created.Folder).Color);
+        var preferences = JsonNode.Parse(File.ReadAllText(Path.Combine(created.Path, "Preferences")))!;
+        Assert.Equal("autogenerated_theme_id", (string?)preferences["extensions"]!["theme"]!["id"]);
+        Assert.Equal(unchecked((int)0xFF1E90FF), (int)preferences["autogenerated"]!["theme"]!["color"]!);
+        Assert.Equal("Renamed test", (string?)preferences["profile"]!["name"]);
+
+        Directory.CreateDirectory(Path.Combine(created.Path, "Local Storage"));
+        File.WriteAllText(Path.Combine(created.Path, "Local Storage", "test.txt"), "local test data");
+        var zip = _manager.Backup(EdgeChannel.Dev, created.Folder, Path.Combine(_edge.Root, "Backups"), new TransferOptions());
+        Assert.True(File.Exists(zip), "Backup erzeugt ZIP");
+
+        _manager.Restore(EdgeChannel.Beta, zip, "Profile 20", new TransferOptions());
+        Assert.Equal("Renamed test", _manager.GetProfile(EdgeChannel.Beta, "Profile 20").Name);
+        Assert.Throws<InvalidOperationException>(() => _manager.Restore(EdgeChannel.Beta, zip, "Profile 20", new TransferOptions()));
+        _manager.Restore(EdgeChannel.Beta, zip, "Profile 20", new TransferOptions { ReplaceExisting = true });
+
+        _manager.Restore(EdgeChannel.Beta, zip, "Profile 21", new TransferOptions { LocalOnly = true });
+        Assert.True(File.Exists(Path.Combine(_edge.Environment.UserDataDir(EdgeChannel.Beta), "Profile 21", "Local Storage", "test.txt")), "LocalOnly stellt lokale Daten her");
+    }
+
+    [Test]
+    public void DeleteRemovesFolderAndRegistration()
+    {
+        var dir = NewTestProfile(EdgeChannel.Canary, "Profile 1");
+        _manager.Delete(EdgeChannel.Canary, "Test customer");
+        Assert.True(!Directory.Exists(dir));
+        Assert.True(LocalState(EdgeChannel.Canary)["profile"]!["info_cache"]!["Profile 1"] is null);
+    }
+
+    [Test]
+    public void RejectsInvalidAvatar()
+    {
+        var notPng = Path.Combine(_edge.Root, "fake.png");
+        File.WriteAllText(notPng, "kein png");
+        Assert.Throws<ArgumentException>(() => ProfileManager.ValidateAvatar(notPng));
+    }
+
+    [Test]
+    public void ReplaceProfileReferenceUpdatesNestedEntries()
+    {
+        var config = ConfigStore.Parse("""{"menu":[{"group":"A","children":[{"profile":"stable/Profile 1"}]},{"profile":"Stable/Profile 1"},{"profile":"Beta/Profile 1"}]}""");
+        Assert.Equal(2, MenuResolver.ReplaceProfileReference(config, "Stable/Profile 1", "Dev/Profile 3"));
+        Assert.Equal("Dev/Profile 3", config.Menu[0].Children![0].Profile);
+        Assert.Equal("Beta/Profile 1", config.Menu[2].Profile);
+    }
+
+    private static Exception? Catch(Action action)
+    {
+        try { action(); return null; }
+        catch (Exception ex) { return ex; }
+    }
+
+    public void Dispose() => _edge.Dispose();
+
+    private sealed class FakeGuard : IEdgeProcessGuard
+    {
+        public HashSet<EdgeChannel> Running { get; } = [];
+        public bool IsRunning(EdgeChannel channel) => Running.Contains(channel);
+        public void Close(EdgeChannel channel) => Running.Remove(channel);
+    }
+
+    /// <summary>Echte Kopie (robocopy) mit optionaler Fehler- bzw. Manipulations-Simulation.</summary>
+    private sealed class TestCopier : IProfileCopier
+    {
+        private readonly RobocopyProfileCopier _inner = new();
+        public bool Fail { get; set; }
+        public Action<string>? AfterCopy { get; set; }
+
+        public void Copy(string source, string destination, bool includeCaches)
+        {
+            if (Fail) throw new IOException("Simulated copy failure");
+            _inner.Copy(source, destination, includeCaches);
+            AfterCopy?.Invoke(destination);
+        }
+    }
+}

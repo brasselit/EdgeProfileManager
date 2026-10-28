@@ -5,6 +5,9 @@ namespace EdgeProfileManager.Core.Edge;
 
 public sealed record EdgeProfile(EdgeChannel Channel, string Folder, string Name, string? User, string Path, string? IconPath)
 {
+    /// <summary>Profilfarbe aus Local State (profile_highlight_color) als 0xRRGGBB, falls gesetzt.</summary>
+    public int? Color { get; init; }
+
     /// <summary>Stabile Referenz "Channel/Folder", wie sie in der Konfiguration verwendet wird.</summary>
     public string Key => $"{Channel}/{Folder}";
 }
@@ -33,7 +36,8 @@ public sealed partial class ProfileDiscovery(EdgeEnvironment environment)
             var name = (string?)info?["name"] ?? folder;
             var user = ReadCustomerUser(dir) ?? NullIfEmpty((string?)info?["user_name"]);
             var icon = System.IO.Path.Combine(dir, "Edge Profile.ico");
-            result.Add(new EdgeProfile(channel, folder, name, user, dir, File.Exists(icon) ? icon : null));
+            var color = info?["profile_highlight_color"] is JsonValue value && value.TryGetValue<long>(out var argb) ? (int)(argb & 0xFFFFFF) : (int?)null;
+            result.Add(new EdgeProfile(channel, folder, name, user, dir, File.Exists(icon) ? icon : null) { Color = color });
         }
         result.Sort((a, b) => FolderSortKey(a.Folder).CompareTo(FolderSortKey(b.Folder)));
         return result;

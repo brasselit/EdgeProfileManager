@@ -1,3 +1,5 @@
+using System.Drawing;
+using System.Windows.Forms;
 using System.Reflection;
 using EdgeProfileManager.Core.Config;
 
@@ -56,6 +58,7 @@ public sealed class TrayIcon : IDisposable
         if (_app.Menu.Nodes.Count == 0) _menu.Items.Add(new ToolStripMenuItem("Keine Edge-Profile gefunden") { Enabled = false });
 
         _menu.Items.Add(new ToolStripSeparator());
+        _menu.Items.Add("Profile verwalten…", null, (_, _) => _app.ShowManagementWindow());
         _menu.Items.Add(BuildSettingsMenu());
         _menu.Items.Add("Beenden", null, (_, _) => _app.Shutdown());
         _menu.ResumeLayout();
@@ -89,7 +92,7 @@ public sealed class TrayIcon : IDisposable
     private ToolStripMenuItem CreateProfileItem(ProfileNode node, bool isRunning)
     {
         var profile = node.Profile;
-        var item = new ToolStripMenuItem(node.Title, GetIcon(profile.IconPath))
+        var item = new ToolStripMenuItem(node.Title, GetIcon(profile.IconPath, profile.Color))
         {
             ToolTipText = $"Edge {profile.Channel} – {profile.Folder}" +
                 (profile.User is null ? "" : $"\n{profile.User}") +
@@ -150,16 +153,38 @@ public sealed class TrayIcon : IDisposable
         }
     }
 
-    private Image? GetIcon(string? path)
+    /// <summary>Profil-Icon von Edge; mit gesetzter Profilfarbe zusätzlich ein Farbpunkt unten rechts.</summary>
+    private Image? GetIcon(string? path, int? color)
     {
-        if (path is null || !File.Exists(path)) return null;
-        var modified = File.GetLastWriteTimeUtc(path);
-        if (_icons.TryGetValue(path, out var cached) && cached.Modified == modified) return cached.Image;
+        var hasIcon = path is not null && File.Exists(path);
+        if (!hasIcon && color is null) return null;
+        var key = $"{path}|{color}";
+        var modified = hasIcon ? File.GetLastWriteTimeUtc(path!) : DateTime.MinValue;
+        if (_icons.TryGetValue(key, out var cached) && cached.Modified == modified) return cached.Image;
         try
         {
-            using var icon = new Icon(path, SystemInformation.SmallIconSize);
-            var image = icon.ToBitmap();
-            _icons[path] = (modified, image);
+            var size = SystemInformation.SmallIconSize;
+            var image = new Bitmap(size.Width, size.Height);
+            using (var graphics = Graphics.FromImage(image))
+            {
+                graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                if (hasIcon)
+                {
+                    using var icon = new Icon(path!, size);
+                    graphics.DrawIcon(icon, new Rectangle(Point.Empty, size));
+                }
+                if (color is { } rgb)
+                {
+                    var dot = hasIcon ? size.Width * 0.55f : size.Width - 2f;
+                    var rect = new RectangleF(size.Width - dot - 0.5f, size.Height - dot - 0.5f, dot, dot);
+                    using var fill = new SolidBrush(Color.FromArgb(rgb | unchecked((int)0xFF000000)));
+                    using var outline = new Pen(Color.White, 1.5f);
+                    graphics.FillEllipse(fill, rect);
+                    graphics.DrawEllipse(outline, rect);
+                }
+            }
+            if (_icons.Remove(key, out var old)) old.Image.Dispose();
+            _icons[key] = (modified, image);
             return image;
         }
         catch (Exception ex) when (ex is ArgumentException or IOException)

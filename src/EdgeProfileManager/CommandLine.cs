@@ -1,6 +1,6 @@
 namespace EdgeProfileManager;
 
-public enum CommandKind { ShowMenu, Background, Open, DumpWindows, Reload, Exit, Invalid }
+public enum CommandKind { ShowMenu, Background, Open, Manage, DumpWindows, Reload, Exit, Invalid }
 
 /// <summary>
 /// Befehlszeile. Ohne Argumente (z.B. Klick auf die angeheftete Taskbar-Schaltfläche) wird das
@@ -26,6 +26,7 @@ public sealed record CommandLine(CommandKind Kind, string? ProfileKey = null, bo
                 case "--new-window": newWindow = true; break;
                 case "--background": kind = CommandKind.Background; break;
                 case "--menu": kind = CommandKind.ShowMenu; break;
+                case "--manage": kind = CommandKind.Manage; break;
                 case "--dump-windows": kind = CommandKind.DumpWindows; break;
                 case "--reload": kind = CommandKind.Reload; break;
                 case "--exit": kind = CommandKind.Exit; break;
@@ -42,6 +43,7 @@ public sealed record CommandLine(CommandKind Kind, string? ProfileKey = null, bo
         EdgeProfileManager.exe                     Profilmenü anzeigen (startet bei Bedarf im Tray)
         EdgeProfileManager.exe --background        Nur im Tray starten (Autostart)
         EdgeProfileManager.exe --open "Stable/Profile 1" [--new-window]
+        EdgeProfileManager.exe --manage            Verwaltungsfenster öffnen
         EdgeProfileManager.exe --dump-windows      Edge-Fenster mit Profil und AUMID auflisten
         EdgeProfileManager.exe --reload | --exit
         """;
