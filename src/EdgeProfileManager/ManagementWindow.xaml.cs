@@ -370,18 +370,22 @@ public partial class ManagementWindow : Window
         {
             for (var attempt = 0; ; attempt++)
             {
-                try
+                // EdgeRunningException schon im Hintergrund abfangen: Würde sie Task.Run verlassen,
+                // hielte der Debugger (Just My Code) sie für unbehandelt, obwohl hier nachgefragt wird.
+                var (result, running) = await Task.Run<(T?, EdgeRunningException?)>(() =>
                 {
-                    var result = await Task.Run(() => work(_app.Manager));
+                    try { return (work(_app.Manager), null); }
+                    catch (EdgeRunningException ex) { return (null, ex); }
+                });
+                if (running is null)
+                {
                     Status.Text = "Aktion abgeschlossen.";
                     return result;
                 }
-                catch (EdgeRunningException ex) when (attempt < 3)
-                {
-                    if (!Confirm($"Edge {ex.Channel} läuft noch.\n\nEdge {ex.Channel} jetzt beenden und fortfahren? Nicht gespeicherte Eingaben können verloren gehen.")) throw;
-                    AddLog($"Beende Edge {ex.Channel} …");
-                    await Task.Run(() => _app.Guard.Close(ex.Channel));
-                }
+                if (attempt >= 3) throw running;
+                if (!Confirm($"Edge {running.Channel} läuft noch.\n\nEdge {running.Channel} jetzt beenden und fortfahren? Nicht gespeicherte Eingaben können verloren gehen.")) throw running;
+                AddLog($"Beende Edge {running.Channel} …");
+                await Task.Run(() => _app.Guard.Close(running.Channel));
             }
         }
         catch (Exception ex)
