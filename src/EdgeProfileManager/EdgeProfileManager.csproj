@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\EdgeProfileManager.Core\EdgeProfileManager.Core.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <StartupObject>EdgeProfileManager.Program</StartupObject>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <AssemblyTitle>Edge Profile Manager</AssemblyTitle>
+    <Product>Edge Profile Manager</Product>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- DPI-Awareness kommt bewusst aus dem Manifest, da WPF und nicht WinForms die Anwendung startet. -->
+    <NoWarn>$(NoWarn);WFO0003</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\app.ico" LogicalName="app.ico" />
+    <!-- Optional: VirtualDesktopAccessor.dll für die Desktop-Zuordnung (siehe README). -->
+    <None Include="..\..\lib\VirtualDesktopAccessor.dll" Condition="Exists('..\..\lib\VirtualDesktopAccessor.dll')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>VirtualDesktopAccessor.dll</Link>
+    </None>
+  </ItemGroup>
+
+</Project>

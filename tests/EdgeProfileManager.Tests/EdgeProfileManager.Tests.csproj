@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Bewusst ohne NuGet-Pakete (auf dem Entwicklungsrechner ist keine Paketquelle konfiguriert).
+       Ausführen siehe README (dotnet run im Testprojekt). -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\EdgeProfileManager.Core\EdgeProfileManager.Core.csproj" />
+  </ItemGroup>
+
+</Project>
