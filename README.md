@@ -150,7 +150,6 @@ Das Testprojekt hat keine NuGet-Abhängigkeiten und bringt einen minimalen eigen
   - Fenstersuche über AppUserModelID (`MSEdge`, `MSEdge.UserData.Profile1`, …)
   - Launcher, Konfiguration, virtuelle Desktops
 - `src/EdgeProfileManager`: WPF/WinForms-Tray-App mit Tray-Menü, Jump List, Single Instance, Autostart und Startmenü-Verknüpfung
-- `proprietary/`: Ursprüngliches PowerShell-Script. Dient als Vorlage für die Portierung der Verwaltungsfunktionen in Phase 3.
 
 ## Nächste Schritte
 

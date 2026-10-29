@@ -5,7 +5,7 @@ using EdgeProfileManager.Core.Management;
 
 namespace EdgeProfileManager.Tests;
 
-/// <summary>Port der Szenarien aus proprietary/EdgeProfile.Tests.ps1 (isoliert, ohne echte Edge-Profile).</summary>
+/// <summary>Szenarien der Profilverwaltung (isoliert, ohne echte Edge-Profile).</summary>
 internal sealed class ProfileManagerTests : IDisposable
 {
     private const string OnePixelPng = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a7WQAAAAASUVORK5CYII=";
