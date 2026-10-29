@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/EdgeProfileManager.Core/EdgeProfileManager.Core.csproj" />
+    <Project Path="src/EdgeProfileManager/EdgeProfileManager.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/EdgeProfileManager.Tests/EdgeProfileManager.Tests.csproj" />
+  </Folder>
+</Solution>

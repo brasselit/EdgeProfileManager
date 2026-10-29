@@ -1,0 +1,22 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      // The build itself stops the running tray instance from bin\Debug (target StopRunningInstance
+      // in EdgeProfileManager.csproj); otherwise it would lock DLLs and "swallow" the debug launch via the pipe.
+      "label": "build",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["build", "${workspaceFolder}/src/EdgeProfileManager/EdgeProfileManager.csproj", "-p:GenerateFullPaths=true", "-consoleloggerparameters:NoSummary"],
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build tests",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["build", "${workspaceFolder}/tests/EdgeProfileManager.Tests/EdgeProfileManager.Tests.csproj", "-p:GenerateFullPaths=true", "-consoleloggerparameters:NoSummary"],
+      "problemMatcher": "$msCompile"
+    }
+  ]
+}

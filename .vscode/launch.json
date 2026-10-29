@@ -1,0 +1,60 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Tray (show menu)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/src/EdgeProfileManager/bin/Debug/net10.0-windows/EdgeProfileManager.exe",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "console": "internalConsole",
+      "stopAtEntry": false
+    },
+    {
+      "name": "Tray (background only)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/src/EdgeProfileManager/bin/Debug/net10.0-windows/EdgeProfileManager.exe",
+      "args": ["--background"],
+      "cwd": "${workspaceFolder}",
+      "console": "internalConsole"
+    },
+    {
+      "name": "Open profile (--open)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/src/EdgeProfileManager/bin/Debug/net10.0-windows/EdgeProfileManager.exe",
+      "args": ["--open", "${input:profileKey}"],
+      "cwd": "${workspaceFolder}",
+      "console": "internalConsole"
+    },
+    {
+      "name": "Tests",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build tests",
+      "program": "${workspaceFolder}/tests/EdgeProfileManager.Tests/bin/Debug/net10.0-windows/EdgeProfileManager.Tests.exe",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "console": "internalConsole"
+    },
+    {
+      "name": "Attach to running instance",
+      "type": "coreclr",
+      "request": "attach",
+      "processName": "EdgeProfileManager.exe"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "profileKey",
+      "type": "promptString",
+      "description": "Profile reference channel/folder",
+      "default": "Stable/Default"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Intentionally without NuGet packages; uses a minimal built-in test runner.
+       Run with "dotnet run" in this project (see README). -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\EdgeProfileManager.Core\EdgeProfileManager.Core.csproj" />
+  </ItemGroup>
+
+</Project>
