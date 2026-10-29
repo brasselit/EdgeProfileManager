@@ -40,6 +40,19 @@ internal sealed class LocalizationTests
         Assert.True(problems.Count == 0, string.Join(Environment.NewLine, problems));
     }
 
+    [Test]
+    public void XamlBindingsUseExistingKeys()
+    {
+        var app = Path.Combine(FindRepositoryRoot(), "src", "EdgeProfileManager");
+        var keys = Read(Path.Combine(app, "Resources", "BoardStrings.resx")).Keys.ToHashSet();
+        var missing = Directory.EnumerateFiles(app, "*.xaml", SearchOption.AllDirectories)
+            .SelectMany(f => Regex.Matches(File.ReadAllText(f), @"\{Binding \[(\w+)\], Source=\{StaticResource Board\}\}")
+                .Select(m => $"{Path.GetFileName(f)}: {m.Groups[1].Value}"))
+            .Where(k => !keys.Contains(k.Split(": ")[1]))
+            .ToList();
+        Assert.True(missing.Count == 0, "Unknown resource keys: " + string.Join(", ", missing));
+    }
+
     private static Dictionary<string, string> Read(string file) =>
         XDocument.Load(file).Root!.Elements("data")
             .ToDictionary(d => (string)d.Attribute("name")!, d => (string?)d.Element("value") ?? "");

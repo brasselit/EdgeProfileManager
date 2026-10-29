@@ -120,7 +120,7 @@ public static class MenuBoard
     public static void Place(AppConfig config, MenuEntry entry, List<MenuEntry> target, MenuEntry? before)
     {
         if (ReferenceEquals(entry, before)) return;
-        if (entry.Group is not null && Contains(entry, target)) throw new InvalidOperationException("A group cannot be moved into itself.");
+        if (entry.Group is not null && Contains(entry, target)) throw new InvalidOperationException(Strings.Error_GroupIntoItself);
         FindParent(config, entry)?.Remove(entry);
         Insert(target, entry, before);
     }

@@ -1,9 +1,11 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.Windows;
 using EdgeProfileManager.Core.Config;
 using EdgeProfileManager.Core.Desktops;
 using EdgeProfileManager.Core.Edge;
 using EdgeProfileManager.Core.Management;
+using EdgeProfileManager.Resources;
 using Application = System.Windows.Application;
 
 namespace EdgeProfileManager;
@@ -55,6 +57,7 @@ public sealed class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        Resources["Board"] = new ResourceText(BoardStrings.ResourceManager);
         AppLog.Write($"Start {Updater.Version} ({ShellIntegration.ExecutablePath})");
         DispatcherUnhandledException += (_, args) =>
         {
@@ -87,7 +90,7 @@ public sealed class App : Application
 
         if (_firstRun)
         {
-            _tray.ShowInfo("Edge Profile Manager is running in the tray. Use Settings › Pin to taskbar… to pin it.", 10000);
+            _tray.ShowInfo(Strings.App_FirstRun, 10000);
         }
         if (Updater.IsInstalled)
         {
@@ -129,7 +132,7 @@ public sealed class App : Application
                 Shutdown();
                 break;
             case CommandKind.Invalid:
-                _tray.ShowError(command.Error ?? "Invalid command line.");
+                _tray.ShowError(command.Error ?? Strings.App_InvalidCommandLine);
                 break;
         }
     }
@@ -141,7 +144,7 @@ public sealed class App : Application
         {
             // Read fresh so that just-created profiles are found too.
             var profile = Discovery.GetProfiles().FirstOrDefault(p => string.Equals(p.Key, key, StringComparison.OrdinalIgnoreCase))
-                ?? throw new InvalidOperationException($"Profile '{key}' not found.");
+                ?? throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Strings.App_ProfileNotFound, key));
             var settings = Menu.SettingsByKey.GetValueOrDefault(profile.Key) ?? MenuResolver.DefaultSettings(Config);
             Launcher.Open(profile, settings, newWindow);
         }
@@ -173,7 +176,7 @@ public sealed class App : Application
         if (_updating) return;
         if (!Updater.IsInstalled)
         {
-            if (interactive) MessageBox.Show("Updates are only available in the installed version (Setup.exe from the GitHub releases).",
+            if (interactive) MessageBox.Show(Strings.Update_NotInstalled,
                 "Edge Profile Manager", MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
@@ -183,7 +186,7 @@ public sealed class App : Application
             var update = await Updater.CheckAsync();
             if (update is null)
             {
-                if (interactive) _tray.ShowInfo($"Edge Profile Manager {Updater.Version} is up to date.");
+                if (interactive) _tray.ShowInfo(string.Format(CultureInfo.CurrentCulture, Strings.Update_UpToDate, Updater.Version));
                 return;
             }
             var version = update.TargetFullRelease.Version.ToString();
@@ -192,20 +195,20 @@ public sealed class App : Application
             {
                 if (_notifiedVersion == version) return;
                 _notifiedVersion = version;
-                _tray.ShowInfo($"Version {version} is available. Click here to install it.", 15000,
+                _tray.ShowInfo(string.Format(CultureInfo.CurrentCulture, Strings.Update_Available, version), 15000,
                     () => _ = CheckForUpdatesAsync(interactive: true));
                 return;
             }
-            if (MessageBox.Show($"Install Edge Profile Manager {version} now (currently {Updater.Version})?\n\nThe app restarts in the tray afterwards.",
+            if (MessageBox.Show(string.Format(CultureInfo.CurrentCulture, Strings.Update_InstallPrompt, version, Updater.Version),
                     "Edge Profile Manager", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
-            _tray.ShowInfo($"Downloading version {version} …");
+            _tray.ShowInfo(string.Format(CultureInfo.CurrentCulture, Strings.Update_Downloading, version));
             AppLog.Write($"Installing update {version}");
             await Updater.InstallAsync(update);
         }
         catch (Exception ex)
         {
             AppLog.Write($"Update check failed: {ex}");
-            if (interactive) _tray.ShowError($"Update failed: {ex.Message}");
+            if (interactive) _tray.ShowError(string.Format(CultureInfo.CurrentCulture, Strings.Update_Failed, ex.Message));
         }
         finally
         {
@@ -241,12 +244,12 @@ public sealed class App : Application
         try
         {
             Config = _configStore.LoadOrCreate(() => ConfigStore.CreateDefault(Discovery.GetProfiles()));
-            if (!initial) _tray.ShowInfo("Configuration reloaded.");
+            if (!initial) _tray.ShowInfo(Strings.App_ConfigReloaded);
         }
         catch (Exception ex)
         {
             AppLog.Write($"Invalid configuration: {ex.Message}");
-            _tray.ShowError($"Invalid configuration, the last valid one stays active:\n{ex.Message}");
+            _tray.ShowError(string.Format(CultureInfo.CurrentCulture, Strings.App_ConfigInvalid, ex.Message));
         }
         RefreshProfiles();
     }
@@ -289,7 +292,7 @@ public sealed class App : Application
         catch (Exception ex)
         {
             AppLog.Write($"Editor '{editor}' could not be started: {ex.Message}");
-            _tray.ShowError($"Editor '{editor}' could not be started: {ex.Message}");
+            _tray.ShowError(string.Format(CultureInfo.CurrentCulture, Strings.App_EditorFailed, editor, ex.Message));
         }
     }
 

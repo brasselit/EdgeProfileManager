@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI workflow that builds and tests every pull request.
 - Dependabot updates for NuGet packages and GitHub Actions.
 - [User manual](https://github.com/brasselit/EdgeProfileManager/wiki) in the GitHub wiki.
+- German user interface. The language follows the Windows display language and can be set in the menu board settings (`language` in `config.json`).
 
 ### Changed
 

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using EdgeProfileManager.Core.Resources;
 
 namespace EdgeProfileManager.Core.Config;
 
@@ -80,7 +81,7 @@ internal sealed class DesktopTargetConverter : JsonConverter<DesktopTarget>
         JsonTokenType.String when int.TryParse(reader.GetString(), out var n) => new DesktopTarget(n, null),
         JsonTokenType.String => new DesktopTarget(null, reader.GetString()),
         JsonTokenType.Null => null,
-        _ => throw new JsonException("desktop must be a number or a name."),
+        _ => throw new JsonException(Strings.Config_DesktopInvalid),
     };
 
     public override void Write(Utf8JsonWriter writer, DesktopTarget value, JsonSerializerOptions options)

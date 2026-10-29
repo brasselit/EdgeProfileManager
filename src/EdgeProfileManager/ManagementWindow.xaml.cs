@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,6 +12,7 @@ using EdgeProfileManager.Core.Config;
 using EdgeProfileManager.Core.Edge;
 using EdgeProfileManager.Core.Management;
 using EdgeProfileManager.Dialogs;
+using EdgeProfileManager.Resources;
 
 namespace EdgeProfileManager;
 
@@ -20,8 +22,7 @@ namespace EdgeProfileManager;
 /// </summary>
 public partial class ManagementWindow : Window
 {
-    private const string NewProfile = "New profile";
-    private const string NoDesktop = "— no desktop";
+    private static string NoDesktop => BoardStrings.Desktop_None;
     private const string DragFormat = "EdgeProfileManager.BoardCard";
     private const double LaneWidth = 230;
 
@@ -29,7 +30,9 @@ public partial class ManagementWindow : Window
         Line = Hex("#DDE4E6"), LaneBackground = Hex("#E6ECEE"), DropBackground = Hex("#D3E8EA"), Neutral = Hex("#E3EAEC"),
         Running = Hex("#1E6B3A"), Warning = Hex("#A4262C");
 
-    private static readonly string[] ModeLabels = ["Default", "Switch to desktop", "Bring here", "Move to assigned desktop"];
+    /// <summary>Labels of <see cref="DesktopMode"/>, index = mode + 1; index 0 = default (no mode set).</summary>
+    private static readonly string[] ModeLabels =
+        [BoardStrings.Mode_Default, BoardStrings.Mode_SwitchToDesktop, BoardStrings.Mode_BringHere, BoardStrings.Mode_MoveToAssigned];
 
     private readonly App _app;
     private readonly List<(BoardCard Card, Border View)> _cardViews = [];
@@ -70,7 +73,7 @@ public partial class ManagementWindow : Window
         {
             if (!_busy) return;
             e.Cancel = true;
-            MessageBox.Show(this, "Please wait for the running action to finish.", Title, MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, BoardStrings.Message_WaitForAction, Title, MessageBoxButton.OK, MessageBoxImage.Information);
         };
         Closed += (_, _) =>
         {
@@ -89,16 +92,16 @@ public partial class ManagementWindow : Window
     private Field[] OptionFields(bool localOnly = true, bool allowRunning = true)
     {
         var fields = new List<Field>();
-        if (localOnly) fields.Add(new Field("LocalOnly", "Local data only", FieldType.Check)
+        if (localOnly) fields.Add(new Field("LocalOnly", BoardStrings.Option_LocalOnly, FieldType.Check)
         {
             Value = _options.LocalOnly.ToString(),
-            ToolTip = "Only Local Storage, IndexedDB etc. instead of the whole profile.",
+            ToolTip = BoardStrings.Option_LocalOnlyToolTip,
         });
-        fields.Add(new Field("IncludeCaches", "Include caches", FieldType.Check) { Value = _options.IncludeCaches.ToString() });
-        if (allowRunning) fields.Add(new Field("AllowRunning", "Allow running source", FieldType.Check)
+        fields.Add(new Field("IncludeCaches", BoardStrings.Option_IncludeCaches, FieldType.Check) { Value = _options.IncludeCaches.ToString() });
+        if (allowRunning) fields.Add(new Field("AllowRunning", BoardStrings.Option_AllowRunning, FieldType.Check)
         {
             Value = _options.AllowRunningSource.ToString(),
-            ToolTip = "Back up or copy while Edge is open; the copy may be inconsistent.",
+            ToolTip = BoardStrings.Option_AllowRunningToolTip,
         });
         return [.. fields];
     }
@@ -139,7 +142,7 @@ public partial class ManagementWindow : Window
 
     private void BuildFilters()
     {
-        var all = new ToggleButton { Content = "All channels", Style = (Style)Resources["FilterChip"], IsChecked = true };
+        var all = new ToggleButton { Content = BoardStrings.Filter_AllChannels, Style = (Style)Resources["FilterChip"], IsChecked = true };
         Filters.Children.Add(all);
         foreach (var channel in EdgeChannels.All)
             Filters.Children.Add(new ToggleButton { Content = channel.ToString(), Style = (Style)Resources["FilterChip"], Tag = channel });
@@ -203,8 +206,8 @@ public partial class ManagementWindow : Window
             TextTrimming = TextTrimming.CharacterEllipsis,
             ToolTip = lane.Kind switch
             {
-                LaneKind.Root => "Profiles directly in the tray menu, without a group (below the groups).",
-                LaneKind.Unassigned => "Profiles not in the menu. Drag here = remove from menu.",
+                LaneKind.Root => BoardStrings.Lane_RootToolTip,
+                LaneKind.Unassigned => BoardStrings.Lane_UnassignedToolTip,
                 _ => null,
             },
         });
@@ -238,7 +241,7 @@ public partial class ManagementWindow : Window
         {
             items.Children.Add(new TextBlock
             {
-                Text = unassigned ? "All profiles are in the menu." : "Drag profiles here",
+                Text = unassigned ? BoardStrings.Lane_AllAssigned : BoardStrings.Lane_DropHere,
                 Foreground = Muted,
                 FontSize = 12,
                 HorizontalAlignment = HorizontalAlignment.Center,
@@ -271,17 +274,17 @@ public partial class ManagementWindow : Window
             Height = 24,
             Background = Brushes.Transparent,
             BorderBrush = Brushes.Transparent,
-            ToolTip = "Edit group",
+            ToolTip = BoardStrings.Lane_EditGroup,
         };
         DockPanel.SetDock(button, Dock.Right);
         var menu = new ContextMenu();
-        AddMenuItem(menu, "Rename …", () => RenameGroup(lane.Group!));
-        AddMenuItem(menu, "Move left", () => _app.UpdateConfig(c => MenuBoard.MoveGroup(c, lane.Group!, -1)));
-        AddMenuItem(menu, "Move right", () => _app.UpdateConfig(c => MenuBoard.MoveGroup(c, lane.Group!, +1)));
-        AddMenuItem(menu, "Add separator", () => _app.UpdateConfig(c => MenuBoard.ChildrenOf(c, lane.Group).Add(new MenuEntry { Separator = true })));
-        AddMenuItem(menu, "Add subgroup …", () => AddGroup(lane.Group));
+        AddMenuItem(menu, BoardStrings.Lane_RenameGroup, () => RenameGroup(lane.Group!));
+        AddMenuItem(menu, BoardStrings.Lane_MoveLeft, () => _app.UpdateConfig(c => MenuBoard.MoveGroup(c, lane.Group!, -1)));
+        AddMenuItem(menu, BoardStrings.Lane_MoveRight, () => _app.UpdateConfig(c => MenuBoard.MoveGroup(c, lane.Group!, +1)));
+        AddMenuItem(menu, BoardStrings.Lane_AddSeparator, () => _app.UpdateConfig(c => MenuBoard.ChildrenOf(c, lane.Group).Add(new MenuEntry { Separator = true })));
+        AddMenuItem(menu, BoardStrings.Lane_AddSubgroup, () => AddGroup(lane.Group));
         menu.Items.Add(new Separator());
-        AddMenuItem(menu, "Delete group …", () => DeleteGroup(lane));
+        AddMenuItem(menu, BoardStrings.Lane_DeleteGroup, () => DeleteGroup(lane));
         button.Click += (_, _) =>
         {
             menu.PlacementTarget = button;
@@ -317,7 +320,7 @@ public partial class ManagementWindow : Window
         });
         titles.Children.Add(new TextBlock
         {
-            Text = profile is null ? $"{card.Reference} – not found" : $"Edge {profile.Channel}",
+            Text = profile is null ? string.Format(CultureInfo.CurrentCulture, BoardStrings.Card_NotFound, card.Reference) : $"Edge {profile.Channel}",
             FontSize = 11,
             Foreground = Muted,
             TextTrimming = TextTrimming.CharacterEllipsis,
@@ -327,8 +330,8 @@ public partial class ManagementWindow : Window
 
         var tags = new WrapPanel { Margin = new Thickness(0, 6, 0, 0) };
         if (card.Entry?.Desktop is { } desktop) tags.Children.Add(CreateTag($"▣ {desktop}", Hex("#E1EEF0"), Hex("#0F4F55")));
-        if (isRunning) tags.Children.Add(CreateTag("● running", Hex("#E3F1E7"), Running));
-        if (card.Entry?.JumpList == false) tags.Children.Add(CreateTag("no Jump List", Neutral, Hex("#2E4247")));
+        if (isRunning) tags.Children.Add(CreateTag(BoardStrings.Card_Running, Hex("#E3F1E7"), Running));
+        if (card.Entry?.JumpList == false) tags.Children.Add(CreateTag(BoardStrings.Card_NoJumpList, Neutral, Hex("#2E4247")));
         if (tags.Children.Count > 0) body.Children.Add(tags);
 
         var content = new DockPanel();
@@ -346,7 +349,7 @@ public partial class ManagementWindow : Window
             Child = content,
             Cursor = Cursors.Hand,
             AllowDrop = true,
-            ToolTip = profile is null ? null : $"{profile.Name}\n{profile.Key}{(profile.User is null ? "" : $"\n{profile.User}")}\nDouble-click opens the profile.",
+            ToolTip = profile is null ? null : $"{profile.Name}\n{profile.Key}{(profile.User is null ? "" : $"\n{profile.User}")}\n{BoardStrings.Card_DoubleClickHint}",
         };
         _cardViews.Add((card, view));
 
@@ -492,8 +495,9 @@ public partial class ManagementWindow : Window
 
     private void AddGroup(MenuEntry? parent)
     {
-        var values = FieldsDialog.Show(this, parent is null ? "New group" : $"Subgroup in “{parent.Group}”",
-            new Field("Name", "Group name") { Required = true });
+        var values = FieldsDialog.Show(this,
+            parent is null ? BoardStrings.Dialog_NewGroupTitle : string.Format(CultureInfo.CurrentCulture, BoardStrings.Dialog_SubgroupTitle, parent.Group),
+            new Field("Name", BoardStrings.Dialog_GroupName) { Required = true });
         if (values is null) return;
         _app.UpdateConfig(c =>
         {
@@ -504,14 +508,14 @@ public partial class ManagementWindow : Window
 
     private void RenameGroup(MenuEntry group)
     {
-        var values = FieldsDialog.Show(this, "Rename group", new Field("Name", "Group name") { Value = group.Group, Required = true });
+        var values = FieldsDialog.Show(this, BoardStrings.Dialog_RenameGroupTitle, new Field("Name", BoardStrings.Dialog_GroupName) { Value = group.Group, Required = true });
         if (values is not null) _app.UpdateConfig(_ => group.Group = values["Name"]);
     }
 
     private void DeleteGroup(BoardLane lane)
     {
         var count = lane.Items.OfType<BoardCard>().Count();
-        if (count > 0 && !Confirm($"Delete group “{lane.Title}”? Its {count} profile(s) will be removed from the menu (the Edge profiles are kept).")) return;
+        if (count > 0 && !Confirm(string.Format(CultureInfo.CurrentCulture, BoardStrings.Confirm_DeleteGroup, lane.Title, count))) return;
         _app.UpdateConfig(c => MenuBoard.Remove(c, lane.Group!));
     }
 
@@ -554,7 +558,7 @@ public partial class ManagementWindow : Window
         RemoveFromMenuButton.Click += (_, _) => EditEntry((c, entry) => MenuBoard.Remove(c, entry));
         AddToMenuButton.Click += (_, _) => Invoke(() =>
         {
-            var card = _selected ?? throw new InvalidOperationException("Please select a card first.");
+            var card = _selected ?? throw new InvalidOperationException(BoardStrings.Error_SelectCard);
             _app.UpdateConfig(c => MenuBoard.Add(MenuBoard.ChildrenOf(c, GroupAt(AddToGroupCombo.SelectedIndex)), card.Reference, null));
         });
     }
@@ -577,7 +581,7 @@ public partial class ManagementWindow : Window
                 DetailSubtitle.Text = "";
                 return;
             }
-            DetailSubtitle.Text = card.Entry is null ? "not in menu" : $"Card “{card.Title}”";
+            DetailSubtitle.Text = card.Entry is null ? BoardStrings.Detail_SubtitleNotInMenu : string.Format(CultureInfo.CurrentCulture, BoardStrings.Detail_SubtitleCard, card.Title);
             ShowProfile(card);
 
             InMenuPanel.Visibility = card.Entry is null ? Visibility.Collapsed : Visibility.Visible;
@@ -590,7 +594,8 @@ public partial class ManagementWindow : Window
                 LabelBox.Text = entry.Label ?? DefaultLabel;
                 ShowDesktop(entry.Desktop);
                 ModeCombo.SelectedIndex = entry.DesktopMode is { } mode ? (int)mode + 1 : 0;
-                ModeCombo.ToolTip = $"Default: {(entry.Desktop is not null ? ModeLabels[3] : ModeLabels[(int)_app.Config.DefaultDesktopMode + 1])}";
+                ModeCombo.ToolTip = string.Format(CultureInfo.CurrentCulture, BoardStrings.Detail_ModeDefault,
+                    entry.Desktop is not null ? ModeLabels[3] : ModeLabels[(int)_app.Config.DefaultDesktopMode + 1]);
                 JumpListCheck.IsChecked = entry.JumpList != false;
             }
             else
@@ -614,13 +619,13 @@ public partial class ManagementWindow : Window
         AvatarImage.Source = LoadImage(profile?.IconPath);
         AvatarInitials.Text = AvatarImage.Source is null ? Initials(profile?.Name ?? card.Title) : "";
         AvatarInitials.Foreground = color is null ? Hex("#2E4247") : Brushes.White;
-        ProfileNameText.Text = profile?.Name ?? "Profile not found";
+        ProfileNameText.Text = profile?.Name ?? BoardStrings.Detail_ProfileNotFound;
         ProfileUserText.Text = profile?.User ?? (profile is null ? card.Reference : "");
         var running = profile is not null && _running.Contains(profile.Key);
-        RunningText.Text = profile is null ? "" : running ? "● running" : "closed";
+        RunningText.Text = profile is null ? "" : running ? BoardStrings.Card_Running : BoardStrings.Detail_Closed;
         RunningText.Foreground = running ? Running : Muted;
         ColorSwatch.Fill = color ?? Brushes.Transparent;
-        ColorText.Text = profile?.Color is { } value ? $"#{value:X6}" : "none";
+        ColorText.Text = profile?.Color is { } value ? $"#{value:X6}" : BoardStrings.Detail_NoColor;
         ChannelText.Text = profile is null ? "–" : $"Edge {profile.Channel}";
         FolderText.Text = profile?.Folder ?? "";
         PathText.Text = profile?.Path ?? "";
@@ -685,29 +690,34 @@ public partial class ManagementWindow : Window
 
     private void EditSettings()
     {
-        const string yes = "Yes", no = "No", systemLanguage = "Windows display language";
+        // Combo options are compared by index, never by their (localized) text.
+        string[] yesNo = [BoardStrings.Settings_Yes, BoardStrings.Settings_No];
+        string[] jumpStyles = [BoardStrings.Settings_JumpListCategories, BoardStrings.Settings_JumpListTasks];
+        string[] modes = ModeLabels[1..];
         var config = _app.Config;
-        string[] languages = [systemLanguage, .. Localization.Languages.Select(l => l.Name)];
-        var currentLanguage = Localization.Languages.FirstOrDefault(l => string.Equals(l.Code, config.Language, StringComparison.OrdinalIgnoreCase)).Name ?? systemLanguage;
-        var values = FieldsDialog.Show(this, "Settings",
-            new Field("Language", "Language (applies after restarting the tool)", FieldType.Combo) { Options = languages, Value = currentLanguage },
-            new Field("Mode", "If a window is already open (default)", FieldType.Combo) { Options = ModeLabels[1..], Value = ModeLabels[(int)config.DefaultDesktopMode + 1] },
-            new Field("Unassigned", "Show unassigned profiles in tray menu", FieldType.Combo) { Options = [yes, no], Value = config.ShowUnassigned ? yes : no },
-            new Field("JumpUnassigned", "… and in the Jump List", FieldType.Combo) { Options = [yes, no], Value = config.JumpListUnassigned ? yes : no },
-            new Field("JumpStyle", "Jump List", FieldType.Combo)
+        string[] languages = [BoardStrings.Settings_SystemLanguage, .. Localization.Languages.Select(l => l.Name)];
+        var currentLanguage = Localization.Languages.FirstOrDefault(l => string.Equals(l.Code, config.Language, StringComparison.OrdinalIgnoreCase)).Name
+            ?? BoardStrings.Settings_SystemLanguage;
+        var values = FieldsDialog.Show(this, BoardStrings.Settings_Title,
+            new Field("Language", BoardStrings.Settings_Language, FieldType.Combo) { Options = languages, Value = currentLanguage },
+            new Field("Mode", BoardStrings.Settings_Mode, FieldType.Combo) { Options = modes, Value = modes[(int)config.DefaultDesktopMode] },
+            new Field("Unassigned", BoardStrings.Settings_ShowUnassigned, FieldType.Combo) { Options = yesNo, Value = yesNo[config.ShowUnassigned ? 0 : 1] },
+            new Field("JumpUnassigned", BoardStrings.Settings_JumpListUnassigned, FieldType.Combo) { Options = yesNo, Value = yesNo[config.JumpListUnassigned ? 0 : 1] },
+            new Field("JumpStyle", BoardStrings.Settings_JumpListStyle, FieldType.Combo)
             {
-                Options = ["Categories per group (max. ~10 entries)", "Tasks (all profiles, ungrouped)"],
-                Value = config.JumpListStyle == JumpListStyle.Categories ? "Categories per group (max. ~10 entries)" : "Tasks (all profiles, ungrouped)",
+                Options = jumpStyles,
+                Value = jumpStyles[config.JumpListStyle == JumpListStyle.Categories ? 0 : 1],
             });
         if (values is null) return;
         var languageIndex = Array.IndexOf(languages, values["Language"]);
+        var modeIndex = Array.IndexOf(modes, values["Mode"]);
         _app.UpdateConfig(c =>
         {
             c.Language = languageIndex > 0 ? Localization.Languages[languageIndex - 1].Code : null;
-            c.DefaultDesktopMode = (DesktopMode)(Array.IndexOf(ModeLabels, values["Mode"]) - 1);
-            c.ShowUnassigned = values["Unassigned"] == yes;
-            c.JumpListUnassigned = values["JumpUnassigned"] == yes;
-            c.JumpListStyle = values["JumpStyle"].StartsWith("Categories", StringComparison.Ordinal) ? JumpListStyle.Categories : JumpListStyle.Tasks;
+            if (modeIndex >= 0) c.DefaultDesktopMode = (DesktopMode)modeIndex;
+            c.ShowUnassigned = Array.IndexOf(yesNo, values["Unassigned"]) == 0;
+            c.JumpListUnassigned = Array.IndexOf(yesNo, values["JumpUnassigned"]) == 0;
+            c.JumpListStyle = Array.IndexOf(jumpStyles, values["JumpStyle"]) == 0 ? JumpListStyle.Categories : JumpListStyle.Tasks;
         });
     }
 
@@ -746,8 +756,8 @@ public partial class ManagementWindow : Window
         try { await action(); }
         catch (Exception ex)
         {
-            Report($"Error: {ex.Message}");
-            MessageBox.Show(this, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            Report(string.Format(CultureInfo.CurrentCulture, BoardStrings.Status_Error, ex.Message));
+            MessageBox.Show(this, ex.Message, BoardStrings.Message_ErrorTitle, MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -755,80 +765,88 @@ public partial class ManagementWindow : Window
 
     // ---------- Edge actions ----------
 
-    private EdgeProfile SelectedProfile => _selected?.Profile ?? throw new InvalidOperationException("Please select an existing profile first.");
+    private EdgeProfile SelectedProfile => _selected?.Profile ?? throw new InvalidOperationException(BoardStrings.Error_SelectProfile);
 
     private EdgeChannel ActiveChannel => _selected?.Profile?.Channel ?? _filter ?? EdgeChannels.All.FirstOrDefault(IsInstalled);
 
     private bool IsInstalled(EdgeChannel channel) => _app.Environment.FindExecutable(channel) is not null;
 
+    /// <summary>File dialog filters: localized description, fixed pattern.</summary>
+    private static string PngFilter => BoardStrings.Dialog_PngFilter + "|*.png";
+    private static string BackupFilter => BoardStrings.Dialog_BackupFilter + "|*.zip";
+
     private async Task CreateAsync()
     {
         var channels = ChannelsStartingWith(ActiveChannel);
-        var values = FieldsDialog.Show(this, "New profile",
-            new Field("Channel", "Channel", FieldType.Combo) { Options = channels },
-            new Field("Name", "Profile name") { Required = true },
-            new Field("User", "Email") { Required = true },
-            new Field("Avatar", "Avatar (optional, PNG)", FieldType.File) { Filter = "PNG image|*.png" });
+        var values = FieldsDialog.Show(this, BoardStrings.Dialog_NewProfileTitle,
+            new Field("Channel", BoardStrings.Dialog_Channel, FieldType.Combo) { Options = channels },
+            new Field("Name", BoardStrings.Dialog_ProfileName) { Required = true },
+            new Field("User", BoardStrings.Dialog_Email) { Required = true },
+            new Field("Avatar", BoardStrings.Dialog_AvatarOptional, FieldType.File) { Filter = PngFilter });
         if (values is null) return;
         var channel = Enum.Parse<EdgeChannel>(values["Channel"]);
-        var created = await RunAsync("Create profile", m => m.Create(channel, values["Name"], values["User"], values["Avatar"]));
+        var created = await RunAsync(BoardStrings.Action_CreateProfile, m => m.Create(channel, values["Name"], values["User"], values["Avatar"]));
         if (created is not null) SelectProfile(created.Key);
     }
 
     private async Task RenameAsync()
     {
         var selected = SelectedProfile;
-        var values = FieldsDialog.Show(this, "Rename profile", new Field("Name", "New name in Edge") { Value = selected.Name, Required = true });
-        if (values is not null) await RunAsync("Rename profile", m => m.Rename(selected.Channel, selected.Folder, values["Name"]));
+        var values = FieldsDialog.Show(this, BoardStrings.Dialog_RenameProfileTitle, new Field("Name", BoardStrings.Dialog_NewName) { Value = selected.Name, Required = true });
+        if (values is not null) await RunAsync(BoardStrings.Action_RenameProfile, m => m.Rename(selected.Channel, selected.Folder, values["Name"]));
     }
 
     private async Task AvatarAsync()
     {
         var selected = SelectedProfile;
-        var values = FieldsDialog.Show(this, "Profile avatar",
-            new Field("Avatar", "PNG file", FieldType.File) { Filter = "PNG image|*.png", Required = true });
-        if (values is not null) await RunAsync("Set avatar", m => m.SetAvatar(selected.Channel, selected.Folder, values["Avatar"]));
+        var values = FieldsDialog.Show(this, BoardStrings.Dialog_AvatarTitle,
+            new Field("Avatar", BoardStrings.Dialog_PngFile, FieldType.File) { Filter = PngFilter, Required = true });
+        if (values is not null) await RunAsync(BoardStrings.Action_SetAvatar, m => m.SetAvatar(selected.Channel, selected.Folder, values["Avatar"]));
     }
 
     private async Task ColorAsync()
     {
         var selected = SelectedProfile;
         if (ProfileColorDialog.Show(this, selected.Name, selected.Color) is { } choice)
-            await RunAsync(choice.Rgb is null ? "Remove color" : "Set color", m => m.SetColor(selected.Channel, selected.Folder, choice.Rgb));
+            await RunAsync(choice.Rgb is null ? BoardStrings.Action_RemoveColor : BoardStrings.Action_SetColor, m => m.SetColor(selected.Channel, selected.Folder, choice.Rgb));
     }
 
     private async Task DeleteAsync()
     {
         var selected = SelectedProfile;
-        if (!Confirm($"Permanently delete profile '{selected.Name}' ({selected.Channel} / {selected.Folder}) including all local data?")) return;
-        await RunAsync("Delete profile", m => m.Delete(selected.Channel, selected.Folder));
+        if (!Confirm(string.Format(CultureInfo.CurrentCulture, BoardStrings.Confirm_DeleteProfile, selected.Name, selected.Channel, selected.Folder))) return;
+        await RunAsync(BoardStrings.Action_DeleteProfile, m => m.Delete(selected.Channel, selected.Folder));
     }
 
     private async Task BackupAsync() => await BackupAsync(singleOnly: false);
 
     private async Task BackupAsync(bool singleOnly)
     {
-        const string single = "Selected profile", instance = "Channel of selected profile", all = "All channels";
+        // Scope options by index: 0 = all channels, 1 = channel of selected profile, 2 = selected profile.
+        const int all = 0, instance = 1, single = 2;
+        string[] scopes = [BoardStrings.Dialog_BackupScopeAll, BoardStrings.Dialog_BackupScopeChannel, BoardStrings.Dialog_BackupScopeSingle];
         var fields = new List<Field>();
-        if (!singleOnly) fields.Add(new Field("Scope", "Scope", FieldType.Combo) { Options = _selected?.Profile is null ? [all] : [all, instance, single] });
-        fields.Add(new Field("Path", "Backup folder", FieldType.Folder) { Value = Environment.ExpandEnvironmentVariables(_app.Config.BackupPath), Required = true });
+        if (!singleOnly) fields.Add(new Field("Scope", BoardStrings.Dialog_BackupScope, FieldType.Combo) { Options = _selected?.Profile is null ? [scopes[all]] : scopes });
+        fields.Add(new Field("Path", BoardStrings.Dialog_BackupFolder, FieldType.Folder) { Value = Environment.ExpandEnvironmentVariables(_app.Config.BackupPath), Required = true });
         fields.AddRange(OptionFields());
-        var values = FieldsDialog.Show(this, singleOnly ? $"Backup of “{SelectedProfile.Name}”" : "Create backup", [.. fields]);
+        var values = FieldsDialog.Show(this,
+            singleOnly ? string.Format(CultureInfo.CurrentCulture, BoardStrings.Dialog_BackupOfTitle, SelectedProfile.Name) : BoardStrings.Action_CreateBackup,
+            [.. fields]);
         if (values is null) return;
 
         var path = values["Path"];
-        var scope = singleOnly ? single : values["Scope"];
+        var scope = singleOnly ? single : Array.IndexOf(scopes, values["Scope"]);
         IReadOnlyList<EdgeProfile> targets = scope switch
         {
             single => [SelectedProfile],
             instance => _app.Discovery.GetProfiles(SelectedProfile.Channel),
             _ => _app.Discovery.GetProfiles(),
         };
-        if (targets.Count == 0) throw new InvalidOperationException("No profiles found to back up.");
+        if (targets.Count == 0) throw new InvalidOperationException(BoardStrings.Error_NoProfilesToBackUp);
         var options = ReadOptions(values);
         var perChannel = scope != single;
         _app.UpdateConfig(c => c.BackupPath = path);
-        await RunAsync("Create backup", m =>
+        await RunAsync(BoardStrings.Action_CreateBackup, m =>
         {
             foreach (var p in targets) m.Backup(p.Channel, p.Folder, perChannel ? Path.Combine(path, p.Channel.ToString()) : path, options);
         });
@@ -836,17 +854,17 @@ public partial class ManagementWindow : Window
 
     private async Task RestoreAsync()
     {
-        var values = FieldsDialog.Show(this, "Restore backup",
+        var values = FieldsDialog.Show(this, BoardStrings.Action_RestoreBackup,
         [
-            new Field("Zip", "Backup ZIP", FieldType.File) { Filter = "Edge backup|*.zip", Required = true },
-            new Field("Channel", "Target channel", FieldType.Combo) { Options = ChannelsStartingWith(ActiveChannel) },
+            new Field("Zip", BoardStrings.Dialog_BackupZip, FieldType.File) { Filter = BackupFilter, Required = true },
+            new Field("Channel", BoardStrings.Dialog_TargetChannel, FieldType.Combo) { Options = ChannelsStartingWith(ActiveChannel) },
             .. OptionFields(allowRunning: false),
         ]);
         if (values is null) return;
         var channel = Enum.Parse<EdgeChannel>(values["Channel"]);
         var options = ReadOptions(values);
-        if (SelectTargetFolder(channel, options, "Restore backup") is not { } target) return;
-        var folder = await RunAsync("Restore backup", m =>
+        if (SelectTargetFolder(channel, options, BoardStrings.Action_RestoreBackup) is not { } target) return;
+        var folder = await RunAsync(BoardStrings.Action_RestoreBackup, m =>
             m.Restore(channel, values["Zip"], target.Folder, options with { ReplaceExisting = target.Folder is not null }));
         if (folder is not null) SelectProfile($"{channel}/{folder}");
     }
@@ -854,31 +872,33 @@ public partial class ManagementWindow : Window
     private async Task TransferDialogAsync()
     {
         var selected = SelectedProfile;
-        var values = FieldsDialog.Show(this, $"Transfer “{selected.Name}”",
+        // Action options by index: 0 = copy, 1 = verified move.
+        string[] actions = [BoardStrings.Dialog_TransferCopy, BoardStrings.Dialog_TransferVerifiedMove];
+        var values = FieldsDialog.Show(this, string.Format(CultureInfo.CurrentCulture, BoardStrings.Dialog_TransferTitle, selected.Name),
         [
-            new Field("Channel", "Target channel", FieldType.Combo) { Options = EdgeChannels.All.Where(c => c != selected.Channel).Select(c => c.ToString()).ToList() },
-            new Field("Mode", "Action", FieldType.Combo) { Options = ["Copy", "Verified move"] },
+            new Field("Channel", BoardStrings.Dialog_TargetChannel, FieldType.Combo) { Options = EdgeChannels.All.Where(c => c != selected.Channel).Select(c => c.ToString()).ToList() },
+            new Field("Mode", BoardStrings.Dialog_TransferAction, FieldType.Combo) { Options = actions },
             .. OptionFields(),
         ]);
         if (values is null) return;
         var channel = Enum.Parse<EdgeChannel>(values["Channel"]);
         var options = ReadOptions(values);
-        if (values["Mode"] == "Verified move")
+        if (Array.IndexOf(actions, values["Mode"]) == 1)
         {
             if (options.LocalOnly || options.AllowRunningSource)
-                throw new InvalidOperationException("A verified move always transfers the whole, closed profile. Turn off \"Local data only\" and \"Allow running source\".");
-            if (!Confirm($"Move profile '{selected.Name}' from {selected.Channel} to {channel}?\n\nThe source is deleted only after a successful SHA256 check. Caches are only carried over with the corresponding option. Menu entries are switched to the new profile.")) return;
-            var folder = await RunAsync("Move profile", m => m.MoveVerified(selected.Channel, channel, selected.Folder, options));
+                throw new InvalidOperationException(BoardStrings.Error_VerifiedMoveOptions);
+            if (!Confirm(string.Format(CultureInfo.CurrentCulture, BoardStrings.Confirm_MoveProfile, selected.Name, selected.Channel, channel))) return;
+            var folder = await RunAsync(BoardStrings.Action_MoveProfile, m => m.MoveVerified(selected.Channel, channel, selected.Folder, options));
             if (folder is null) return;
             var newKey = $"{channel}/{folder}";
             var updated = _app.ReplaceProfileReference(selected.Key, newKey);
-            if (updated > 0) Report($"Configuration: {updated} reference(s) switched from {selected.Key} to {newKey}.");
+            if (updated > 0) Report(string.Format(CultureInfo.CurrentCulture, BoardStrings.Status_ReferencesSwitched, updated, selected.Key, newKey));
             SelectProfile(newKey);
             return;
         }
 
-        if (SelectTargetFolder(channel, options, "Copy profile") is not { } target) return;
-        var copied = await RunAsync("Copy profile", m =>
+        if (SelectTargetFolder(channel, options, BoardStrings.Action_CopyProfile) is not { } target) return;
+        var copied = await RunAsync(BoardStrings.Action_CopyProfile, m =>
             m.Copy(selected.Channel, channel, selected.Folder, target.Folder, options with { ReplaceExisting = target.Folder is not null }));
         if (copied is not null) SelectProfile($"{channel}/{copied}");
     }
@@ -887,17 +907,20 @@ public partial class ManagementWindow : Window
     private TargetChoice? SelectTargetFolder(EdgeChannel channel, TransferOptions options, string title)
     {
         var profiles = _app.Discovery.GetProfiles(channel);
-        var labels = new List<string> { NewProfile };
+        // Index 0 = new profile, followed by the existing profiles.
+        var labels = new List<string> { BoardStrings.Dialog_TargetNewProfile };
         labels.AddRange(profiles.Select(p => $"{p.Folder} | {p.Name}"));
-        var values = FieldsDialog.Show(this, "Target profile", new Field("Target", "Target profile", FieldType.Combo) { Options = labels });
+        var values = FieldsDialog.Show(this, BoardStrings.Dialog_TargetProfile,
+            new Field("Target", BoardStrings.Dialog_TargetProfile, FieldType.Combo) { Options = labels });
         if (values is null) return null;
-        if (values["Target"] == NewProfile) return new TargetChoice(null);
+        var index = labels.IndexOf(values["Target"]);
+        if (index == 0) return new TargetChoice(null);
 
-        var target = profiles[labels.IndexOf(values["Target"]) - 1];
+        var target = profiles[index - 1];
         var effect = options.LocalOnly
-            ? $"Merge local data into '{target.Name}'? Existing files may be replaced."
-            : $"The existing profile '{target.Name}' ({channel} / {target.Folder}) will be completely replaced.";
-        return Confirm($"{title}: {effect}\n\nContinue?") ? new TargetChoice(target.Folder) : null;
+            ? string.Format(CultureInfo.CurrentCulture, BoardStrings.Confirm_MergeLocal, target.Name)
+            : string.Format(CultureInfo.CurrentCulture, BoardStrings.Confirm_ReplaceProfile, target.Name, channel, target.Folder);
+        return Confirm(string.Format(CultureInfo.CurrentCulture, BoardStrings.Confirm_TargetContinue, title, effect)) ? new TargetChoice(target.Folder) : null;
     }
 
     /// <summary>Chosen target profile; <see cref="Folder"/> null = create a new profile.</summary>
@@ -922,7 +945,7 @@ public partial class ManagementWindow : Window
     /// </summary>
     private async Task<T?> RunAsync<T>(string label, Func<ProfileManager, T> work) where T : class
     {
-        if (_busy) throw new InvalidOperationException("An action is already running.");
+        if (_busy) throw new InvalidOperationException(BoardStrings.Error_ActionRunning);
         _busy = true;
         WorkArea.IsEnabled = DetailContent.IsEnabled = false;
         Report($"{label} …");
@@ -939,19 +962,19 @@ public partial class ManagementWindow : Window
                 });
                 if (running is null)
                 {
-                    Status.Text = $"{label}: done.";
+                    Status.Text = string.Format(CultureInfo.CurrentCulture, BoardStrings.Status_Done, label);
                     return result;
                 }
                 if (attempt >= 3) throw running;
-                if (!Confirm($"Edge {running.Channel} is still running.\n\nClose Edge {running.Channel} now and continue? Unsaved input may be lost.")) throw running;
-                Report($"Closing Edge {running.Channel} …");
+                if (!Confirm(string.Format(CultureInfo.CurrentCulture, BoardStrings.Confirm_CloseEdge, running.Channel))) throw running;
+                Report(string.Format(CultureInfo.CurrentCulture, BoardStrings.Status_Closing, running.Channel));
                 await Task.Run(() => _app.Guard.Close(running.Channel));
             }
         }
         catch (Exception ex)
         {
-            Report($"Error: {ex.Message}");
-            MessageBox.Show(this, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            Report(string.Format(CultureInfo.CurrentCulture, BoardStrings.Status_Error, ex.Message));
+            MessageBox.Show(this, ex.Message, BoardStrings.Message_ErrorTitle, MessageBoxButton.OK, MessageBoxImage.Error);
             return null;
         }
         finally

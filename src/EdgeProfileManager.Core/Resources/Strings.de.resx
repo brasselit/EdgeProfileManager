@@ -18,4 +18,193 @@
   <data name="Menu_Unassigned" xml:space="preserve">
     <value>Nicht zugeordnet</value>
   </data>
+  <data name="Menu_NotFound" xml:space="preserve">
+    <value>{0} (nicht gefunden)</value>
+  </data>
+  <data name="Error_GroupIntoItself" xml:space="preserve">
+    <value>Eine Gruppe kann nicht in sich selbst verschoben werden.</value>
+  </data>
+  <data name="Config_Empty" xml:space="preserve">
+    <value>Konfiguration ist leer.</value>
+  </data>
+  <data name="Config_DesktopInvalid" xml:space="preserve">
+    <value>desktop muss eine Nummer oder ein Name sein.</value>
+  </data>
+  <data name="Desktops_DllNotFound" xml:space="preserve">
+    <value>{0} nicht gefunden ({1}). Desktop-Zuordnung ist deaktiviert.</value>
+  </data>
+  <data name="Desktops_NoDesktop" xml:space="preserve">
+    <value>GetDesktopCount lieferte keinen Desktop.</value>
+  </data>
+  <data name="Desktops_LoadFailed" xml:space="preserve">
+    <value>{0} konnte nicht geladen werden: {1}</value>
+  </data>
+  <data name="Error_EdgeAppNotFound" xml:space="preserve">
+    <value>Edge {0} Anwendung nicht gefunden.</value>
+  </data>
+  <data name="Log_Started" xml:space="preserve">
+    <value>Gestartet: Edge {0} – {1} ({2})</value>
+  </data>
+  <data name="Log_WindowMoved" xml:space="preserve">
+    <value>Fenster von {0} auf Desktop {1} verschoben.</value>
+  </data>
+  <data name="Log_WindowNotFound" xml:space="preserve">
+    <value>Neues Fenster von {0} nicht innerhalb von {1:0} s gefunden.</value>
+  </data>
+  <data name="Error_EdgeRunning" xml:space="preserve">
+    <value>Edge {0} läuft noch. Bitte schliessen oder beenden lassen.</value>
+  </data>
+  <data name="Error_RobocopyNotFound" xml:space="preserve">
+    <value>Windows-Kopierprogramm nicht gefunden: {0}. Bitte die Windows-Installation prüfen.</value>
+  </data>
+  <data name="Error_RobocopyNotStarted" xml:space="preserve">
+    <value>robocopy konnte nicht gestartet werden.</value>
+  </data>
+  <data name="Error_Robocopy" xml:space="preserve">
+    <value>Robocopy-Fehler ({0}): {1}</value>
+  </data>
+  <data name="Error_ProfileNotFound" xml:space="preserve">
+    <value>Profil '{0}' in {1} nicht gefunden.</value>
+  </data>
+  <data name="Error_CreateRequiresNameAndEmail" xml:space="preserve">
+    <value>Zum Erstellen sind Profilname und E-Mail erforderlich.</value>
+  </data>
+  <data name="Error_StartEdgeFirst" xml:space="preserve">
+    <value>Edge {0} zuerst einmal starten.</value>
+  </data>
+  <data name="Error_ProfileExists" xml:space="preserve">
+    <value>Profil '{0}' in {1} existiert bereits.</value>
+  </data>
+  <data name="Log_ProfileCreated" xml:space="preserve">
+    <value>Profil '{0}' ({1}/{2}) erstellt. Zur Synchronisierung bei Edge als {3} anmelden.</value>
+  </data>
+  <data name="Error_NewNameMissing" xml:space="preserve">
+    <value>Neuer Name fehlt.</value>
+  </data>
+  <data name="Error_ProfileNotInitialized" xml:space="preserve">
+    <value>Profil '{0}' wurde von Edge noch nicht initialisiert.</value>
+  </data>
+  <data name="Error_ProfileNotRegistered" xml:space="preserve">
+    <value>Profil '{0}' ist nicht registriert.</value>
+  </data>
+  <data name="Log_ProfileRenamed" xml:space="preserve">
+    <value>Profil '{0}' in Edge {1} heisst jetzt '{2}'.</value>
+  </data>
+  <data name="Error_ProfileNotInLocalState" xml:space="preserve">
+    <value>Profil '{0}' ist nicht in Local State registriert.</value>
+  </data>
+  <data name="Log_AvatarSet" xml:space="preserve">
+    <value>Eigenes Avatar für Edge {0}/{1} gesetzt.</value>
+  </data>
+  <data name="Log_ColorSet" xml:space="preserve">
+    <value>Farbe #{0:X6} für Edge {1}/{2} gesetzt.</value>
+  </data>
+  <data name="Log_ColorRemoved" xml:space="preserve">
+    <value>Farbe für Edge {0}/{1} entfernt.</value>
+  </data>
+  <data name="Log_ProfileDeleted" xml:space="preserve">
+    <value>Profil '{0}' aus Edge {1} gelöscht.</value>
+  </data>
+  <data name="Log_BackingUp" xml:space="preserve">
+    <value>Sichere Edge {0} – {1} ({2}) …</value>
+  </data>
+  <data name="Log_BackupCreated" xml:space="preserve">
+    <value>Backup erstellt: {0}</value>
+  </data>
+  <data name="Log_DpapiNote" xml:space="preserve">
+    <value>Hinweis: Gespeicherte Passwörter/Cookies sind per DPAPI verschlüsselt und auf einem anderen PC/Benutzer nicht lesbar.</value>
+  </data>
+  <data name="Error_BackupFileNotFound" xml:space="preserve">
+    <value>Backup-Datei '{0}' nicht gefunden.</value>
+  </data>
+  <data name="Error_EdgeNotInstalled" xml:space="preserve">
+    <value>Edge {0} ist nicht installiert bzw. wurde nie gestartet.</value>
+  </data>
+  <data name="Log_ExtractingBackup" xml:space="preserve">
+    <value>Entpacke Backup: {0}</value>
+  </data>
+  <data name="Log_CopyingProfile" xml:space="preserve">
+    <value>Kopiere Profil nach Edge {0}/{1} …</value>
+  </data>
+  <data name="Log_ProfileRestored" xml:space="preserve">
+    <value>Profil '{0}' nach Edge {1}/{2} wiederhergestellt.</value>
+  </data>
+  <data name="Error_SourceEqualsTarget" xml:space="preserve">
+    <value>Quelle und Ziel sind identisch.</value>
+  </data>
+  <data name="Log_Transferring" xml:space="preserve">
+    <value>Übertrage {0} von Edge {1} nach {2}/{3} …</value>
+  </data>
+  <data name="Log_ProfileCopied" xml:space="preserve">
+    <value>Profil '{0}' von {1} nach {2}/{3} kopiert.</value>
+  </data>
+  <data name="Error_MoveRequiresFullProfile" xml:space="preserve">
+    <value>Verschieben erfordert ein vollständiges Profil und geschlossene Edge-Instanzen.</value>
+  </data>
+  <data name="Error_MoveReparsePoints" xml:space="preserve">
+    <value>Profile mit symbolischen Links oder Verzeichnisverknüpfungen werden aus Sicherheitsgründen nicht verschoben.</value>
+  </data>
+  <data name="Log_ComputingChecksums" xml:space="preserve">
+    <value>Erstelle Prüfsummen der Quelle …</value>
+  </data>
+  <data name="Error_TargetNotRegistered" xml:space="preserve">
+    <value>Zielprofil nicht registriert. Quelle bleibt erhalten.</value>
+  </data>
+  <data name="Log_VerifyingCopy" xml:space="preserve">
+    <value>Prüfe Zielkopie …</value>
+  </data>
+  <data name="Error_SourceChanged" xml:space="preserve">
+    <value>Quelldateien haben sich geändert. Quelle bleibt erhalten.</value>
+  </data>
+  <data name="Error_VerificationFailed" xml:space="preserve">
+    <value>Prüfung fehlgeschlagen: {0}. Quelle bleibt erhalten.</value>
+  </data>
+  <data name="Error_EdgeStartedDuringVerification" xml:space="preserve">
+    <value>Edge wurde während der Prüfung gestartet. Quelle bleibt erhalten.</value>
+  </data>
+  <data name="Log_ProfileMoved" xml:space="preserve">
+    <value>Profil nach {0}/{1} verschoben; Zielkopie mit SHA256 geprüft.</value>
+  </data>
+  <data name="Log_EdgeRunningWarning" xml:space="preserve">
+    <value>Warnung: Edge {0} läuft noch. Die Profilkopie kann unvollständig oder inkonsistent sein.</value>
+  </data>
+  <data name="Error_TargetExists" xml:space="preserve">
+    <value>Zielprofil '{0}' existiert bereits. Zum Ersetzen bestätigen.</value>
+  </data>
+  <data name="Error_TargetNotProfile" xml:space="preserve">
+    <value>Zielordner '{0}' ist kein vorhandenes Edge-Profil.</value>
+  </data>
+  <data name="Error_NoLocalState" xml:space="preserve">
+    <value>Keine 'Local State' Datei in {0} gefunden. Edge einmal starten.</value>
+  </data>
+  <data name="Log_TransferringLocalData" xml:space="preserve">
+    <value>Übertrage lokale Daten nach Edge {0}/{1} …</value>
+  </data>
+  <data name="Log_AccountToSignIn" xml:space="preserve">
+    <value>Konto für die erneute Anmeldung: {0}</value>
+  </data>
+  <data name="Log_NewProfileWithoutSignIn" xml:space="preserve">
+    <value>Neues Profil ohne Anmeldung angelegt. Edge {0}/{1} starten und anmelden, um die Synchronisierung zu aktivieren.</value>
+  </data>
+  <data name="Log_LocalDataTransferred" xml:space="preserve">
+    <value>Lokale Daten nach Edge {0}/{1} übertragen.</value>
+  </data>
+  <data name="Log_CopyingDirectory" xml:space="preserve">
+    <value>  Kopiere {0} …</value>
+  </data>
+  <data name="Log_NoLocalStateWarning" xml:space="preserve">
+    <value>Warnung: Keine 'Local State' Datei in {0} gefunden – Edge einmal starten.</value>
+  </data>
+  <data name="Error_AvatarNotFound" xml:space="preserve">
+    <value>Avatar-Datei '{0}' nicht gefunden.</value>
+  </data>
+  <data name="Error_AvatarNotPng" xml:space="preserve">
+    <value>Das Profilavatar muss eine PNG-Datei sein.</value>
+  </data>
+  <data name="Error_AvatarInvalidPng" xml:space="preserve">
+    <value>Die Avatar-Datei ist kein gültiges PNG.</value>
+  </data>
+  <data name="Error_NotJsonObject" xml:space="preserve">
+    <value>{0} enthält kein JSON-Objekt.</value>
+  </data>
 </root>

@@ -1,3 +1,4 @@
+using System.Globalization;
 using EdgeProfileManager.Core.Resources;
 using EdgeProfileManager.Core.Edge;
 
@@ -66,7 +67,7 @@ public static class MenuResolver
                 }
                 else
                 {
-                    result.Add(new MissingProfileNode(entry.Profile, $"{entry.Label ?? entry.Profile} (not found)"));
+                    result.Add(new MissingProfileNode(entry.Profile, string.Format(CultureInfo.CurrentCulture, Strings.Menu_NotFound, entry.Label ?? entry.Profile)));
                 }
             }
         }
