@@ -125,7 +125,7 @@ internal static partial class Native
         finally { Marshal.ReleaseComObject(store); }
     }
 
-    /// <summary>Fenster auf einem anderen virtuellen Desktop sind "cloaked", aber weiterhin gültig.</summary>
+    /// <summary>Windows on another virtual desktop are "cloaked" but still valid.</summary>
     public static bool IsCloaked(nint hwnd) =>
         DwmGetWindowAttribute(hwnd, DWMWA_CLOAKED, out var cloaked, sizeof(int)) == 0 && cloaked != 0;
 }

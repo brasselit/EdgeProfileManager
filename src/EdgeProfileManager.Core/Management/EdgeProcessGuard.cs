@@ -4,22 +4,22 @@ using EdgeProfileManager.Core.Interop;
 
 namespace EdgeProfileManager.Core.Management;
 
-/// <summary>Prüft und beendet laufende Edge-Instanzen eines Channels.</summary>
+/// <summary>Checks for and terminates running Edge processes of a channel.</summary>
 public interface IEdgeProcessGuard
 {
     bool IsRunning(EdgeChannel channel);
 
-    /// <summary>Schliesst alle Fenster des Channels und beendet verbleibende Prozesse.</summary>
+    /// <summary>Closes all windows of the channel and terminates remaining processes.</summary>
     void Close(EdgeChannel channel);
 }
 
 public sealed class EdgeRunningException(EdgeChannel channel)
-    : InvalidOperationException($"Edge {channel} läuft noch. Bitte schliessen oder beenden lassen.")
+    : InvalidOperationException($"Edge {channel} is still running. Please close it or let it be terminated.")
 {
     public EdgeChannel Channel { get; } = channel;
 }
 
-/// <summary>Port von Test-EdgeRunning / Assert-EdgeClosed -Force.</summary>
+/// <summary>Detects running msedge.exe processes per channel and closes them, gracefully first, then forcibly.</summary>
 public sealed class EdgeProcessGuard(EdgeWindowFinder finder) : IEdgeProcessGuard
 {
     private static readonly TimeSpan GracefulTimeout = TimeSpan.FromSeconds(8);
@@ -28,7 +28,7 @@ public sealed class EdgeProcessGuard(EdgeWindowFinder finder) : IEdgeProcessGuar
 
     public void Close(EdgeChannel channel)
     {
-        // Zuerst regulär schliessen, damit Edge Sitzung und Einstellungen sauber speichert.
+        // Close normally first so Edge saves its session and settings cleanly.
         foreach (var window in finder.GetWindows().Where(w => w.Channel == channel))
         {
             Native.PostMessage(window.Handle, Native.WM_CLOSE, 0, 0);
@@ -36,7 +36,7 @@ public sealed class EdgeProcessGuard(EdgeWindowFinder finder) : IEdgeProcessGuar
         var stopwatch = Stopwatch.StartNew();
         while (stopwatch.Elapsed < GracefulTimeout && IsRunning(channel)) Thread.Sleep(250);
 
-        // Hintergrundprozesse (Startup Boost, Erweiterungen) bleiben oft bestehen.
+        // Background processes (startup boost, extensions) often remain.
         foreach (var process in GetProcesses(channel))
         {
             try { process.Kill(); process.WaitForExit(5000); }

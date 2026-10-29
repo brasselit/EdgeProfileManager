@@ -9,7 +9,7 @@ internal sealed class AssertionException(string message) : Exception(message);
 
 internal static class Assert
 {
-    public static void True(bool condition, string message = "Bedingung nicht erfüllt")
+    public static void True(bool condition, string message = "Condition not met")
     {
         if (!condition) throw new AssertionException(message);
     }
@@ -17,31 +17,31 @@ internal static class Assert
     public static void Equal<T>(T expected, T actual, string? context = null)
     {
         if (!EqualityComparer<T>.Default.Equals(expected, actual))
-            throw new AssertionException($"{context}{(context is null ? "" : ": ")}erwartet <{expected}>, erhalten <{actual}>");
+            throw new AssertionException($"{context}{(context is null ? "" : ": ")}expected <{expected}>, got <{actual}>");
     }
 
     public static void SequenceEqual<T>(IEnumerable<T> expected, IEnumerable<T> actual)
     {
         var e = expected.ToList();
         var a = actual.ToList();
-        if (!e.SequenceEqual(a)) throw new AssertionException($"erwartet [{string.Join(", ", e)}], erhalten [{string.Join(", ", a)}]");
+        if (!e.SequenceEqual(a)) throw new AssertionException($"expected [{string.Join(", ", e)}], got [{string.Join(", ", a)}]");
     }
 
     public static T IsType<T>(object? value)
     {
         if (value is T typed) return typed;
-        throw new AssertionException($"erwartet Typ {typeof(T).Name}, erhalten {value?.GetType().Name ?? "null"}");
+        throw new AssertionException($"expected type {typeof(T).Name}, got {value?.GetType().Name ?? "null"}");
     }
 
     public static void Throws<TException>(Action action) where TException : Exception
     {
         try { action(); }
         catch (TException) { return; }
-        throw new AssertionException($"{typeof(TException).Name} erwartet");
+        throw new AssertionException($"{typeof(TException).Name} expected");
     }
 }
 
-/// <summary>Minimaler Testrunner: führt alle [Test]-Methoden aus; Filter optional als Argument.</summary>
+/// <summary>Minimal test runner: runs all [Test] methods; optional filter as argument.</summary>
 internal static class TestRunner
 {
     private static int Main(string[] args)
@@ -77,7 +77,7 @@ internal static class TestRunner
                 (instance as IDisposable)?.Dispose();
             }
         }
-        Console.WriteLine($"{tests.Count - failed}/{tests.Count} Tests erfolgreich.");
+        Console.WriteLine($"{tests.Count - failed}/{tests.Count} tests passed.");
         return failed == 0 ? 0 : 1;
     }
 }

@@ -15,7 +15,7 @@
             <Setter Property="BorderBrush" Value="#0F6C74"/>
             <Setter Property="Foreground" Value="#FFFFFF"/>
         </Style>
-        <!-- Kleiner Edit-Button neben einem angezeigten Wert (Segoe-MDL2-Glyphe als Inhalt). -->
+        <!-- Small edit button next to a displayed value (Segoe MDL2 glyph as content). -->
         <Style x:Key="EditButton" TargetType="Button">
             <Setter Property="Width" Value="28"/>
             <Setter Property="Height" Value="28"/>
@@ -88,29 +88,29 @@
             <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
             <DockPanel Margin="0,0,0,10">
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                    <Button x:Name="AddGroupButton" Content="+ Gruppe" Margin="0,0,6,0"/>
-                    <Button x:Name="NewProfileButton" Content="+ Neues Profil" Margin="0,0,6,0"/>
-                    <Button x:Name="RestoreButton" Content="Wiederherstellen" Margin="0,0,6,0"/>
+                    <Button x:Name="AddGroupButton" Content="+ Group" Margin="0,0,6,0"/>
+                    <Button x:Name="NewProfileButton" Content="+ New profile" Margin="0,0,6,0"/>
+                    <Button x:Name="RestoreButton" Content="Restore" Margin="0,0,6,0"/>
                     <Button x:Name="BackupButton" Content="Backup …" Margin="0,0,6,0"/>
-                    <Button x:Name="SettingsButton" Margin="0,0,6,0" ToolTip="Einstellungen">
+                    <Button x:Name="SettingsButton" Margin="0,0,6,0" ToolTip="Settings">
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE713;"/>
                     </Button>
-                    <Button x:Name="RefreshButton" ToolTip="Profile neu einlesen">
+                    <Button x:Name="RefreshButton" ToolTip="Refresh profiles">
                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE72C;"/>
                     </Button>
                 </StackPanel>
-                <TextBlock Text="Menü-Board" FontSize="22" FontWeight="SemiBold" Foreground="#163F43" VerticalAlignment="Center"/>
-                <TextBlock Text="Spalte = Gruppe im Tray-Menü · Karte ziehen = Gruppe wechseln" Foreground="#4F6066" FontSize="12"
+                <TextBlock Text="Menu board" FontSize="22" FontWeight="SemiBold" Foreground="#163F43" VerticalAlignment="Center"/>
+                <TextBlock Text="Column = group in tray menu · drag card = change group" Foreground="#4F6066" FontSize="12"
                            VerticalAlignment="Center" Margin="12,4,0,0" TextTrimming="CharacterEllipsis"/>
             </DockPanel>
             <DockPanel Grid.Row="1" Margin="0,0,0,10">
                 <StackPanel x:Name="Filters" Orientation="Horizontal" VerticalAlignment="Center"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <CheckBox x:Name="LocalOption" Content="Nur lokale Daten" Margin="0,0,16,0"
-                              ToolTip="Backup, Restore und Übertragen: nur Local Storage, IndexedDB usw. statt des ganzen Profils."/>
-                    <CheckBox x:Name="CacheOption" Content="Caches einschliessen" Margin="0,0,16,0"/>
-                    <CheckBox x:Name="RunningOption" Content="Quelle darf laufen"
-                              ToolTip="Backup/Kopie bei geöffnetem Edge; die Kopie kann inkonsistent sein."/>
+                    <CheckBox x:Name="LocalOption" Content="Local data only" Margin="0,0,16,0"
+                              ToolTip="Backup, restore and transfer: only Local Storage, IndexedDB etc. instead of the whole profile."/>
+                    <CheckBox x:Name="CacheOption" Content="Include caches" Margin="0,0,16,0"/>
+                    <CheckBox x:Name="RunningOption" Content="Allow running source"
+                              ToolTip="Backup/copy while Edge is open; the copy may be inconsistent."/>
                 </StackPanel>
             </DockPanel>
             <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
@@ -120,8 +120,8 @@
 
         <!-- Status -->
         <DockPanel Grid.Row="1" Margin="20,0,20,10">
-            <Button x:Name="LogButton" DockPanel.Dock="Right" Content="Protokoll" Padding="10,3"/>
-            <TextBlock x:Name="Status" Text="Bereit" Foreground="#163F43" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+            <Button x:Name="LogButton" DockPanel.Dock="Right" Content="Log" Padding="10,3"/>
+            <TextBlock x:Name="Status" Text="Ready" Foreground="#163F43" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
         </DockPanel>
 
         <!-- Details -->
@@ -135,17 +135,17 @@
                 </Border>
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel x:Name="DetailContent" Margin="14,12">
-                        <TextBlock x:Name="EmptyHint" Text="Karte auswählen, um Profil und Menü-Eintrag zu bearbeiten." Foreground="#4F6066"
+                        <TextBlock x:Name="EmptyHint" Text="Select a card to edit its profile and menu entry." Foreground="#4F6066"
                                    TextWrapping="Wrap" Margin="2,8"/>
 
-                        <!-- Abschnitt Edge-Profil -->
+                        <!-- Edge profile section -->
                         <Border x:Name="ProfileSection" BorderBrush="#DDE4E6" BorderThickness="1" CornerRadius="8" Margin="0,0,0,12">
                             <StackPanel>
                                 <Border Background="#163F43" CornerRadius="7,7,0,0" Padding="12,8">
                                     <DockPanel>
-                                        <TextBlock DockPanel.Dock="Right" Text="ändert Edge selbst" Foreground="#CFE0E2" FontSize="12"/>
+                                        <TextBlock DockPanel.Dock="Right" Text="changes Edge itself" Foreground="#CFE0E2" FontSize="12"/>
                                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE77B;" Foreground="#FFFFFF" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                        <TextBlock Text="EDGE-PROFIL" Foreground="#FFFFFF" FontWeight="Bold" FontSize="12"/>
+                                        <TextBlock Text="EDGE PROFILE" Foreground="#FFFFFF" FontWeight="Bold" FontSize="12"/>
                                     </DockPanel>
                                 </Border>
                                 <StackPanel x:Name="ProfileDetails" Margin="12,12,12,10">
@@ -160,9 +160,9 @@
                                                 </Grid>
                                             </Border>
                                             <Button x:Name="AvatarButton" Style="{StaticResource EditButton}" Width="24" Height="24" FontSize="10"
-                                                    HorizontalAlignment="Right" VerticalAlignment="Bottom" ToolTip="Avatar ändern" Content="&#xE70F;"/>
+                                                    HorizontalAlignment="Right" VerticalAlignment="Bottom" ToolTip="Change avatar" Content="&#xE70F;"/>
                                         </Grid>
-                                        <Button x:Name="RenameButton" DockPanel.Dock="Right" Style="{StaticResource EditButton}" ToolTip="Umbenennen"
+                                        <Button x:Name="RenameButton" DockPanel.Dock="Right" Style="{StaticResource EditButton}" ToolTip="Rename"
                                                 Content="&#xE70F;" VerticalAlignment="Center"/>
                                         <StackPanel VerticalAlignment="Center">
                                             <TextBlock x:Name="ProfileNameText" FontSize="17" FontWeight="SemiBold" Foreground="#163F43" TextTrimming="CharacterEllipsis"/>
@@ -172,17 +172,17 @@
                                     </DockPanel>
                                     <Border Style="{StaticResource KeyValueRow}">
                                         <DockPanel>
-                                            <TextBlock Text="Farbe" Width="62" Style="{StaticResource KeyLabel}"/>
-                                            <Button x:Name="ColorButton" DockPanel.Dock="Right" Style="{StaticResource EditButton}" ToolTip="Farbe ändern" Content="&#xE70F;"/>
+                                            <TextBlock Text="Color" Width="62" Style="{StaticResource KeyLabel}"/>
+                                            <Button x:Name="ColorButton" DockPanel.Dock="Right" Style="{StaticResource EditButton}" ToolTip="Change color" Content="&#xE70F;"/>
                                             <Ellipse x:Name="ColorSwatch" Width="18" Height="18" Stroke="#C4CDD0" Margin="0,0,8,0" VerticalAlignment="Center"/>
                                             <TextBlock x:Name="ColorText" FontFamily="Consolas" FontSize="12" VerticalAlignment="Center"/>
                                         </DockPanel>
                                     </Border>
                                     <Border Style="{StaticResource KeyValueRow}">
                                         <DockPanel>
-                                            <TextBlock Text="Instanz" Width="62" Style="{StaticResource KeyLabel}"/>
+                                            <TextBlock Text="Channel" Width="62" Style="{StaticResource KeyLabel}"/>
                                             <Button x:Name="TransferButton" DockPanel.Dock="Right" Style="{StaticResource EditButton}"
-                                                    ToolTip="In andere Instanz übertragen (kopieren oder verschieben)" Content="&#xE8AB;"/>
+                                                    ToolTip="Transfer to another channel (copy or move)" Content="&#xE8AB;"/>
                                             <Border Background="#163F43" CornerRadius="3" Padding="6,1" VerticalAlignment="Center" Margin="0,0,8,0">
                                                 <TextBlock x:Name="ChannelText" Foreground="#FFFFFF" FontSize="11"/>
                                             </Border>
@@ -191,68 +191,68 @@
                                     </Border>
                                     <Border Style="{StaticResource KeyValueRow}">
                                         <DockPanel>
-                                            <TextBlock Text="Ordner" Width="62" Style="{StaticResource KeyLabel}"/>
-                                            <Button x:Name="OpenFolderButton" DockPanel.Dock="Right" Style="{StaticResource EditButton}" ToolTip="Profilordner öffnen" Content="&#xE8A7;"/>
+                                            <TextBlock Text="Folder" Width="62" Style="{StaticResource KeyLabel}"/>
+                                            <Button x:Name="OpenFolderButton" DockPanel.Dock="Right" Style="{StaticResource EditButton}" ToolTip="Open profile folder" Content="&#xE8A7;"/>
                                             <TextBlock x:Name="PathText" Foreground="#4F6066" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,8,0"/>
                                         </DockPanel>
                                     </Border>
                                     <Border BorderBrush="#EEF2F3" BorderThickness="0,1,0,0" Padding="0,10,0,0">
                                         <DockPanel>
                                             <Button x:Name="DeleteButton" DockPanel.Dock="Right" Style="{StaticResource EditButton}" Width="30" Height="30"
-                                                    Foreground="#A4262C" BorderBrush="#E3B4B6" ToolTip="Profil löschen" Content="&#xE74D;"/>
+                                                    Foreground="#A4262C" BorderBrush="#E3B4B6" ToolTip="Delete profile" Content="&#xE74D;"/>
                                             <Button x:Name="BackupProfileButton" DockPanel.Dock="Right" Content="Backup" Margin="0,0,6,0"/>
-                                            <Button x:Name="NewWindowButton" DockPanel.Dock="Right" Content="Neues Fenster" Margin="0,0,6,0"/>
-                                            <Button x:Name="OpenButton" Style="{StaticResource PrimaryButton}" Content="Öffnen" Margin="0,0,6,0"/>
+                                            <Button x:Name="NewWindowButton" DockPanel.Dock="Right" Content="New window" Margin="0,0,6,0"/>
+                                            <Button x:Name="OpenButton" Style="{StaticResource PrimaryButton}" Content="Open" Margin="0,0,6,0"/>
                                         </DockPanel>
                                     </Border>
                                 </StackPanel>
                             </StackPanel>
                         </Border>
 
-                        <!-- Abschnitt Menü-Eintrag -->
+                        <!-- Menu entry section -->
                         <Border x:Name="MenuSection" BorderBrush="#DDE4E6" BorderThickness="1" CornerRadius="8">
                             <StackPanel>
                                 <Border Background="#DCEEEF" CornerRadius="7,7,0,0" Padding="12,8">
                                     <DockPanel>
-                                        <TextBlock DockPanel.Dock="Right" Text="nur Tray-Menü und Jump List" Foreground="#0F4F55" FontSize="12"/>
+                                        <TextBlock DockPanel.Dock="Right" Text="tray menu and Jump List only" Foreground="#0F4F55" FontSize="12"/>
                                         <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE700;" Foreground="#0F4F55" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                        <TextBlock Text="MENÜ-EINTRAG" Foreground="#0F4F55" FontWeight="Bold" FontSize="12"/>
+                                        <TextBlock Text="MENU ENTRY" Foreground="#0F4F55" FontWeight="Bold" FontSize="12"/>
                                     </DockPanel>
                                 </Border>
                                 <StackPanel x:Name="InMenuPanel" Margin="12,10,12,12">
                                     <Grid>
                                         <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="8"/><ColumnDefinition/></Grid.ColumnDefinitions>
                                         <StackPanel>
-                                            <TextBlock Text="Gruppe" Style="{StaticResource FieldLabel}"/>
+                                            <TextBlock Text="Group" Style="{StaticResource FieldLabel}"/>
                                             <ComboBox x:Name="GroupCombo"/>
                                         </StackPanel>
                                         <StackPanel Grid.Column="2">
-                                            <TextBlock Text="Bezeichnung" Style="{StaticResource FieldLabel}"/>
-                                            <TextBox x:Name="LabelBox" ToolTip="Leer = Name des Edge-Profils"/>
+                                            <TextBlock Text="Label" Style="{StaticResource FieldLabel}"/>
+                                            <TextBox x:Name="LabelBox" ToolTip="Empty = name of the Edge profile"/>
                                         </StackPanel>
                                     </Grid>
                                     <Grid Margin="0,10,0,0">
                                         <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="8"/><ColumnDefinition/></Grid.ColumnDefinitions>
                                         <StackPanel>
                                             <TextBlock Text="Desktop" Style="{StaticResource FieldLabel}"/>
-                                            <ComboBox x:Name="DesktopCombo" IsEditable="True" ToolTip="Nummer oder Name des virtuellen Desktops"/>
+                                            <ComboBox x:Name="DesktopCombo" IsEditable="True" ToolTip="Number or name of the virtual desktop"/>
                                         </StackPanel>
                                         <StackPanel Grid.Column="2">
-                                            <TextBlock Text="Wenn Fenster offen" Style="{StaticResource FieldLabel}"/>
+                                            <TextBlock Text="If window is open" Style="{StaticResource FieldLabel}"/>
                                             <ComboBox x:Name="ModeCombo"/>
                                         </StackPanel>
                                     </Grid>
                                     <DockPanel Margin="0,12,0,0">
-                                        <Button x:Name="RemoveFromMenuButton" DockPanel.Dock="Right" Content="Aus Menü entfernen" Foreground="#A4262C"
+                                        <Button x:Name="RemoveFromMenuButton" DockPanel.Dock="Right" Content="Remove from menu" Foreground="#A4262C"
                                                 Background="Transparent" BorderThickness="0" Padding="2" Cursor="Hand"/>
-                                        <CheckBox x:Name="JumpListCheck" Content="In der Jump List" VerticalAlignment="Center"/>
+                                        <CheckBox x:Name="JumpListCheck" Content="In Jump List" VerticalAlignment="Center"/>
                                     </DockPanel>
                                 </StackPanel>
                                 <StackPanel x:Name="NotInMenuPanel" Margin="12,10,12,12">
-                                    <TextBlock Text="Dieses Profil steht nicht im Menü." Foreground="#4F6066" Margin="0,0,0,8"/>
-                                    <TextBlock Text="Aufnehmen in" Style="{StaticResource FieldLabel}"/>
+                                    <TextBlock Text="This profile is not in the menu." Foreground="#4F6066" Margin="0,0,0,8"/>
+                                    <TextBlock Text="Add to" Style="{StaticResource FieldLabel}"/>
                                     <DockPanel>
-                                        <Button x:Name="AddToMenuButton" DockPanel.Dock="Right" Content="Aufnehmen" Margin="8,0,0,0"/>
+                                        <Button x:Name="AddToMenuButton" DockPanel.Dock="Right" Content="Add" Margin="8,0,0,0"/>
                                         <ComboBox x:Name="AddToGroupCombo"/>
                                     </DockPanel>
                                 </StackPanel>

@@ -4,23 +4,23 @@ using System.Windows.Media;
 
 namespace EdgeProfileManager.Dialogs;
 
-/// <summary>Farbauswahl für ein Profil: feste Palette und eigene Farbe.</summary>
+/// <summary>Color picker for a profile: fixed palette and custom color.</summary>
 public static class ProfileColorDialog
 {
-    /// <summary>Gut unterscheidbare Farben, angelehnt an die Edge-Farbdesigns.</summary>
+    /// <summary>Easily distinguishable colors, based on the Edge color themes.</summary>
     public static readonly (string Name, int Rgb)[] Palette =
     [
-        ("Blau", 0x0F6CBD), ("Indigo", 0x4F6BED), ("Lila", 0x8764B8), ("Pink", 0xE3008C),
-        ("Rot", 0xD13438), ("Orange", 0xCA5010), ("Gelb", 0xC19C00), ("Limette", 0x73AA24),
-        ("Grün", 0x107C10), ("Türkis", 0x038387), ("Grau", 0x69797E), ("Marine", 0x243A5E),
+        ("Blue", 0x0F6CBD), ("Indigo", 0x4F6BED), ("Purple", 0x8764B8), ("Pink", 0xE3008C),
+        ("Red", 0xD13438), ("Orange", 0xCA5010), ("Yellow", 0xC19C00), ("Lime", 0x73AA24),
+        ("Green", 0x107C10), ("Teal", 0x038387), ("Gray", 0x69797E), ("Navy", 0x243A5E),
     ];
 
-    /// <summary>Liefert die gewählte Farbe (<c>Rgb</c> null = „Keine Farbe“) oder null bei Abbruch.</summary>
+    /// <summary>Returns the chosen color (<c>Rgb</c> null = "No color") or null if canceled.</summary>
     public static ProfileColorChoice? Show(Window owner, string profileName, int? current)
     {
         var dialog = new Window
         {
-            Title = $"Farbe für {profileName}",
+            Title = $"Color for {profileName}",
             Owner = owner,
             SizeToContent = SizeToContent.WidthAndHeight,
             ResizeMode = ResizeMode.NoResize,
@@ -33,7 +33,7 @@ public static class ProfileColorDialog
         var panel = new StackPanel { Margin = new Thickness(20) };
         panel.Children.Add(new TextBlock
         {
-            Text = "Setzt das Farbdesign und die Profilfarbe in Edge oder entfernt sie mit „Keine Farbe“. Edge muss dafür geschlossen sein.",
+            Text = "Sets the color theme and profile color in Edge, or removes them with \"No color\". Edge must be closed for this.",
             TextWrapping = TextWrapping.Wrap,
             MaxWidth = 360,
             Margin = new Thickness(0, 0, 0, 12),
@@ -59,7 +59,7 @@ public static class ProfileColorDialog
         panel.Children.Add(swatches);
 
         var buttons = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 8, 0, 0) };
-        var custom = new Button { Content = "Eigene Farbe…", Padding = new Thickness(10, 5, 10, 5), Margin = new Thickness(0, 0, 8, 0) };
+        var custom = new Button { Content = "Custom color…", Padding = new Thickness(10, 5, 10, 5), Margin = new Thickness(0, 0, 8, 0) };
         custom.Click += (_, _) =>
         {
             using var picker = new System.Windows.Forms.ColorDialog { FullOpen = true, AnyColor = true };
@@ -70,14 +70,14 @@ public static class ProfileColorDialog
         };
         var none = new Button
         {
-            Content = "Keine Farbe",
+            Content = "No color",
             Padding = new Thickness(10, 5, 10, 5),
             Margin = new Thickness(0, 0, 8, 0),
-            ToolTip = "Farbdesign entfernen und zum Standarddesign von Edge zurückkehren",
+            ToolTip = "Remove the color theme and return to the default Edge theme",
             IsEnabled = current is not null,
         };
         none.Click += (_, _) => { result = new ProfileColorChoice(null); dialog.DialogResult = true; };
-        var cancel = new Button { Content = "Abbrechen", IsCancel = true, Padding = new Thickness(10, 5, 10, 5) };
+        var cancel = new Button { Content = "Cancel", IsCancel = true, Padding = new Thickness(10, 5, 10, 5) };
         buttons.Children.Add(none);
         buttons.Children.Add(custom);
         buttons.Children.Add(cancel);
@@ -90,5 +90,5 @@ public static class ProfileColorDialog
     public static Color ToColor(int rgb) => Color.FromRgb((byte)(rgb >> 16), (byte)(rgb >> 8), (byte)rgb);
 }
 
-/// <summary>Ergebnis des Farbdialogs; <see cref="Rgb"/> null = keine Farbe.</summary>
+/// <summary>Result of the color dialog; <see cref="Rgb"/> null = no color.</summary>
 public sealed record ProfileColorChoice(int? Rgb);

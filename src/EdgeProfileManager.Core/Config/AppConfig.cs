@@ -7,18 +7,18 @@ public sealed class AppConfig
 {
     public string BackupPath { get; set; } = @"%USERPROFILE%\EdgeProfileBackups";
 
-    /// <summary>Verhalten, wenn ein Profil keine eigene desktopMode-Angabe hat.</summary>
+    /// <summary>Behavior when a profile has no desktopMode of its own.</summary>
     public DesktopMode DefaultDesktopMode { get; set; } = DesktopMode.SwitchTo;
 
-    /// <summary>Profile, die nicht im Menübaum stehen, in "Nicht zugeordnet" anzeigen.</summary>
+    /// <summary>Show profiles that are not in the menu tree under "Unassigned".</summary>
     public bool ShowUnassigned { get; set; } = true;
 
-    /// <summary>Nicht zugeordnete Profile auch in der Jump List anzeigen.</summary>
+    /// <summary>Also show unassigned profiles in the Jump List.</summary>
     public bool JumpListUnassigned { get; set; }
 
     public JumpListStyle JumpListStyle { get; set; } = JumpListStyle.Categories;
 
-    /// <summary>Programm für "Konfiguration bearbeiten"; leer = Dateizuordnung, VS Code oder Notepad.</summary>
+    /// <summary>Program for "Edit configuration"; empty = file association, VS Code or Notepad.</summary>
     public string? Editor { get; set; }
 
     public List<MenuEntry> Menu { get; set; } = [];
@@ -26,20 +26,20 @@ public sealed class AppConfig
 
 public enum JumpListStyle
 {
-    /// <summary>Eine Jump-List-Kategorie pro Gruppe. Windows zeigt dort nur begrenzt viele Einträge
-    /// und blendet sie aus, wenn "Zuletzt geöffnete Elemente in Sprunglisten" deaktiviert ist.</summary>
+    /// <summary>One Jump List category per group. Windows shows only a limited number of entries there
+    /// and hides them when "Show recently opened items in Jump Lists" is turned off.</summary>
     Categories,
-    /// <summary>Alle Profile im Abschnitt "Aufgaben", ohne Gruppierung, aber ohne diese Einschränkungen.</summary>
+    /// <summary>All profiles in the "Tasks" section, without grouping but also without these restrictions.</summary>
     Tasks,
 }
 
-/// <summary>Ein Eintrag im Menübaum: Gruppe, Profil oder Trennlinie.</summary>
+/// <summary>An entry in the menu tree: group, profile or separator.</summary>
 public sealed class MenuEntry
 {
     public string? Group { get; set; }
     public List<MenuEntry>? Children { get; set; }
 
-    /// <summary>Profilreferenz "Channel/Folder", z.B. "Stable/Profile 1".</summary>
+    /// <summary>Profile reference "Channel/Folder", e.g. "Stable/Profile 1".</summary>
     public string? Profile { get; set; }
     public string? Label { get; set; }
     public DesktopTarget? Desktop { get; set; }
@@ -51,15 +51,15 @@ public sealed class MenuEntry
 
 public enum DesktopMode
 {
-    /// <summary>Zum Desktop wechseln, auf dem das Fenster liegt.</summary>
+    /// <summary>Switch to the desktop the window is on.</summary>
     SwitchTo,
-    /// <summary>Fenster auf den aktuellen Desktop holen.</summary>
+    /// <summary>Bring the window to the current desktop.</summary>
     BringHere,
-    /// <summary>Fenster auf den zugewiesenen Desktop verschieben und dorthin wechseln.</summary>
+    /// <summary>Move the window to the assigned desktop and switch there.</summary>
     MoveToAssigned,
 }
 
-/// <summary>Virtueller Desktop per Nummer (1-basiert) oder Name.</summary>
+/// <summary>Virtual desktop by number (1-based) or name.</summary>
 [JsonConverter(typeof(DesktopTargetConverter))]
 public sealed record DesktopTarget(int? Number, string? Name)
 {
@@ -74,7 +74,7 @@ internal sealed class DesktopTargetConverter : JsonConverter<DesktopTarget>
         JsonTokenType.String when int.TryParse(reader.GetString(), out var n) => new DesktopTarget(n, null),
         JsonTokenType.String => new DesktopTarget(null, reader.GetString()),
         JsonTokenType.Null => null,
-        _ => throw new JsonException("desktop muss eine Nummer oder ein Name sein."),
+        _ => throw new JsonException("desktop must be a number or a name."),
     };
 
     public override void Write(Utf8JsonWriter writer, DesktopTarget value, JsonSerializerOptions options)

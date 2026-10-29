@@ -16,19 +16,19 @@
     <AssemblyTitle>Edge Profile Manager</AssemblyTitle>
     <Product>Edge Profile Manager</Product>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <!-- DPI-Awareness kommt bewusst aus dem Manifest, da WPF und nicht WinForms die Anwendung startet. -->
+    <!-- DPI awareness deliberately comes from the manifest, since WPF and not WinForms starts the application. -->
     <NoWarn>$(NoWarn);WFO0003</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- WinForms (Tray) und WPF (Fenster) teilen viele Typnamen; WinForms nur dort einbinden, wo es gebraucht wird. -->
+    <!-- WinForms (tray) and WPF (windows) share many type names; only import WinForms where it is needed. -->
     <Using Remove="System.Windows.Forms" />
     <Using Remove="System.Drawing" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Assets\app.ico" LogicalName="app.ico" />
-    <!-- Optional: VirtualDesktopAccessor.dll für die Desktop-Zuordnung (siehe README). -->
+    <!-- Optional: VirtualDesktopAccessor.dll for desktop assignment (see README). -->
     <None Include="..\..\lib\VirtualDesktopAccessor.dll" Condition="Exists('..\..\lib\VirtualDesktopAccessor.dll')">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>VirtualDesktopAccessor.dll</Link>
@@ -36,9 +36,9 @@
   </ItemGroup>
 
   <!--
-    Eine laufende Tray-Instanz aus diesem Ausgabeordner sperrt die DLLs. Vor dem Löschen (Clean,
-    Rebuild) und vor dem Kopieren beenden, egal ob der Build aus VS Code, C# Dev Kit oder der
-    Konsole kommt. Instanzen an anderen Orten (z.B. eine installierte Release-Version) bleiben unberührt.
+    A running tray instance from this output folder locks the DLLs. Stop it before deleting (Clean,
+    Rebuild) and before copying, whether the build comes from VS Code, C# Dev Kit or the
+    console. Instances in other locations (e.g. an installed release version) are left alone.
   -->
   <Target Name="StopRunningInstance" BeforeTargets="CoreClean;_CopyFilesMarkedCopyLocal;CopyFilesToOutputDirectory"
           Condition="'$(OS)' == 'Windows_NT' And '$(DesignTimeBuild)' != 'true' And Exists('$(TargetDir)$(TargetName).exe')">

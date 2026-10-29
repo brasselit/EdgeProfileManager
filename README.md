@@ -1,161 +1,156 @@
 # Edge Profile Manager
 
-Ein Tray- und Taskbar-Tool, um Edge-Profile aller Channels (Stable, Beta, Dev, Canary) mit einem Klick zu starten oder zu deren Fenster zu wechseln.
+A tray and taskbar tool that starts Edge profiles of all channels (Stable, Beta, Dev, Canary) or switches to their windows with a single click.
 
-## Funktionen (Stand Phase 1 und 2)
+## Features
 
-- **Tray-Menü:** Ein Klick (links oder rechts) zeigt alle Profile, gruppiert gemäss `config.json`.
-  - Profile mit offenem Fenster erscheinen **fett**.
-  - Klick auf ein Profil: Ist ein Fenster offen, wird es aktiviert, sonst wird das Profil gestartet.
-  - Ist das aktive Fenster bereits von diesem Profil, wechselt ein erneuter Klick zum nächsten Fenster desselben Profils.
-  - **Shift+Klick** öffnet immer ein neues Fenster.
-- **Taskbar und Start:** Die Startmenü-Verknüpfung „Edge Profile Manager“ anheften. Am einfachsten über **Einstellungen › An Start anheften…** bzw. **An Taskleiste anheften…** im Tray-Menü: Diese Punkte markieren die Verknüpfung im Explorer und zeigen, welchen Rechtsklick-Befehl du wählst. Windows lässt Programme nicht selbst anheften.
-  - Linksklick auf die Schaltfläche zeigt das Profilmenü an der Maus.
-  - Rechtsklick zeigt die **Jump List** mit den Profilen.
-- **Virtuelle Desktops:** Pro Profil lässt sich ein Desktop festlegen (siehe `desktop` / `desktopMode`). Dafür wird `VirtualDesktopAccessor.dll` benötigt; ohne die DLL ist die Funktion deaktiviert.
-- **Live-Aktualisierung:**
-  - Änderungen an `config.json` werden sofort übernommen.
-  - Neue oder umbenannte Edge-Profile werden erkannt, weil das Tool die `Local State`-Dateien überwacht.
+- **Tray menu:** A click (left or right) shows all profiles, grouped as defined in `config.json`.
+  - Profiles with an open window are shown in **bold**.
+  - Clicking a profile activates its window if one is open; otherwise the profile is started.
+  - If the active window already belongs to that profile, clicking again switches to the next window of the same profile.
+  - **Shift+click** always opens a new window.
+- **Taskbar and Start:** Pin the Start menu shortcut “Edge Profile Manager”. The easiest way is **Settings › Pin to Start…** or **Pin to taskbar…** in the tray menu: these items select the shortcut in Explorer and show which context menu command to choose. Windows does not let programs pin themselves.
+  - Left-clicking the taskbar button shows the profile menu at the mouse pointer.
+  - Right-clicking shows the **Jump List** with the profiles.
+- **Virtual desktops:** A desktop can be assigned per profile (see `desktop` / `desktopMode`). This requires `VirtualDesktopAccessor.dll`; without the DLL the feature is disabled.
+- **Live updates:**
+  - Changes to `config.json` are applied immediately.
+  - New or renamed Edge profiles are detected, because the tool watches Edge's `Local State` files.
 
-## Profile und Menü verwalten (Phasen 3–5)
+## Managing profiles and the menu
 
-Tray-Menü › **Profile und Menü verwalten…** oder `EdgeProfileManager.exe --manage` öffnet das Menü-Board:
+Tray menu › **Manage profiles and menu…** or `EdgeProfileManager.exe --manage` opens the menu board:
 
-- **Spalten** sind die Gruppen des Tray-Menüs: links „Hauptmenü“ (Profile ohne Gruppe), rechts „Nicht zugeordnet“.
-- **Karten** sind Profile, mit Profilfarbe, Avatar, Instanz, zugewiesenem Desktop und dem Hinweis „läuft“.
-- **Karte ziehen:**
-  - in eine andere Spalte: Gruppe wechseln
-  - auf eine Karte: davor einsortieren
-  - nach „Nicht zugeordnet“: aus dem Menü entfernen
-- **Gruppen:** Das Menü ⋯ einer Spalte bietet Umbenennen, Verschieben, Trennlinie, Untergruppe und Löschen. Neue Gruppen legst du mit **+ Gruppe** an.
-- Oben lässt sich die Ansicht auf eine Instanz filtern.
-- Jede Änderung wird sofort in `config.json` gespeichert; Tray-Menü und Jump List folgen direkt.
+- **Columns** are the groups of the tray menu: “Main menu” (profiles without a group) on the left, “Unassigned” on the right.
+- **Cards** are profiles, showing profile color, avatar, channel, assigned desktop and a “running” hint.
+- **Dragging a card:**
+  - to another column: changes the group
+  - onto a card: places it before that card
+  - to “Unassigned”: removes it from the menu
+- **Groups:** The ⋯ menu of a column offers Rename, Move left/right, Add separator, Add subgroup and Delete group. Create new groups with **+ Group**.
+- The view can be filtered to one channel at the top.
+- Every change is saved to `config.json` immediately; tray menu and Jump List follow right away.
 
-Ein Klick auf eine Karte zeigt rechts die Details, getrennt in zwei Abschnitte.
+Clicking a card shows its details on the right, split into two sections.
 
-**Edge-Profil** – ändert Edge selbst, Edge muss dafür geschlossen sein (das Tool fragt nach):
+**Edge profile** – changes Edge itself; Edge must be closed for this (the tool offers to close it):
 
-| Aktion | Beschreibung |
+| Action | Description |
 |---|---|
-| Umbenennen, Avatar | Edit-Button neben Name bzw. Avatar; Änderungen in `Preferences` und `Local State` |
-| **Farbe** | Setzt das Farbdesign des Profils (wie „Darstellung › Farbe“ in Edge) sowie die Avatar- und Hervorhebungsfarbe. Auswahl aus einer Palette oder frei; „Keine Farbe“ stellt das Standarddesign wieder her. |
-| Übertragen ⇄ | Kopieren in eine andere Instanz (neues oder vorhandenes Zielprofil) oder **geprüft verschieben**: Jede Datei wird mit SHA256 geprüft, die Quelle erst danach gelöscht. Menüeinträge werden automatisch umgestellt. |
-| Öffnen, Neues Fenster | Profil starten bzw. zum Fenster wechseln (auch per Doppelklick auf die Karte) |
-| Backup, Profilordner, Löschen | Backup als ZIP mit `meta.json`, kompatibel zum Script. Löschen erst nach Rückfrage. |
+| Rename, Avatar | Edit buttons next to the name and the avatar; changes are written to `Preferences` and `Local State` |
+| **Color** | Sets the profile's color theme (like “Appearance › Color” in Edge) as well as the avatar and highlight color. Choose from a palette or any custom color; “No color” restores the default theme. |
+| Transfer ⇄ | Copies the profile to another channel (new or existing target profile) or performs a **verified move**: every file is checked with SHA256 and the source is deleted only afterwards. Menu entries are updated automatically. |
+| Open, New window | Starts the profile or switches to its window (also by double-clicking the card) |
+| Backup, Profile folder, Delete | Backup as ZIP including `meta.json`. Delete asks for confirmation first. |
 
-**Menü-Eintrag** – ändert nur `config.json`: Gruppe, Bezeichnung (leer = Edge-Name), Desktop, Verhalten bei offenem Fenster, Jump List, „Aus Menü entfernen“. Bei nicht zugeordneten Profilen steht hier „Aufnehmen in …“.
+**Menu entry** – changes `config.json` only: group, label (empty = Edge name), desktop, behavior when a window is already open, Jump List, “Remove from menu”. For unassigned profiles this section offers “Add to …”.
 
-In der Kopfzeile:
-- **+ Neues Profil**: Name, E-Mail und optional ein PNG-Avatar; die E-Mail landet in `customer-profile.json`
-- **Wiederherstellen**
-- **Backup …**: Umfang alle Instanzen, Instanz des ausgewählten Profils oder nur das ausgewählte Profil
-- **Einstellungen** (Zahnrad): Standardverhalten und Jump List
+In the header:
+- **+ New profile**: name, email and an optional PNG avatar; the email is stored in `customer-profile.json`
+- **Restore**
+- **Backup …**: scope is all channels, the channel of the selected profile, or only the selected profile
+- **Settings** (gear): default behavior and Jump List
 
-Diese Optionen gelten für Backup, Restore und Übertragen:
-- **Nur lokale Daten**: überträgt Local Storage, IndexedDB usw. statt des ganzen Profils.
-- **Caches einschliessen**
-- **Quelle darf laufen**: erlaubt Backup oder Kopie bei geöffnetem Edge.
+These options apply to backup, restore and transfer:
+- **Local data only**: transfers Local Storage, IndexedDB etc. instead of the whole profile.
+- **Include caches**
+- **Allow running source**: allows a backup or copy while Edge is open.
 
-Läuft eine betroffene Edge-Instanz, fragt das Tool nach, ob sie beendet werden soll. Es schliesst zuerst die Fenster regulär und beendet danach verbleibende Prozesse.
+If an affected Edge channel is running, the tool asks whether it should be closed. It first closes the windows normally and then ends any remaining processes.
 
-## Bauen und starten
+## Build and run
 
 ```powershell
 dotnet build
 .\src\EdgeProfileManager\bin\Debug\net10.0-windows\EdgeProfileManager.exe
 ```
 
-Für einen festen Installationsort:
+For a fixed install location:
 
 ```powershell
 dotnet publish src/EdgeProfileManager -c Release -o "$env:LOCALAPPDATA\Programs\EdgeProfileManager"
 ```
 
-Danach von dort starten. Die Startmenü-Verknüpfung wird dabei automatisch auf den neuen Pfad gesetzt. Autostart schaltest du im Tray unter **Einstellungen › Mit Windows starten** ein.
+Then start it from there. The Start menu shortcut is automatically pointed to the new path. Enable autostart in the tray under **Settings › Start with Windows**.
 
-### Befehlszeile
+### Command line
 
-| Aufruf | Wirkung |
+| Call | Effect |
 |---|---|
-| *(ohne Argumente)* | Profilmenü an der Maus anzeigen (startet bei Bedarf im Tray) |
-| `--background` | Nur im Tray starten (wird für Autostart verwendet) |
-| `--manage` | Verwaltungsfenster öffnen |
-| `--open "Stable/Profile 1" [--new-window]` | Profil aktivieren oder starten (wird von der Jump List verwendet) |
-| `--dump-windows` | Edge-Fenster mit erkanntem Profil, Desktop-Status und AUMID ausgeben |
-| `--reload`, `--exit` | Konfiguration neu laden bzw. Tray-Instanz beenden |
+| *(no arguments)* | Show the profile menu at the mouse pointer (starts in the tray if needed) |
+| `--background` | Start in the tray only (used for autostart) |
+| `--manage` | Open the management window |
+| `--open "Stable/Profile 1" [--new-window]` | Activate or start a profile (used by the Jump List) |
+| `--dump-windows` | List Edge windows with detected profile, desktop state and AUMID |
+| `--reload`, `--exit` | Reload the configuration or exit the tray instance |
 
-Läuft bereits eine Instanz, wird der Befehl über eine Named Pipe an sie weitergegeben.
+If an instance is already running, the command is passed to it via a named pipe.
 
-## Konfiguration
+## Configuration
 
-Datei: `%APPDATA%\EdgeProfileManager\config.json`. Beim ersten Start wird sie mit einer Gruppe pro Channel erzeugt. Kommentare (`//`) und nachgestellte Kommas sind erlaubt.
+File: `%APPDATA%\EdgeProfileManager\config.json`. On first start it is created with one group per channel. Comments (`//`) and trailing commas are allowed.
 
 ```jsonc
 {
   "defaultDesktopMode": "switchTo",   // switchTo | bringHere | moveToAssigned
-  "showUnassigned": true,             // nicht eingetragene Profile unter "Nicht zugeordnet"
-  "jumpListUnassigned": false,        // ... und auch in der Jump List
+  "showUnassigned": true,             // profiles not in the menu appear under "Unassigned"
+  "jumpListUnassigned": false,        // ... and in the Jump List as well
   "jumpListStyle": "categories",      // categories | tasks
   "menu": [
-    { "group": "Kunden", "children": [
-      { "profile": "Stable/Profile 3", "label": "Kunde A", "desktop": 2 },
-      { "group": "Archiv", "children": [ { "profile": "Beta/Profile 1", "jumpList": false } ] }
+    { "group": "Customers", "children": [
+      { "profile": "Stable/Profile 3", "label": "Customer A", "desktop": 2 },
+      { "group": "Archive", "children": [ { "profile": "Beta/Profile 1", "jumpList": false } ] }
     ]},
     { "separator": true },
-    { "profile": "Stable/Default", "desktop": "Privat", "desktopMode": "switchTo" }
+    { "profile": "Stable/Default", "desktop": "Private", "desktopMode": "switchTo" }
   ]
 }
 ```
 
-- **`profile`**: `Channel/Ordner`, z.B. `Stable/Default` oder `Beta/Profile 4`. Der Ordner bleibt auch nach einem Umbenennen gleich. Die Referenzen zeigt **Einstellungen › Fenster-Diagnose** bzw. `--dump-windows`.
-- **`label`**: Anzeigename im Menü. Ohne Angabe wird der Edge-Profilname verwendet.
-- **`desktop`**: Nummer (ab 1) oder Name des virtuellen Desktops.
-- **`desktopMode`**: Was passiert, wenn bereits ein Fenster offen ist:
-  - `switchTo`: zum Desktop wechseln, auf dem das Fenster liegt
-  - `bringHere`: Fenster auf den aktuellen Desktop holen
-  - `moveToAssigned`: Fenster auf den zugewiesenen `desktop` verschieben und dorthin wechseln. Das ist der Standard, wenn `desktop` gesetzt ist.
+- **`profile`**: `Channel/Folder`, e.g. `Stable/Default` or `Beta/Profile 4`. The folder stays the same when a profile is renamed. **Settings › Window diagnostics** or `--dump-windows` show the references.
+- **`label`**: Display name in the menu. Defaults to the Edge profile name.
+- **`desktop`**: Number (starting at 1) or name of the virtual desktop.
+- **`desktopMode`**: What happens if a window is already open:
+  - `switchTo`: switch to the desktop the window is on
+  - `bringHere`: move the window to the current desktop
+  - `moveToAssigned`: move the window to the assigned `desktop` and switch there. This is the default when `desktop` is set.
 
-  Neue Fenster werden immer auf den zugewiesenen `desktop` verschoben.
-- **`jumpList`**: `false` blendet das Profil in der Jump List aus.
+  New windows are always moved to the assigned `desktop`.
+- **`jumpList`**: `false` hides the profile in the Jump List.
 
-### Hinweise zur Jump List
+### Jump List notes
 
-- Jump Lists kennen keine Untermenüs. Verschachtelte Gruppen erscheinen deshalb als Kategorie „Gruppe › Untergruppe“.
-- Mit dem Stil `categories` zeigt Windows pro Liste nur rund 10 Einträge. Ausserdem muss die Option **Einstellungen › Personalisierung › Start › „Zuletzt geöffnete Elemente … in Sprunglisten anzeigen“** aktiv sein.
-- `"jumpListStyle": "tasks"` zeigt alle Profile ungruppiert im Abschnitt „Aufgaben“. Dieser Stil ist von beiden Einschränkungen nicht betroffen.
+- Jump Lists have no submenus. Nested groups therefore appear as a category “Group › Subgroup”.
+- With the `categories` style, Windows shows only about 10 entries per list. In addition, **Settings › Personalization › Start › “Show recently opened items in Start, Jump Lists, and File Explorer”** must be enabled.
+- `"jumpListStyle": "tasks"` shows all profiles ungrouped in the “Tasks” section. This style is not affected by either limitation.
 
-## Virtuelle Desktops
+## Virtual desktops
 
-Windows bietet keine öffentliche API, um Fenster anderer Programme zwischen Desktops zu verschieben. Deshalb wird [VirtualDesktopAccessor](https://github.com/Ciantic/VirtualDesktopAccessor) verwendet:
+Windows has no public API to move other programs' windows between desktops. Therefore [VirtualDesktopAccessor](https://github.com/Ciantic/VirtualDesktopAccessor) is used:
 
-- Datei: `lib/VirtualDesktopAccessor.dll`, Release `2024-12-16-windows11` für 24H2
+- File: `lib/VirtualDesktopAccessor.dll`, release `2024-12-16-windows11` for 24H2
 - SHA256: `8740c572a1c000e3b87ffeb1e4c397eae9af3bd4a2abdc3bcffacab4493f8ff5`
-- Wird beim Build automatisch neben die exe kopiert.
+- Copied next to the exe automatically during build.
 
-Nach einem grösseren Windows-Update kann eine neuere Version der DLL nötig sein. Den Status zeigt das Tray-Menü unter **Einstellungen**.
+A major Windows update may require a newer version of the DLL. The tray menu shows the status under **Settings**.
 
 ## Tests
 
 ```powershell
-dotnet run --project tests/EdgeProfileManager.Tests            # alle Tests
-dotnet run --project tests/EdgeProfileManager.Tests -- Config  # nur passende Tests
+dotnet run --project tests/EdgeProfileManager.Tests            # all tests
+dotnet run --project tests/EdgeProfileManager.Tests -- Config  # matching tests only
 ```
 
-Das Testprojekt hat keine NuGet-Abhängigkeiten und bringt einen minimalen eigenen Runner mit.
+The test project has no NuGet dependencies and comes with a minimal test runner of its own.
 
-## Aufbau
+## Structure
 
-- `src/EdgeProfileManager.Core`: UI-freie Logik
-  - Profilerkennung (Port von `Get-EdgeProfiles`)
-  - Fenstersuche über AppUserModelID (`MSEdge`, `MSEdge.UserData.Profile1`, …)
-  - Launcher, Konfiguration, virtuelle Desktops
-- `src/EdgeProfileManager`: WPF/WinForms-Tray-App mit Tray-Menü, Jump List, Single Instance, Autostart und Startmenü-Verknüpfung
+- `src/EdgeProfileManager.Core`: UI-free logic
+  - profile discovery
+  - window lookup via AppUserModelID (`MSEdge`, `MSEdge.UserData.Profile1`, …)
+  - launcher, configuration, virtual desktops, profile management
+- `src/EdgeProfileManager`: WPF/WinForms tray app with tray menu, Jump List, management window, single instance, autostart and Start menu shortcut
 
-## Lizenz
+## License
 
-[Apache License 2.0](LICENSE), Copyright 2026 Brassel IT. Hinweise zu mitgelieferten Fremdkomponenten stehen in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
-
-## Nächste Schritte
-
-- **Phasen 3–5:** erledigt (siehe „Profile und Menü verwalten“).
-- **Phase 6:** Erster Release mit Setup und GitHub-Repository.
+[Apache License 2.0](LICENSE), Copyright 2026 Brassel IT. Notices for bundled third-party components are in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

@@ -9,24 +9,24 @@ internal sealed class ProfileDiscoveryTests : IDisposable
     [Test]
     public void FindsRegisteredProfilesInNumericOrder()
     {
-        _edge.AddProfile(EdgeChannel.Stable, "Profile 10", "Zehn");
-        _edge.AddProfile(EdgeChannel.Stable, "Profile 2", "Zwei");
-        _edge.AddProfile(EdgeChannel.Stable, "Default", "Privat");
+        _edge.AddProfile(EdgeChannel.Stable, "Profile 10", "Ten");
+        _edge.AddProfile(EdgeChannel.Stable, "Profile 2", "Two");
+        _edge.AddProfile(EdgeChannel.Stable, "Default", "Personal");
 
         var profiles = new ProfileDiscovery(_edge.Environment).GetProfiles(EdgeChannel.Stable);
 
         Assert.SequenceEqual(["Default", "Profile 2", "Profile 10"], profiles.Select(p => p.Folder));
-        Assert.SequenceEqual(["Privat", "Zwei", "Zehn"], profiles.Select(p => p.Name));
+        Assert.SequenceEqual(["Personal", "Two", "Ten"], profiles.Select(p => p.Name));
         Assert.Equal("Stable/Profile 2", profiles[1].Key);
     }
 
     [Test]
     public void IgnoresSystemFoldersAndUninitializedUnregisteredProfiles()
     {
-        _edge.AddProfile(EdgeChannel.Beta, "Profile 1", "Kunde");
+        _edge.AddProfile(EdgeChannel.Beta, "Profile 1", "Customer");
         _edge.AddProfile(EdgeChannel.Beta, "System Profile", registered: false);
         _edge.AddProfile(EdgeChannel.Beta, "Profile 5", registered: false, preferences: false);
-        // Wie im Script: Preferences ohne Registrierung zählt als Profil (Name = Ordner).
+        // Preferences without registration counts as a profile (name = folder).
         _edge.AddProfile(EdgeChannel.Beta, "Profile 6", registered: false);
 
         var profiles = new ProfileDiscovery(_edge.Environment).GetProfiles(EdgeChannel.Beta);
@@ -38,13 +38,13 @@ internal sealed class ProfileDiscoveryTests : IDisposable
     [Test]
     public void CustomerProfileUserWinsOverSignedInAccount()
     {
-        _edge.AddProfile(EdgeChannel.Dev, "Profile 1", userName: "konto@firma.ch", customerUser: "kunde@kunde.ch");
-        _edge.AddProfile(EdgeChannel.Dev, "Profile 2", userName: "konto@firma.ch");
+        _edge.AddProfile(EdgeChannel.Dev, "Profile 1", userName: "account@company.ch", customerUser: "user@customer.ch");
+        _edge.AddProfile(EdgeChannel.Dev, "Profile 2", userName: "account@company.ch");
         _edge.AddProfile(EdgeChannel.Dev, "Profile 3");
 
         var profiles = new ProfileDiscovery(_edge.Environment).GetProfiles(EdgeChannel.Dev);
 
-        Assert.SequenceEqual(["kunde@kunde.ch", "konto@firma.ch", null], profiles.Select(p => p.User));
+        Assert.SequenceEqual(["user@customer.ch", "account@company.ch", null], profiles.Select(p => p.User));
     }
 
     [Test]
@@ -52,7 +52,7 @@ internal sealed class ProfileDiscoveryTests : IDisposable
     {
         _edge.AddProfile(EdgeChannel.Stable, "Default");
         var canary = _edge.AddProfile(EdgeChannel.Canary, "Profile 1", registered: false);
-        File.WriteAllText(Path.Combine(Path.GetDirectoryName(canary)!, "Local State"), "{ kaputt");
+        File.WriteAllText(Path.Combine(Path.GetDirectoryName(canary)!, "Local State"), "{ broken");
 
         var profiles = new ProfileDiscovery(_edge.Environment).GetProfiles();
 

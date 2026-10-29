@@ -5,14 +5,14 @@ namespace EdgeProfileManager.Core.Edge;
 
 public sealed record EdgeProfile(EdgeChannel Channel, string Folder, string Name, string? User, string Path, string? IconPath)
 {
-    /// <summary>Profilfarbe aus Local State (profile_highlight_color) als 0xRRGGBB, falls gesetzt.</summary>
+    /// <summary>Profile color from Local State (profile_highlight_color) as 0xRRGGBB, if set.</summary>
     public int? Color { get; init; }
 
-    /// <summary>Stabile Referenz "Channel/Folder", wie sie in der Konfiguration verwendet wird.</summary>
+    /// <summary>Stable reference "Channel/Folder" as used in the configuration.</summary>
     public string Key => $"{Channel}/{Folder}";
 }
 
-/// <summary>Port von Get-EdgeProfiles / Get-LocalState aus EdgeProfile.ps1.</summary>
+/// <summary>Finds the Edge profiles of all channels from the User Data folders and Local State.</summary>
 public sealed partial class ProfileDiscovery(EdgeEnvironment environment)
 {
     public EdgeEnvironment Environment { get; } = environment;
@@ -49,7 +49,7 @@ public sealed partial class ProfileDiscovery(EdgeEnvironment environment)
         if (!File.Exists(file)) return null;
         try
         {
-            // Edge hält die Datei offen; deshalb mit FileShare.ReadWrite lesen.
+            // Edge keeps the file open, so read it with FileShare.ReadWrite.
             using var stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
             return JsonNode.Parse(stream);
         }
@@ -69,7 +69,7 @@ public sealed partial class ProfileDiscovery(EdgeEnvironment environment)
 
     private static string? NullIfEmpty(string? value) => string.IsNullOrWhiteSpace(value) ? null : value;
 
-    /// <summary>Default zuerst, danach "Profile N" numerisch sortiert.</summary>
+    /// <summary>Default first, then "Profile N" sorted numerically.</summary>
     private static int FolderSortKey(string folder)
     {
         if (folder == "Default") return 0;

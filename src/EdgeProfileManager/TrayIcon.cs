@@ -5,10 +5,10 @@ using EdgeProfileManager.Core.Config;
 
 namespace EdgeProfileManager;
 
-/// <summary>Tray-Symbol mit dem Profilmenü gemäss Konfiguration.</summary>
+/// <summary>Tray icon with the profile menu as configured.</summary>
 public sealed class TrayIcon : IDisposable
 {
-    // NotifyIcon zeigt das Kontextmenü intern so an, dass es sich beim Wegklicken zuverlässig schliesst.
+    // NotifyIcon shows the context menu internally in a way that reliably closes it when clicking elsewhere.
     private static readonly MethodInfo? ShowContextMenuMethod =
         typeof(NotifyIcon).GetMethod("ShowContextMenu", BindingFlags.Instance | BindingFlags.NonPublic);
 
@@ -55,12 +55,12 @@ public sealed class TrayIcon : IDisposable
         _menu.Items.Clear();
         var running = _app.GetRunningProfileKeys();
         AddNodes(_menu.Items, _app.Menu.Nodes, running);
-        if (_app.Menu.Nodes.Count == 0) _menu.Items.Add(new ToolStripMenuItem("Keine Edge-Profile gefunden") { Enabled = false });
+        if (_app.Menu.Nodes.Count == 0) _menu.Items.Add(new ToolStripMenuItem("No Edge profiles found") { Enabled = false });
 
         _menu.Items.Add(new ToolStripSeparator());
-        _menu.Items.Add("Profile und Menü verwalten…", null, (_, _) => _app.ShowManagementWindow());
+        _menu.Items.Add("Manage profiles and menu…", null, (_, _) => _app.ShowManagementWindow());
         _menu.Items.Add(BuildSettingsMenu());
-        _menu.Items.Add("Beenden", null, (_, _) => _app.Shutdown());
+        _menu.Items.Add("Exit", null, (_, _) => _app.Shutdown());
         _menu.ResumeLayout();
     }
 
@@ -97,7 +97,7 @@ public sealed class TrayIcon : IDisposable
             ToolTipText = $"Edge {profile.Channel} – {profile.Folder}" +
                 (profile.User is null ? "" : $"\n{profile.User}") +
                 (node.Settings.Desktop is null ? "" : $"\nDesktop: {node.Settings.Desktop}") +
-                (isRunning ? "\nGeöffnet – Klick wechselt zum Fenster, Shift+Klick öffnet ein neues." : ""),
+                (isRunning ? "\nRunning – click switches to the window, Shift+click opens a new one." : ""),
         };
         if (isRunning) item.Font = _runningFont;
         item.Click += (_, _) => _app.Open(profile.Key, newWindow: (Control.ModifierKeys & Keys.Shift) != 0);
@@ -106,34 +106,34 @@ public sealed class TrayIcon : IDisposable
 
     private ToolStripMenuItem BuildSettingsMenu()
     {
-        var settings = new ToolStripMenuItem("Einstellungen");
-        settings.DropDownItems.Add("Konfiguration bearbeiten", null, (_, _) => _app.EditFile(_app.ConfigPath));
-        settings.DropDownItems.Add("Konfigurationsordner öffnen", null, (_, _) => _app.OpenFile(Path.GetDirectoryName(_app.ConfigPath)!));
-        settings.DropDownItems.Add("Neu laden", null, (_, _) => _app.LoadConfig(initial: false));
+        var settings = new ToolStripMenuItem("Settings");
+        settings.DropDownItems.Add("Edit configuration", null, (_, _) => _app.EditFile(_app.ConfigPath));
+        settings.DropDownItems.Add("Open configuration folder", null, (_, _) => _app.OpenFile(Path.GetDirectoryName(_app.ConfigPath)!));
+        settings.DropDownItems.Add("Reload", null, (_, _) => _app.LoadConfig(initial: false));
         settings.DropDownItems.Add(new ToolStripSeparator());
 
-        var autostart = new ToolStripMenuItem("Mit Windows starten") { Checked = ShellIntegration.IsAutostartEnabled() };
+        var autostart = new ToolStripMenuItem("Start with Windows") { Checked = ShellIntegration.IsAutostartEnabled() };
         autostart.Click += (_, _) => ShellIntegration.SetAutostart(!autostart.Checked);
         settings.DropDownItems.Add(autostart);
-        // Windows erlaubt Programmen kein Anheften (Zugriff verweigert); deshalb die Verknüpfung im
-        // Explorer markieren und den nötigen Rechtsklick-Befehl anzeigen.
-        settings.DropDownItems.Add("An Start anheften…", null, (_, _) =>
-            RevealShortcut("Rechtsklick auf „Edge Profile Manager“ → „An Start anheften“."));
-        settings.DropDownItems.Add("An Taskleiste anheften…", null, (_, _) =>
-            RevealShortcut("Rechtsklick auf „Edge Profile Manager“ → „Weitere Optionen anzeigen“ → „An Taskleiste anheften“."));
+        // Windows does not let programs pin themselves (access denied); so select the shortcut in
+        // Explorer and show the required right-click command.
+        settings.DropDownItems.Add("Pin to Start…", null, (_, _) =>
+            RevealShortcut("Right-click \"Edge Profile Manager\" → \"Pin to Start\"."));
+        settings.DropDownItems.Add("Pin to taskbar…", null, (_, _) =>
+            RevealShortcut("Right-click \"Edge Profile Manager\" → \"Show more options\" → \"Pin to taskbar\"."));
         settings.DropDownItems.Add(new ToolStripSeparator());
 
-        settings.DropDownItems.Add("Fenster-Diagnose", null, (_, _) =>
+        settings.DropDownItems.Add("Window diagnostics", null, (_, _) =>
         {
             var file = Path.Combine(AppLog.Directory, "windows.txt");
             Directory.CreateDirectory(AppLog.Directory);
             File.WriteAllText(file, ShellIntegration.DescribeWindows(_app.Discovery, _app.Finder));
             _app.EditFile(file);
         });
-        settings.DropDownItems.Add("Protokoll öffnen", null, (_, _) => _app.EditFile(AppLog.FilePath));
+        settings.DropDownItems.Add("Open log", null, (_, _) => _app.EditFile(AppLog.FilePath));
         var desktopState = _app.Desktops.IsAvailable
-            ? $"Virtuelle Desktops: {_app.Desktops.DesktopCount} (aktuell {_app.Desktops.CurrentDesktop + 1})"
-            : "Virtuelle Desktops: nicht verfügbar";
+            ? $"Virtual desktops: {_app.Desktops.DesktopCount} (current {_app.Desktops.CurrentDesktop + 1})"
+            : "Virtual desktops: not available";
         settings.DropDownItems.Add(new ToolStripMenuItem(desktopState) { Enabled = false });
         return settings;
     }
@@ -144,16 +144,16 @@ public sealed class TrayIcon : IDisposable
         {
             ShellIntegration.EnsureStartMenuShortcut(force: true);
             ShellIntegration.RevealInExplorer(ShellIntegration.StartMenuShortcutPath);
-            _notifyIcon.ShowBalloonTip(15000, "Anheften", instruction, ToolTipIcon.Info);
+            _notifyIcon.ShowBalloonTip(15000, "Pin", instruction, ToolTipIcon.Info);
         }
         catch (Exception ex)
         {
-            AppLog.Write($"Verknüpfung anzeigen fehlgeschlagen: {ex.Message}");
+            AppLog.Write($"Showing shortcut failed: {ex.Message}");
             ShowError(ex.Message);
         }
     }
 
-    /// <summary>Profil-Icon von Edge; mit gesetzter Profilfarbe zusätzlich ein Farbpunkt unten rechts.</summary>
+    /// <summary>Edge's profile icon; with a profile color set, also a color dot at the bottom right.</summary>
     private Image? GetIcon(string? path, int? color)
     {
         var hasIcon = path is not null && File.Exists(path);

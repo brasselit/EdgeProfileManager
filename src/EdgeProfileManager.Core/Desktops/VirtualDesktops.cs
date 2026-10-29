@@ -4,7 +4,7 @@ using EdgeProfileManager.Core.Config;
 
 namespace EdgeProfileManager.Core.Desktops;
 
-/// <summary>Virtuelle Desktops; Nummern sind 0-basiert.</summary>
+/// <summary>Virtual desktops; numbers are 0-based.</summary>
 public interface IVirtualDesktopService
 {
     bool IsAvailable { get; }
@@ -15,7 +15,7 @@ public interface IVirtualDesktopService
     bool GoToDesktop(int desktop);
     string? GetDesktopName(int desktop);
 
-    /// <summary>Löst eine Konfigurationsangabe (1-basierte Nummer oder Name) auf.</summary>
+    /// <summary>Resolves a configured target (1-based number or name).</summary>
     int? Resolve(DesktopTarget? target)
     {
         if (target is null || !IsAvailable) return null;
@@ -40,9 +40,9 @@ public sealed class NullVirtualDesktopService : IVirtualDesktopService
 }
 
 /// <summary>
-/// Anbindung an VirtualDesktopAccessor.dll (https://github.com/Ciantic/VirtualDesktopAccessor).
-/// Windows bietet keine öffentliche API, um fremde Fenster zwischen Desktops zu verschieben.
-/// Die DLL wird dynamisch geladen; fehlt sie, ist <see cref="IsAvailable"/> false.
+/// Binding to VirtualDesktopAccessor.dll (https://github.com/Ciantic/VirtualDesktopAccessor).
+/// Windows has no public API for moving other processes' windows between desktops.
+/// The DLL is loaded dynamically; if it is missing, <see cref="IsAvailable"/> is false.
 /// </summary>
 public sealed unsafe class VdaVirtualDesktopService : IVirtualDesktopService
 {
@@ -65,25 +65,25 @@ public sealed unsafe class VdaVirtualDesktopService : IVirtualDesktopService
         _getDesktopName = (delegate* unmanaged<int, byte*, nuint, int>)NativeLibrary.GetExport(library, "GetDesktopName");
     }
 
-    /// <summary>Lädt die DLL aus dem Programmverzeichnis; liefert sonst den Null-Dienst.</summary>
+    /// <summary>Loads the DLL from the application directory; otherwise returns the null service.</summary>
     public static IVirtualDesktopService Load(out string? error)
     {
         error = null;
         var path = Path.Combine(AppContext.BaseDirectory, LibraryName);
         if (!File.Exists(path))
         {
-            error = $"{LibraryName} nicht gefunden ({path}). Desktop-Zuordnung ist deaktiviert.";
+            error = $"{LibraryName} not found ({path}). Desktop assignment is disabled.";
             return new NullVirtualDesktopService();
         }
         try
         {
             var service = new VdaVirtualDesktopService(NativeLibrary.Load(path));
-            if (service.DesktopCount < 1) throw new InvalidOperationException("GetDesktopCount lieferte keinen Desktop.");
+            if (service.DesktopCount < 1) throw new InvalidOperationException("GetDesktopCount returned no desktop.");
             return service;
         }
         catch (Exception ex)
         {
-            error = $"{LibraryName} konnte nicht geladen werden: {ex.Message}";
+            error = $"{LibraryName} could not be loaded: {ex.Message}";
             return new NullVirtualDesktopService();
         }
     }

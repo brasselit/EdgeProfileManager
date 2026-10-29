@@ -7,25 +7,25 @@ using EdgeProfileManager.Core.Edge;
 
 namespace EdgeProfileManager.Core.Management;
 
-/// <summary>Optionen für Backup, Restore, Kopieren und Verschieben (entsprechen den Script-Schaltern).</summary>
+/// <summary>Options for backup, restore, copy and move.</summary>
 public sealed record TransferOptions
 {
-    /// <summary>Nur lokale Anwendungsdaten (Local Storage, IndexedDB, …) statt des ganzen Profils (-LocalOnly).</summary>
+    /// <summary>Only local app data (Local Storage, IndexedDB, …) instead of the whole profile.</summary>
     public bool LocalOnly { get; init; }
 
-    /// <summary>Cache-Ordner mitkopieren (-IncludeCaches).</summary>
+    /// <summary>Also copy cache folders.</summary>
     public bool IncludeCaches { get; init; }
 
-    /// <summary>Quelle darf geöffnet sein; nur für Backup und Kopieren (-BackupWhileRunning).</summary>
+    /// <summary>Source may be open; only for backup and copy.</summary>
     public bool AllowRunningSource { get; init; }
 
-    /// <summary>Vorhandenes Zielprofil vollständig ersetzen (-Force beim Restore/Kopieren).</summary>
+    /// <summary>Fully replace an existing target profile (restore/copy).</summary>
     public bool ReplaceExisting { get; init; }
 }
 
 /// <summary>
-/// Profilverwaltung, portiert aus EdgeProfile.ps1: Neu, Umbenennen, Avatar, Löschen, Backup,
-/// Restore, Kopieren und geprüftes Verschieben zwischen Edge-Instanzen.
+/// Profile management: create, rename, avatar, color, delete, backup, restore,
+/// copy and verified move between Edge channels.
 /// </summary>
 public sealed class ProfileManager(EdgeEnvironment environment, IEdgeProcessGuard guard, IProfileCopier copier)
 {
@@ -44,15 +44,15 @@ public sealed class ProfileManager(EdgeEnvironment environment, IEdgeProcessGuar
     public event Action<string>? Log;
 
     /// <summary>
-    /// Sucht ein Profil nach Ordner, erst danach nach Anzeigename: Edge benennt neue Profile "Profile 1" usw.,
-    /// sodass ein Name zugleich der Ordner eines anderen Profils sein kann.
+    /// Looks up a profile by folder first, then by display name: Edge names new profiles "Profile 1" etc.,
+    /// so a name can also be the folder of another profile.
     /// </summary>
     public EdgeProfile GetProfile(EdgeChannel channel, string profile)
     {
         var profiles = _discovery.GetProfiles(channel);
         return profiles.FirstOrDefault(p => string.Equals(p.Folder, profile, StringComparison.OrdinalIgnoreCase))
             ?? profiles.FirstOrDefault(p => p.Name == profile)
-            ?? throw new InvalidOperationException($"Profil '{profile}' in {channel} nicht gefunden.");
+            ?? throw new InvalidOperationException($"Profile '{profile}' not found in {channel}.");
     }
 
     public string NextProfileFolder(EdgeChannel channel)
@@ -63,17 +63,17 @@ public sealed class ProfileManager(EdgeEnvironment environment, IEdgeProcessGuar
         return $"Profile {i}";
     }
 
-    // ---------- Neu, Umbenennen, Avatar, Löschen ----------
+    // ---------- Create, rename, avatar, delete ----------
 
     public EdgeProfile Create(EdgeChannel channel, string name, string account, string? avatarPath = null)
     {
         if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(account))
-            throw new ArgumentException("Zum Erstellen sind Profilname und E-Mail erforderlich.");
+            throw new ArgumentException("Profile name and email are required to create a profile.");
         if (!string.IsNullOrWhiteSpace(avatarPath)) avatarPath = ValidateAvatar(avatarPath);
         AssertClosed(channel);
         var userData = environment.UserDataDir(channel);
-        if (!Directory.Exists(userData) || LoadLocalState(channel) is null) throw new InvalidOperationException($"Edge {channel} zuerst einmal starten.");
-        if (_discovery.GetProfiles(channel).Any(p => p.Name == name)) throw new InvalidOperationException($"Profil '{name}' in {channel} existiert bereits.");
+        if (!Directory.Exists(userData) || LoadLocalState(channel) is null) throw new InvalidOperationException($"Start Edge {channel} once first.");
+        if (_discovery.GetProfiles(channel).Any(p => p.Name == name)) throw new InvalidOperationException($"Profile '{name}' already exists in {channel}.");
 
         var folder = NextProfileFolder(channel);
         var destination = Path.Combine(userData, folder);
@@ -82,19 +82,19 @@ public sealed class ProfileManager(EdgeEnvironment environment, IEdgeProcessGuar
         WriteJson(Path.Combine(destination, "Preferences"), new JsonObject { ["profile"] = new JsonObject { ["name"] = name } });
         Register(channel, folder, new JsonObject { ["name"] = name, ["is_using_default_name"] = false });
         if (!string.IsNullOrWhiteSpace(avatarPath)) SetAvatar(channel, folder, avatarPath);
-        Log?.Invoke($"Profil '{name}' ({channel}/{folder}) erstellt. Zur Synchronisierung bei Edge als {account} anmelden.");
+        Log?.Invoke($"Profile '{name}' ({channel}/{folder}) created. Sign in to Edge as {account} to enable sync.");
         return GetProfile(channel, folder);
     }
 
     public void Rename(EdgeChannel channel, string profile, string newName)
     {
-        if (string.IsNullOrWhiteSpace(newName)) throw new ArgumentException("Neuer Name fehlt.");
+        if (string.IsNullOrWhiteSpace(newName)) throw new ArgumentException("New name is missing.");
         var p = GetProfile(channel, profile);
         AssertClosed(channel);
         var preferencesFile = Path.Combine(p.Path, "Preferences");
-        if (!File.Exists(preferencesFile)) throw new InvalidOperationException($"Profil '{profile}' wurde von Edge noch nicht initialisiert.");
+        if (!File.Exists(preferencesFile)) throw new InvalidOperationException($"Profile '{profile}' has not been initialized by Edge yet.");
         var state = LoadLocalState(channel);
-        if (state?["profile"]?["info_cache"]?[p.Folder] is not JsonObject info) throw new InvalidOperationException($"Profil '{profile}' ist nicht registriert.");
+        if (state?["profile"]?["info_cache"]?[p.Folder] is not JsonObject info) throw new InvalidOperationException($"Profile '{profile}' is not registered.");
 
         var preferences = ReadJsonObject(preferencesFile);
         if (preferences["profile"] is not JsonObject profileNode) preferences["profile"] = profileNode = new JsonObject();
@@ -103,7 +103,7 @@ public sealed class ProfileManager(EdgeEnvironment environment, IEdgeProcessGuar
         info["is_using_default_name"] = false;
         WriteJson(preferencesFile, preferences);
         SaveLocalState(channel, state);
-        Log?.Invoke($"Profil '{p.Folder}' in Edge {channel} heisst jetzt '{newName}'.");
+        Log?.Invoke($"Profile '{p.Folder}' in Edge {channel} is now named '{newName}'.");
     }
 
     public void SetAvatar(EdgeChannel channel, string profile, string imagePath)
@@ -113,36 +113,36 @@ public sealed class ProfileManager(EdgeEnvironment environment, IEdgeProcessGuar
         AssertClosed(channel);
         File.Copy(image, Path.Combine(p.Path, AvatarFileName), overwrite: true);
         var state = LoadLocalState(channel);
-        if (state?["profile"]?["info_cache"]?[p.Folder] is not JsonObject info) throw new InvalidOperationException($"Profil '{profile}' ist nicht in Local State registriert.");
+        if (state?["profile"]?["info_cache"]?[p.Folder] is not JsonObject info) throw new InvalidOperationException($"Profile '{profile}' is not registered in Local State.");
         info["gaia_picture_file_name"] = AvatarFileName;
         info["use_gaia_picture"] = true;
         info["is_using_default_avatar"] = false;
         info["last_downloaded_gaia_picture_url_with_size"] = "";
         SaveLocalState(channel, state);
-        Log?.Invoke($"Eigenes Avatar für Edge {channel}/{p.Folder} gesetzt.");
+        Log?.Invoke($"Custom avatar set for Edge {channel}/{p.Folder}.");
     }
 
-    /// <summary>Theme-IDs, die Edge für ein Farbdesign ohne Erweiterung verwendet.</summary>
+    /// <summary>Theme IDs that Edge uses for a color theme without an extension.</summary>
     private static readonly string[] ColorThemeIds = ["autogenerated_theme_id", "dynamic_themepack"];
 
     /// <summary>
-    /// Setzt die Profilfarbe wie "Darstellung › Farbe" in Edge: Farbdesign im Profil (Preferences)
-    /// sowie Avatar- und Hervorhebungsfarbe in Local State. Farbe als 0xRRGGBB; null entfernt die Farbe
-    /// wieder (Standarddesign), ein Theme aus einer Erweiterung bleibt dabei erhalten.
+    /// Sets the profile color like "Appearance › Color" in Edge: color theme in the profile (Preferences)
+    /// plus avatar and highlight color in Local State. Color as 0xRRGGBB; null removes the color
+    /// again (default theme) while keeping a theme from an extension.
     /// </summary>
     public void SetColor(EdgeChannel channel, string profile, int? rgb)
     {
         var p = GetProfile(channel, profile);
         AssertClosed(channel);
         var preferencesFile = Path.Combine(p.Path, "Preferences");
-        if (!File.Exists(preferencesFile)) throw new InvalidOperationException($"Profil '{profile}' wurde von Edge noch nicht initialisiert.");
+        if (!File.Exists(preferencesFile)) throw new InvalidOperationException($"Profile '{profile}' has not been initialized by Edge yet.");
         var state = LoadLocalState(channel);
-        if (state?["profile"]?["info_cache"]?[p.Folder] is not JsonObject info) throw new InvalidOperationException($"Profil '{profile}' ist nicht registriert.");
+        if (state?["profile"]?["info_cache"]?[p.Folder] is not JsonObject info) throw new InvalidOperationException($"Profile '{profile}' is not registered.");
 
         var preferences = ReadJsonObject(preferencesFile);
         if (rgb is { } color)
         {
-            // Chromium speichert Farben als vorzeichenbehaftetes ARGB (SkColor).
+            // Chromium stores colors as signed ARGB (SkColor).
             var argb = unchecked((int)(0xFF000000u | ((uint)color & 0xFFFFFFu)));
             GetOrCreate(GetOrCreate(preferences, "extensions"), "theme")["id"] = "autogenerated_theme_id";
             GetOrCreate(GetOrCreate(preferences, "autogenerated"), "theme")["color"] = argb;
@@ -158,7 +158,7 @@ public sealed class ProfileManager(EdgeEnvironment environment, IEdgeProcessGuar
         }
         WriteJson(preferencesFile, preferences);
         SaveLocalState(channel, state);
-        Log?.Invoke(rgb is { } value ? $"Farbe #{value & 0xFFFFFF:X6} für Edge {channel}/{p.Folder} gesetzt." : $"Farbe für Edge {channel}/{p.Folder} entfernt.");
+        Log?.Invoke(rgb is { } value ? $"Color #{value & 0xFFFFFF:X6} set for Edge {channel}/{p.Folder}." : $"Color removed for Edge {channel}/{p.Folder}.");
     }
 
     public void Delete(EdgeChannel channel, string profile)
@@ -175,16 +175,16 @@ public sealed class ProfileManager(EdgeEnvironment environment, IEdgeProcessGuar
             if ((string?)profileNode["last_used"] == p.Folder) profileNode.Remove("last_used");
             SaveLocalState(channel, state);
         }
-        Log?.Invoke($"Profil '{p.Name}' aus Edge {channel} gelöscht.");
+        Log?.Invoke($"Profile '{p.Name}' deleted from Edge {channel}.");
     }
 
-    // ---------- Backup und Restore ----------
+    // ---------- Backup and restore ----------
 
     public string Backup(EdgeChannel channel, string profile, string destinationDir, TransferOptions options)
     {
         AssertClosed(channel, options.AllowRunningSource);
         var p = GetProfile(channel, profile);
-        Log?.Invoke($"Sichere Edge {channel} – {p.Name} ({p.Folder}) …");
+        Log?.Invoke($"Backing up Edge {channel} – {p.Name} ({p.Folder}) …");
         Directory.CreateDirectory(destinationDir);
         var temp = Path.Combine(Path.GetTempPath(), "EdgeBk_" + Guid.NewGuid());
         Directory.CreateDirectory(temp);
@@ -218,28 +218,28 @@ public sealed class ProfileManager(EdgeEnvironment environment, IEdgeProcessGuar
             var zip = Path.Combine(destinationDir, $"Edge_{channel}_{safeName}_{DateTime.Now:yyyyMMdd_HHmmss}.zip");
             if (File.Exists(zip)) File.Delete(zip);
             ZipFile.CreateFromDirectory(temp, zip, CompressionLevel.Fastest, includeBaseDirectory: false);
-            Log?.Invoke($"Backup erstellt: {zip}");
-            Log?.Invoke("Hinweis: Gespeicherte Passwörter/Cookies sind per DPAPI verschlüsselt und auf einem anderen PC/Benutzer nicht lesbar.");
+            Log?.Invoke($"Backup created: {zip}");
+            Log?.Invoke("Note: Saved passwords/cookies are encrypted with DPAPI and cannot be read on another PC or by another user.");
             return zip;
         }
         finally { TryDeleteDirectory(temp); }
     }
 
-    /// <summary>Stellt ein Backup wieder her; ohne <paramref name="targetFolder"/> als neues Profil. Liefert den Zielordner.</summary>
+    /// <summary>Restores a backup; without <paramref name="targetFolder"/> as a new profile. Returns the target folder.</summary>
     public string Restore(EdgeChannel channel, string zipPath, string? targetFolder, TransferOptions options)
     {
-        if (!File.Exists(zipPath)) throw new FileNotFoundException($"Backup-Datei '{zipPath}' nicht gefunden.");
+        if (!File.Exists(zipPath)) throw new FileNotFoundException($"Backup file '{zipPath}' not found.");
         AssertClosed(channel);
         var userData = environment.UserDataDir(channel);
-        if (!Directory.Exists(userData)) throw new InvalidOperationException($"Edge {channel} ist nicht installiert bzw. wurde nie gestartet.");
+        if (!Directory.Exists(userData)) throw new InvalidOperationException($"Edge {channel} is not installed or has never been started.");
 
         var temp = Path.Combine(Path.GetTempPath(), "EdgeRs_" + Guid.NewGuid());
         try
         {
-            Log?.Invoke($"Entpacke Backup: {zipPath}");
+            Log?.Invoke($"Extracting backup: {zipPath}");
             ZipFile.ExtractToDirectory(zipPath, temp);
             var meta = ReadJsonObject(Path.Combine(temp, "meta.json"));
-            var name = (string?)meta["Name"] ?? "Wiederhergestellt";
+            var name = (string?)meta["Name"] ?? "Restored";
             if (string.IsNullOrEmpty(targetFolder)) targetFolder = NextProfileFolder(channel);
             var destination = Path.Combine(userData, targetFolder);
             var source = Path.Combine(temp, "Profile");
@@ -251,27 +251,27 @@ public sealed class ProfileManager(EdgeEnvironment environment, IEdgeProcessGuar
             else
             {
                 ReplaceTarget(destination, targetFolder, options);
-                Log?.Invoke($"Kopiere Profil nach Edge {channel}/{targetFolder} …");
+                Log?.Invoke($"Copying profile to Edge {channel}/{targetFolder} …");
                 copier.Copy(source, destination, includeCaches: true);
                 Register(channel, targetFolder, meta["InfoCache"]?.DeepClone());
-                Log?.Invoke($"Profil '{name}' nach Edge {channel}/{targetFolder} wiederhergestellt.");
+                Log?.Invoke($"Profile '{name}' restored to Edge {channel}/{targetFolder}.");
             }
             return targetFolder;
         }
         finally { TryDeleteDirectory(temp); }
     }
 
-    // ---------- Kopieren und Verschieben ----------
+    // ---------- Copy and move ----------
 
-    /// <summary>Port von Move-EdgeProfile: kopiert ein Profil in eine andere Instanz. Liefert den Zielordner.</summary>
+    /// <summary>Copies a profile to another channel. Returns the target folder.</summary>
     public string Copy(EdgeChannel from, EdgeChannel to, string profile, string? targetFolder, TransferOptions options)
     {
-        if (from == to) throw new InvalidOperationException("Quelle und Ziel sind identisch.");
+        if (from == to) throw new InvalidOperationException("Source and target are identical.");
         AssertClosed(from, options.AllowRunningSource);
         AssertClosed(to);
         var p = GetProfile(from, profile);
         var userData = environment.UserDataDir(to);
-        if (!Directory.Exists(userData)) throw new InvalidOperationException($"Edge {to} ist nicht installiert bzw. wurde nie gestartet.");
+        if (!Directory.Exists(userData)) throw new InvalidOperationException($"Edge {to} is not installed or has never been started.");
         if (string.IsNullOrEmpty(targetFolder)) targetFolder = NextProfileFolder(to);
         var destination = Path.Combine(userData, targetFolder);
 
@@ -283,92 +283,92 @@ public sealed class ProfileManager(EdgeEnvironment environment, IEdgeProcessGuar
         }
 
         ReplaceTarget(destination, targetFolder, options);
-        Log?.Invoke($"Übertrage {p.Name} von Edge {from} nach {to}/{targetFolder} …");
+        Log?.Invoke($"Transferring {p.Name} from Edge {from} to {to}/{targetFolder} …");
         copier.Copy(p.Path, destination, options.IncludeCaches);
         Register(to, targetFolder, LoadLocalState(from)?["profile"]?["info_cache"]?[p.Folder]?.DeepClone());
-        Log?.Invoke($"Profil '{p.Name}' von {from} nach {to}/{targetFolder} kopiert.");
+        Log?.Invoke($"Profile '{p.Name}' copied from {from} to {to}/{targetFolder}.");
         return targetFolder;
     }
 
     /// <summary>
-    /// Port von Move-EdgeProfileVerified: kopiert, prüft jede Datei per SHA256 und löscht die
-    /// Quelle erst danach. Liefert den neuen Zielordner.
+    /// Copies a profile to another channel, verifies every file via SHA256 and only then deletes
+    /// the source. Returns the new target folder.
     /// </summary>
     public string MoveVerified(EdgeChannel from, EdgeChannel to, string profile, TransferOptions options)
     {
-        if (from == to) throw new InvalidOperationException("Quelle und Ziel sind identisch.");
+        if (from == to) throw new InvalidOperationException("Source and target are identical.");
         if (options.LocalOnly || options.AllowRunningSource)
-            throw new InvalidOperationException("Verschieben erfordert ein vollständiges Profil und geschlossene Edge-Instanzen.");
+            throw new InvalidOperationException("Moving requires a complete profile and closed Edge instances.");
         AssertClosed(from);
         AssertClosed(to);
         var source = GetProfile(from, profile);
-        if (LoadLocalState(to) is null) throw new InvalidOperationException($"Edge {to} zuerst einmal starten.");
+        if (LoadLocalState(to) is null) throw new InvalidOperationException($"Start Edge {to} once first.");
         if (Directory.EnumerateFileSystemEntries(source.Path, "*", SearchOption.AllDirectories)
             .Any(entry => File.GetAttributes(entry).HasFlag(FileAttributes.ReparsePoint)))
-            throw new InvalidOperationException("Profile mit symbolischen Links oder Verzeichnisverknüpfungen werden aus Sicherheitsgründen nicht verschoben.");
+            throw new InvalidOperationException("For safety reasons, profiles containing symbolic links or directory junctions are not moved.");
 
         var folder = NextProfileFolder(to);
         var destination = Path.Combine(environment.UserDataDir(to), folder);
-        Log?.Invoke("Erstelle Prüfsummen der Quelle …");
+        Log?.Invoke("Computing source checksums …");
         var manifest = GetRelevantFiles(source.Path, options.IncludeCaches).ToDictionary(r => r, r => Hash(Path.Combine(source.Path, r)), StringComparer.OrdinalIgnoreCase);
 
         Copy(from, to, source.Folder, folder, options with { ReplaceExisting = false });
-        if (LoadLocalState(to)?["profile"]?["info_cache"]?[folder] is null) throw new InvalidOperationException("Zielprofil nicht registriert. Quelle bleibt erhalten.");
+        if (LoadLocalState(to)?["profile"]?["info_cache"]?[folder] is null) throw new InvalidOperationException("Target profile not registered. Source is kept.");
         AssertClosed(from);
         AssertClosed(to);
 
-        Log?.Invoke("Prüfe Zielkopie …");
+        Log?.Invoke("Verifying target copy …");
         if (GetRelevantFiles(source.Path, options.IncludeCaches).Count() != manifest.Count)
-            throw new InvalidOperationException("Quelldateien haben sich geändert. Quelle bleibt erhalten.");
+            throw new InvalidOperationException("Source files have changed. Source is kept.");
         foreach (var (relative, hash) in manifest)
         {
             var target = Path.Combine(destination, relative);
             if (!File.Exists(target) || Hash(target) != hash || Hash(Path.Combine(source.Path, relative)) != hash)
-                throw new InvalidOperationException($"Prüfung fehlgeschlagen: {relative}. Quelle bleibt erhalten.");
+                throw new InvalidOperationException($"Verification failed: {relative}. Source is kept.");
         }
-        if (guard.IsRunning(from) || guard.IsRunning(to)) throw new InvalidOperationException("Edge wurde während der Prüfung gestartet. Quelle bleibt erhalten.");
+        if (guard.IsRunning(from) || guard.IsRunning(to)) throw new InvalidOperationException("Edge was started during verification. Source is kept.");
 
         Delete(from, source.Folder);
-        Log?.Invoke($"Profil nach {to}/{folder} verschoben; Zielkopie mit SHA256 geprüft.");
+        Log?.Invoke($"Profile moved to {to}/{folder}; target copy verified with SHA256.");
         return folder;
     }
 
-    // ---------- Hilfsfunktionen ----------
+    // ---------- Helpers ----------
 
     private void AssertClosed(EdgeChannel channel, bool allowRunning = false)
     {
         if (!guard.IsRunning(channel)) return;
         if (!allowRunning) throw new EdgeRunningException(channel);
-        Log?.Invoke($"Warnung: Edge {channel} läuft noch. Die Profilkopie kann unvollständig oder inkonsistent sein.");
+        Log?.Invoke($"Warning: Edge {channel} is still running. The profile copy may be incomplete or inconsistent.");
     }
 
     private void ReplaceTarget(string destination, string targetFolder, TransferOptions options)
     {
         if (!Directory.Exists(destination)) return;
-        if (!options.ReplaceExisting) throw new InvalidOperationException($"Zielprofil '{targetFolder}' existiert bereits. Zum Ersetzen bestätigen.");
+        if (!options.ReplaceExisting) throw new InvalidOperationException($"Target profile '{targetFolder}' already exists. Confirm to replace it.");
         Directory.Delete(destination, recursive: true);
     }
 
-    /// <summary>Gemeinsamer Teil von Restore/Kopieren mit "nur lokale Daten" (neues oder bestehendes Zielprofil).</summary>
+    /// <summary>Shared part of restore/copy with "local data only" (new or existing target profile).</summary>
     private void ImportLocalData(EdgeChannel channel, string source, string targetFolder, string name, string? account, bool includeCaches)
     {
         var destination = Path.Combine(environment.UserDataDir(channel), targetFolder);
         var isNew = !Directory.Exists(destination);
         if (!isNew && !File.Exists(Path.Combine(destination, "Preferences")))
-            throw new InvalidOperationException($"Zielordner '{targetFolder}' ist kein vorhandenes Edge-Profil.");
+            throw new InvalidOperationException($"Target folder '{targetFolder}' is not an existing Edge profile.");
         if (isNew && LoadLocalState(channel) is null)
-            throw new InvalidOperationException($"Keine 'Local State' Datei in {channel} gefunden. Edge einmal starten.");
+            throw new InvalidOperationException($"No 'Local State' file found in {channel}. Start Edge once.");
 
-        Log?.Invoke($"Übertrage lokale Daten nach Edge {channel}/{targetFolder} …");
+        Log?.Invoke($"Transferring local data to Edge {channel}/{targetFolder} …");
         Directory.CreateDirectory(destination);
         CopyLocalData(source, destination, includeCaches);
         if (isNew)
         {
             Register(channel, targetFolder, new JsonObject { ["name"] = name });
-            if (!string.IsNullOrEmpty(account)) Log?.Invoke($"Konto für die erneute Anmeldung: {account}");
-            Log?.Invoke($"Neues Profil ohne Anmeldung angelegt. Edge {channel}/{targetFolder} starten und anmelden, um die Synchronisierung zu aktivieren.");
+            if (!string.IsNullOrEmpty(account)) Log?.Invoke($"Account to sign in again: {account}");
+            Log?.Invoke($"New profile created without sign-in. Start Edge {channel}/{targetFolder} and sign in to enable sync.");
         }
-        Log?.Invoke($"Lokale Daten nach Edge {channel}/{targetFolder} übertragen.");
+        Log?.Invoke($"Local data transferred to Edge {channel}/{targetFolder}.");
     }
 
     private void CopyLocalData(string source, string destination, bool includeCaches)
@@ -377,7 +377,7 @@ public sealed class ProfileManager(EdgeEnvironment environment, IEdgeProcessGuar
         {
             var from = Path.Combine(source, directory);
             if (!Directory.Exists(from)) continue;
-            Log?.Invoke($"  Kopiere {directory} …");
+            Log?.Invoke($"  Copying {directory} …");
             copier.Copy(from, Path.Combine(destination, directory), includeCaches);
         }
     }
@@ -387,7 +387,7 @@ public sealed class ProfileManager(EdgeEnvironment environment, IEdgeProcessGuar
         var state = LoadLocalState(channel);
         if (state is null)
         {
-            Log?.Invoke($"Warnung: Keine 'Local State' Datei in {channel} gefunden – Edge einmal starten.");
+            Log?.Invoke($"Warning: No 'Local State' file found in {channel} – start Edge once.");
             return;
         }
         if (state["profile"] is not JsonObject profileNode) state["profile"] = profileNode = new JsonObject();
@@ -430,19 +430,19 @@ public sealed class ProfileManager(EdgeEnvironment environment, IEdgeProcessGuar
 
     public static string ValidateAvatar(string imagePath)
     {
-        if (string.IsNullOrWhiteSpace(imagePath) || !File.Exists(imagePath)) throw new FileNotFoundException($"Avatar-Datei '{imagePath}' nicht gefunden.");
-        if (!string.Equals(Path.GetExtension(imagePath), ".png", StringComparison.OrdinalIgnoreCase)) throw new ArgumentException("Das Profilavatar muss eine PNG-Datei sein.");
+        if (string.IsNullOrWhiteSpace(imagePath) || !File.Exists(imagePath)) throw new FileNotFoundException($"Avatar file '{imagePath}' not found.");
+        if (!string.Equals(Path.GetExtension(imagePath), ".png", StringComparison.OrdinalIgnoreCase)) throw new ArgumentException("The profile avatar must be a PNG file.");
         var signature = new byte[8];
         using (var stream = File.OpenRead(imagePath))
         {
             if (stream.ReadAtLeast(signature, 8, throwOnEndOfStream: false) != 8 || !signature.SequenceEqual(PngSignature))
-                throw new ArgumentException("Die Avatar-Datei ist kein gültiges PNG.");
+                throw new ArgumentException("The avatar file is not a valid PNG.");
         }
         return Path.GetFullPath(imagePath);
     }
 
     private static JsonObject ReadJsonObject(string file) =>
-        JsonNode.Parse(File.ReadAllText(file, Encoding.UTF8)) as JsonObject ?? throw new InvalidDataException($"{file} enthält kein JSON-Objekt.");
+        JsonNode.Parse(File.ReadAllText(file, Encoding.UTF8)) as JsonObject ?? throw new InvalidDataException($"{file} does not contain a JSON object.");
 
     private static void WriteJson(string file, JsonNode node, bool indented = false) =>
         File.WriteAllText(file, indented ? node.ToJsonString(IndentedJson) : node.ToJsonString(), new UTF8Encoding(false));

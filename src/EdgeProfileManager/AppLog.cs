@@ -1,6 +1,6 @@
 namespace EdgeProfileManager;
 
-/// <summary>Einfaches Dateiprotokoll unter %LOCALAPPDATA%\EdgeProfileManager\log.txt.</summary>
+/// <summary>Simple file log at %LOCALAPPDATA%\EdgeProfileManager\log.txt.</summary>
 public static class AppLog
 {
     private const long MaxSize = 1024 * 1024;
@@ -27,7 +27,7 @@ public static class AppLog
         }
         catch (IOException)
         {
-            // Protokoll darf die Anwendung nie stören.
+            // Logging must never disrupt the application.
         }
     }
 }

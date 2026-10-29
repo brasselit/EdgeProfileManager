@@ -4,8 +4,8 @@ using System.Text.Json;
 namespace EdgeProfileManager;
 
 /// <summary>
-/// Stellt sicher, dass nur eine Tray-Instanz läuft. Weitere Aufrufe (Jump List, Taskbar-Klick)
-/// leiten ihre Argumente über eine Named Pipe an diese Instanz weiter.
+/// Ensures that only one tray instance runs. Further invocations (jump list, taskbar click)
+/// forward their arguments to this instance via a named pipe.
 /// </summary>
 public sealed class SingleInstance : IDisposable
 {
@@ -21,7 +21,7 @@ public sealed class SingleInstance : IDisposable
 
     public bool IsPrimary { get; }
 
-    // Pipes sind sitzungsübergreifend sichtbar; die Sitzungs-ID entspricht dem Local\-Mutex.
+    // Pipes are visible across sessions; the session ID matches the Local\ mutex.
     private static readonly string PipeName = $"{Id}-{System.Diagnostics.Process.GetCurrentProcess().SessionId}";
 
     public static bool TrySend(IReadOnlyList<string> args)
@@ -38,7 +38,7 @@ public sealed class SingleInstance : IDisposable
             }
             catch (Exception ex) when (ex is TimeoutException or IOException)
             {
-                // Primäre Instanz startet evtl. gerade noch.
+                // The primary instance may still be starting.
                 Thread.Sleep(300);
             }
         }
@@ -62,7 +62,7 @@ public sealed class SingleInstance : IDisposable
                     onCommand(args);
                 }
                 catch (OperationCanceledException) { return; }
-                catch (Exception ex) { AppLog.Write($"Pipe-Fehler: {ex.Message}"); }
+                catch (Exception ex) { AppLog.Write($"Pipe error: {ex.Message}"); }
             }
         }, token);
     }

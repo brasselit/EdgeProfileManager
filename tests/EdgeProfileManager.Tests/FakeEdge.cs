@@ -3,7 +3,7 @@ using EdgeProfileManager.Core.Edge;
 
 namespace EdgeProfileManager.Tests;
 
-/// <summary>Temporäre Edge-Verzeichnisstruktur (%LOCALAPPDATA%\Microsoft\Edge*\User Data) für Tests.</summary>
+/// <summary>Temporary Edge directory structure (%LOCALAPPDATA%\Microsoft\Edge*\User Data) for tests.</summary>
 internal sealed class FakeEdge : IDisposable
 {
     public FakeEdge()
@@ -16,7 +16,7 @@ internal sealed class FakeEdge : IDisposable
     public string Root { get; }
     public EdgeEnvironment Environment { get; }
 
-    /// <summary>Legt ein Profil an; <paramref name="registered"/> trägt es in Local State ein.</summary>
+    /// <summary>Creates a profile; <paramref name="registered"/> adds it to Local State.</summary>
     public string AddProfile(EdgeChannel channel, string folder, string? name = null, bool registered = true,
         bool preferences = true, string? userName = null, string? customerUser = null)
     {

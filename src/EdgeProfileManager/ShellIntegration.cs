@@ -5,24 +5,24 @@ using Microsoft.Win32;
 
 namespace EdgeProfileManager;
 
-/// <summary>Startmenü-Verknüpfung (zum Anheften an die Taskbar), Autostart und Diagnose.</summary>
+/// <summary>Start menu shortcut (for pinning to the taskbar), autostart and diagnostics.</summary>
 public static class ShellIntegration
 {
     private const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
     private const string RunValue = "EdgeProfileManager";
 
-    public static string ExecutablePath { get; } = Environment.ProcessPath ?? throw new InvalidOperationException("Prozesspfad unbekannt.");
+    public static string ExecutablePath { get; } = Environment.ProcessPath ?? throw new InvalidOperationException("Process path unknown.");
 
     public static string StartMenuShortcutPath { get; } = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.Programs), "Edge Profile Manager.lnk");
 
     /// <summary>
-    /// Legt die Startmenü-Verknüpfung an oder korrigiert ihr Ziel, z.B. nach einem Verschieben der Anwendung.
-    /// Die Datei wird überschrieben und nicht gelöscht, damit bestehende Pins erhalten bleiben.
+    /// Creates the Start menu shortcut or fixes its target, e.g. after the application was moved.
+    /// The file is overwritten rather than deleted so that existing pins are kept.
     /// </summary>
     public static void EnsureStartMenuShortcut(bool force = false)
     {
-        var shellType = Type.GetTypeFromProgID("WScript.Shell") ?? throw new InvalidOperationException("WScript.Shell nicht verfügbar.");
+        var shellType = Type.GetTypeFromProgID("WScript.Shell") ?? throw new InvalidOperationException("WScript.Shell not available.");
         dynamic shell = Activator.CreateInstance(shellType)!;
         try
         {
@@ -30,10 +30,10 @@ public static class ShellIntegration
             if (!force && File.Exists(StartMenuShortcutPath) && string.Equals((string)link.TargetPath, ExecutablePath, StringComparison.OrdinalIgnoreCase)) return;
             link.TargetPath = ExecutablePath;
             link.WorkingDirectory = Path.GetDirectoryName(ExecutablePath);
-            link.Description = "Edge-Profile starten oder zu deren Fenster wechseln";
+            link.Description = "Launch Edge profiles or switch to their windows";
             link.IconLocation = $"{ExecutablePath},0";
             link.Save();
-            AppLog.Write($"Startmenü-Verknüpfung erstellt: {StartMenuShortcutPath}");
+            AppLog.Write($"Start menu shortcut created: {StartMenuShortcutPath}");
         }
         finally { Marshal.FinalReleaseComObject(shell); }
     }
@@ -47,18 +47,18 @@ public static class ShellIntegration
     [DllImport("user32.dll")] private static extern bool AllowSetForegroundWindow(int processId);
     private const int ASFW_ANY = -1;
 
-    /// <summary>Gibt es für die Erweiterung ein Programm zum Öffnen?</summary>
+    /// <summary>Is there a program to open files with this extension?</summary>
     public static bool HasFileAssociation(string extension)
     {
         uint length = 0;
-        // Ohne Verb "open" schlägt die Abfrage auch bei vorhandener Zuordnung fehl.
-        // S_FALSE (1) = Länge ermittelt, Zuordnung vorhanden.
+        // Without the verb "open" the query fails even if an association exists.
+        // S_FALSE (1) = length determined, association exists.
         return AssocQueryString(ASSOCF_INIT_IGNOREUNKNOWN, ASSOCSTR_EXECUTABLE, extension, "open", null, ref length) is 0 or 1 && length > 0;
     }
 
     /// <summary>
-    /// Erlaubt dem gleich gestarteten Programm, sich in den Vordergrund zu holen. Ohne das öffnet z.B.
-    /// VS Code die Datei nur als Tab im bestehenden Fenster im Hintergrund.
+    /// Allows the program about to be launched to bring itself to the foreground. Without this, e.g.
+    /// VS Code only opens the file as a tab in the existing window in the background.
     /// </summary>
     public static void AllowForegroundForLaunchedProcess() => AllowSetForegroundWindow(ASFW_ANY);
 
@@ -72,7 +72,7 @@ public static class ShellIntegration
         return candidates.FirstOrDefault(File.Exists);
     }
 
-    /// <summary>Öffnet den Explorer mit markierter Datei.</summary>
+    /// <summary>Opens Explorer with the file selected.</summary>
     public static void RevealInExplorer(string path)
     {
         AllowForegroundForLaunchedProcess();
@@ -92,21 +92,21 @@ public static class ShellIntegration
         else key.DeleteValue(RunValue, throwOnMissingValue: false);
     }
 
-    /// <summary>Text für --dump-windows: alle Edge-Fenster mit erkanntem Profil.</summary>
+    /// <summary>Text for --dump-windows: all Edge windows with their detected profile.</summary>
     public static string DescribeWindows(ProfileDiscovery discovery, EdgeWindowFinder finder)
     {
         var builder = new StringBuilder();
         var profiles = discovery.GetProfiles();
-        builder.AppendLine("Edge-Fenster (zuletzt aktives zuerst):");
+        builder.AppendLine("Edge windows (most recently active first):");
         foreach (var window in finder.GetWindows())
         {
             var channelProfiles = profiles.Where(p => p.Channel == window.Channel).ToList();
             var profile = channelProfiles.FirstOrDefault(p => ProfileWindowMatcher.Matches(window, p, channelProfiles));
             builder.AppendLine($"  0x{window.Handle:X8}  {window.Channel,-7} {(profile?.Folder ?? "?"),-11} " +
-                $"{(window.IsCloaked ? "anderer Desktop" : "sichtbar"),-15} AUMID={window.AppUserModelId}  \"{window.Title}\"");
+                $"{(window.IsCloaked ? "other desktop" : "visible"),-15} AUMID={window.AppUserModelId}  \"{window.Title}\"");
         }
         builder.AppendLine();
-        builder.AppendLine("Profile:");
+        builder.AppendLine("Profiles:");
         foreach (var profile in profiles)
         {
             builder.AppendLine($"  {profile.Key,-20} {profile.Name}{(profile.User is null ? "" : $" <{profile.User}>")}");

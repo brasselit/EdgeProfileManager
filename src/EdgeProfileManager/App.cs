@@ -8,7 +8,7 @@ using Application = System.Windows.Application;
 
 namespace EdgeProfileManager;
 
-/// <summary>Tray-Anwendung: hält Konfiguration, Profile, Tray-Menü und Jump List aktuell.</summary>
+/// <summary>Tray application: keeps configuration, profiles, tray menu and jump list up to date.</summary>
 public sealed class App : Application
 {
     private readonly CommandLine _initialCommand;
@@ -39,7 +39,7 @@ public sealed class App : Application
     public IReadOnlyList<EdgeProfile> Profiles { get; private set; } = [];
     public ResolvedMenu Menu { get; private set; } = new([], new Dictionary<string, ProfileSettings>());
 
-    /// <summary>Nach jeder Aktualisierung von Konfiguration oder Profilen (auf dem UI-Thread).</summary>
+    /// <summary>Raised after every update of configuration or profiles (on the UI thread).</summary>
     public event Action? StateChanged;
 
     protected override void OnStartup(StartupEventArgs e)
@@ -48,7 +48,7 @@ public sealed class App : Application
         AppLog.Write($"Start ({ShellIntegration.ExecutablePath})");
         DispatcherUnhandledException += (_, args) =>
         {
-            AppLog.Write($"Unbehandelter Fehler: {args.Exception}");
+            AppLog.Write($"Unhandled error: {args.Exception}");
             _tray?.ShowError(args.Exception.Message);
             args.Handled = true;
         };
@@ -70,7 +70,7 @@ public sealed class App : Application
         WatchProfiles();
 
         try { ShellIntegration.EnsureStartMenuShortcut(); }
-        catch (Exception ex) { AppLog.Write($"Startmenü-Verknüpfung fehlgeschlagen: {ex.Message}"); }
+        catch (Exception ex) { AppLog.Write($"Start menu shortcut failed: {ex.Message}"); }
 
         _instance.StartServer(args => Dispatcher.BeginInvoke(() => Execute(CommandLine.Parse(args))));
         Execute(_initialCommand);
@@ -82,7 +82,7 @@ public sealed class App : Application
         _profileDebounce?.Dispose();
         _configStore.Dispose();
         _tray.Dispose();
-        AppLog.Write("Beendet");
+        AppLog.Write("Exited");
         base.OnExit(e);
     }
 
@@ -106,7 +106,7 @@ public sealed class App : Application
                 Shutdown();
                 break;
             case CommandKind.Invalid:
-                _tray.ShowError(command.Error ?? "Ungültiger Aufruf.");
+                _tray.ShowError(command.Error ?? "Invalid command line.");
                 break;
         }
     }
@@ -116,15 +116,15 @@ public sealed class App : Application
         var key = MenuResolver.NormalizeReference(profileKey);
         try
         {
-            // Frisch einlesen, damit auch eben erst angelegte Profile gefunden werden.
+            // Read fresh so that just-created profiles are found too.
             var profile = Discovery.GetProfiles().FirstOrDefault(p => string.Equals(p.Key, key, StringComparison.OrdinalIgnoreCase))
-                ?? throw new InvalidOperationException($"Profil '{key}' nicht gefunden.");
+                ?? throw new InvalidOperationException($"Profile '{key}' not found.");
             var settings = Menu.SettingsByKey.GetValueOrDefault(profile.Key) ?? MenuResolver.DefaultSettings(Config);
             Launcher.Open(profile, settings, newWindow);
         }
         catch (Exception ex)
         {
-            AppLog.Write($"Öffnen von {key} fehlgeschlagen: {ex}");
+            AppLog.Write($"Opening {key} failed: {ex}");
             _tray.ShowError(ex.Message);
         }
     }
@@ -141,7 +141,7 @@ public sealed class App : Application
         _managementWindow.Activate();
     }
 
-    /// <summary>Ändert die Konfiguration, speichert sie und aktualisiert Menü und Jump List.</summary>
+    /// <summary>Changes the configuration, saves it and updates menu and jump list.</summary>
     public void UpdateConfig(Action<AppConfig> change)
     {
         change(Config);
@@ -149,7 +149,7 @@ public sealed class App : Application
         RefreshProfiles();
     }
 
-    /// <summary>Stellt Verweise in der Konfiguration um, z.B. nach dem Verschieben eines Profils.</summary>
+    /// <summary>Rewrites references in the configuration, e.g. after moving a profile.</summary>
     public int ReplaceProfileReference(string oldKey, string newKey)
     {
         var count = 0;
@@ -157,7 +157,7 @@ public sealed class App : Application
         return count;
     }
 
-    /// <summary>Schlüssel der Profile, die aktuell mindestens ein Fenster haben.</summary>
+    /// <summary>Keys of the profiles that currently have at least one window.</summary>
     public HashSet<string> GetRunningProfileKeys() =>
         Finder.GetWindows()
             .Select(w => ProfileWindowMatcher.FindProfile(w, Profiles)?.Key)
@@ -169,12 +169,12 @@ public sealed class App : Application
         try
         {
             Config = _configStore.LoadOrCreate(() => ConfigStore.CreateDefault(Discovery.GetProfiles()));
-            if (!initial) _tray.ShowInfo("Konfiguration neu geladen.");
+            if (!initial) _tray.ShowInfo("Configuration reloaded.");
         }
         catch (Exception ex)
         {
-            AppLog.Write($"Konfiguration ungültig: {ex.Message}");
-            _tray.ShowError($"Konfiguration ungültig, die letzte gültige bleibt aktiv:\n{ex.Message}");
+            AppLog.Write($"Invalid configuration: {ex.Message}");
+            _tray.ShowError($"Invalid configuration, the last valid one stays active:\n{ex.Message}");
         }
         RefreshProfiles();
     }
@@ -184,7 +184,7 @@ public sealed class App : Application
         Profiles = Discovery.GetProfiles();
         Menu = MenuResolver.Resolve(Config, Profiles);
         try { _jumpList.Update(Menu, Config.JumpListStyle); }
-        catch (Exception ex) { AppLog.Write($"Jump List fehlgeschlagen: {ex.Message}"); }
+        catch (Exception ex) { AppLog.Write($"Jump list failed: {ex.Message}"); }
         StateChanged?.Invoke();
     }
 
@@ -194,14 +194,14 @@ public sealed class App : Application
         try { Process.Start(new ProcessStartInfo(path) { UseShellExecute = true })?.Dispose(); }
         catch (Exception ex)
         {
-            AppLog.Write($"Öffnen von {path} fehlgeschlagen: {ex.Message}");
+            AppLog.Write($"Opening {path} failed: {ex.Message}");
             _tray.ShowError(ex.Message);
         }
     }
 
     /// <summary>
-    /// Öffnet eine Textdatei zum Bearbeiten. Ohne Dateizuordnung tut ShellExecute für .json
-    /// unter Windows 11 kommentarlos nichts; deshalb wird der Editor explizit gewählt.
+    /// Opens a text file for editing. Without a file association, ShellExecute silently does nothing
+    /// for .json on Windows 11; that is why the editor is chosen explicitly.
     /// </summary>
     public void EditFile(string path)
     {
@@ -216,12 +216,12 @@ public sealed class App : Application
         try { Process.Start(new ProcessStartInfo(editor) { ArgumentList = { path }, UseShellExecute = false })?.Dispose(); }
         catch (Exception ex)
         {
-            AppLog.Write($"Editor '{editor}' konnte nicht gestartet werden: {ex.Message}");
-            _tray.ShowError($"Editor '{editor}' konnte nicht gestartet werden: {ex.Message}");
+            AppLog.Write($"Editor '{editor}' could not be started: {ex.Message}");
+            _tray.ShowError($"Editor '{editor}' could not be started: {ex.Message}");
         }
     }
 
-    /// <summary>Beobachtet "Local State" aller Channels, damit neue oder umbenannte Profile sofort erscheinen.</summary>
+    /// <summary>Watches "Local State" of all channels so that new or renamed profiles show up immediately.</summary>
     private void WatchProfiles()
     {
         _profileDebounce = new Timer(_ => Dispatcher.BeginInvoke(RefreshProfiles));

@@ -14,7 +14,7 @@ public sealed record Field(string Key, string Label, FieldType Type = FieldType.
     public string? Filter { get; init; }
 }
 
-/// <summary>Einfacher Eingabedialog aus einer Feldliste (Port von Show-GuiFields).</summary>
+/// <summary>Simple input dialog built from a list of fields (port of Show-GuiFields).</summary>
 public static class FieldsDialog
 {
     public static Dictionary<string, string>? Show(Window owner, string title, params Field[] fields)
@@ -55,7 +55,7 @@ public static class FieldsDialog
                     {
                         if (field.Type == FieldType.File)
                         {
-                            var open = new OpenFileDialog { Filter = field.Filter ?? "Alle Dateien|*.*", FileName = pathBox.Text };
+                            var open = new OpenFileDialog { Filter = field.Filter ?? "All files|*.*", FileName = pathBox.Text };
                             if (open.ShowDialog(dialog) == true) pathBox.Text = open.FileName;
                         }
                         else
@@ -79,7 +79,7 @@ public static class FieldsDialog
 
         var buttons = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 6, 0, 0) };
         var ok = new Button { Content = "OK", IsDefault = true, Width = 90, Margin = new Thickness(0, 0, 8, 0), Padding = new Thickness(8, 5, 8, 5) };
-        var cancel = new Button { Content = "Abbrechen", IsCancel = true, Width = 90, Padding = new Thickness(8, 5, 8, 5) };
+        var cancel = new Button { Content = "Cancel", IsCancel = true, Width = 90, Padding = new Thickness(8, 5, 8, 5) };
         buttons.Children.Add(ok);
         buttons.Children.Add(cancel);
         panel.Children.Add(buttons);
@@ -91,7 +91,7 @@ public static class FieldsDialog
             var missing = fields.FirstOrDefault(f => f.Required && string.IsNullOrWhiteSpace(values[f.Key]));
             if (missing is not null)
             {
-                MessageBox.Show(dialog, $"Bitte \"{missing.Label}\" ausfüllen.", title, MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(dialog, $"Please fill in \"{missing.Label}\".", title, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
             result = values;

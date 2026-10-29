@@ -12,10 +12,10 @@ public sealed record ProfileSettings(DesktopTarget? Desktop, DesktopMode Mode, b
 
 public sealed record ResolvedMenu(IReadOnlyList<MenuNode> Nodes, IReadOnlyDictionary<string, ProfileSettings> SettingsByKey)
 {
-    public const string UnassignedTitle = "Nicht zugeordnet";
+    public const string UnassignedTitle = "Unassigned";
 }
 
-/// <summary>Verbindet den Menübaum der Konfiguration mit den gefundenen Profilen.</summary>
+/// <summary>Combines the configured menu tree with the discovered profiles.</summary>
 public static class MenuResolver
 {
     public static ResolvedMenu Resolve(AppConfig config, IReadOnlyList<EdgeProfile> profiles)
@@ -65,14 +65,14 @@ public static class MenuResolver
                 }
                 else
                 {
-                    result.Add(new MissingProfileNode(entry.Profile, $"{entry.Label ?? entry.Profile} (nicht gefunden)"));
+                    result.Add(new MissingProfileNode(entry.Profile, $"{entry.Label ?? entry.Profile} (not found)"));
                 }
             }
         }
         return result;
     }
 
-    /// <summary>Ersetzt alle Verweise auf ein Profil, z.B. nach dem Verschieben in eine andere Instanz. Liefert die Anzahl.</summary>
+    /// <summary>Replaces all references to a profile, e.g. after moving it to another channel. Returns the count.</summary>
     public static int ReplaceProfileReference(AppConfig config, string oldKey, string newKey)
     {
         var count = 0;
@@ -93,7 +93,7 @@ public static class MenuResolver
         }
     }
 
-    /// <summary>"stable/profile 1" → "Stable/Profile 1"; unbekannte Channels bleiben unverändert.</summary>
+    /// <summary>"stable/profile 1" → "Stable/Profile 1"; unknown channels are left unchanged.</summary>
     public static string NormalizeReference(string reference)
     {
         var parts = reference.Split('/', 2);
@@ -101,7 +101,7 @@ public static class MenuResolver
         return $"{channel}/{parts[1].Trim()}";
     }
 
-    /// <summary>Alle Profilknoten in Menüreihenfolge, mit Pfad der übergeordneten Gruppen.</summary>
+    /// <summary>All profile nodes in menu order, with the path of their parent groups.</summary>
     public static IEnumerable<(IReadOnlyList<string> Groups, ProfileNode Node)> Flatten(IEnumerable<MenuNode> nodes) =>
         Flatten(nodes, []);
 

@@ -2,8 +2,8 @@
   "version": "2.0.0",
   "tasks": [
     {
-      // Die laufende Tray-Instanz aus bin\Debug beendet der Build selbst (Target StopRunningInstance
-      // in EdgeProfileManager.csproj); sonst würde sie DLLs sperren und den Debug-Start per Pipe "schlucken".
+      // The build itself stops the running tray instance from bin\Debug (target StopRunningInstance
+      // in EdgeProfileManager.csproj); otherwise it would lock DLLs and "swallow" the debug launch via the pipe.
       "label": "build",
       "type": "process",
       "command": "dotnet",

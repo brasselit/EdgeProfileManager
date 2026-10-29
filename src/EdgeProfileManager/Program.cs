@@ -29,8 +29,8 @@ internal static class Program
         using var instance = new SingleInstance();
         if (!instance.IsPrimary)
         {
-            // Dieser Prozess wurde vom Benutzer gestartet und darf den Vordergrund vergeben;
-            // die Tray-Instanz braucht das Recht, um Edge-Fenster bzw. das Menü nach vorne zu holen.
+            // This process was started by the user and may grant the foreground right;
+            // the tray instance needs it to bring Edge windows or the menu to the front.
             AllowSetForegroundWindow(ASFW_ANY);
             return SingleInstance.TrySend(args.Length == 0 ? ["--menu"] : args) ? 0 : 1;
         }
@@ -40,8 +40,8 @@ internal static class Program
     }
 
     /// <summary>
-    /// Aus VS Code gestartet (z.B. beim Debuggen) erbt der Prozess ELECTRON_RUN_AS_NODE=1 und VSCODE_*.
-    /// Damit würde ein gestartetes Code.exe als reines Node.js ohne Fenster laufen und sofort enden.
+    /// When started from VS Code (e.g. while debugging), the process inherits ELECTRON_RUN_AS_NODE=1 and VSCODE_*.
+    /// A launched Code.exe would then run as plain Node.js without a window and exit immediately.
     /// </summary>
     private static void RemoveInheritedVsCodeEnvironment()
     {
@@ -65,7 +65,7 @@ internal static class Program
         }
         else
         {
-            MessageBox.Show(text, "Edge-Fenster");
+            MessageBox.Show(text, "Edge windows");
         }
         return 0;
     }

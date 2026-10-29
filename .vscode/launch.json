@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Tray (Menü anzeigen)",
+      "name": "Tray (show menu)",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
@@ -13,7 +13,7 @@
       "stopAtEntry": false
     },
     {
-      "name": "Tray (nur Hintergrund)",
+      "name": "Tray (background only)",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
@@ -23,7 +23,7 @@
       "console": "internalConsole"
     },
     {
-      "name": "Profil öffnen (--open)",
+      "name": "Open profile (--open)",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
@@ -43,7 +43,7 @@
       "console": "internalConsole"
     },
     {
-      "name": "An laufende Instanz anhängen",
+      "name": "Attach to running instance",
       "type": "coreclr",
       "request": "attach",
       "processName": "EdgeProfileManager.exe"
@@ -53,7 +53,7 @@
     {
       "id": "profileKey",
       "type": "promptString",
-      "description": "Profilreferenz Channel/Ordner",
+      "description": "Profile reference channel/folder",
       "default": "Stable/Default"
     }
   ]

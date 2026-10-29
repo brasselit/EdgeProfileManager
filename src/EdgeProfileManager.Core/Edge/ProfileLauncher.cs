@@ -7,7 +7,7 @@ namespace EdgeProfileManager.Core.Edge;
 
 public enum LaunchOutcome { Activated, Started }
 
-/// <summary>Startet ein Profil oder wechselt zu dessen Fenster (Activate-or-Launch).</summary>
+/// <summary>Starts a profile or switches to its window (activate-or-launch).</summary>
 public sealed class ProfileLauncher(EdgeEnvironment environment, ProfileDiscovery discovery, EdgeWindowFinder finder, IVirtualDesktopService desktops)
 {
     private static readonly TimeSpan NewWindowTimeout = TimeSpan.FromSeconds(10);
@@ -31,7 +31,7 @@ public sealed class ProfileLauncher(EdgeEnvironment environment, ProfileDiscover
         var target = desktops.Resolve(settings.Desktop);
         if (target is not null)
         {
-            // Edge öffnet das Fenster asynchron; danach auf den zugewiesenen Desktop verschieben.
+            // Edge opens the window asynchronously; move it to the assigned desktop once it appears.
             _ = Task.Run(() => MoveNewWindowAsync(profile, channelProfiles, known, target.Value));
         }
         return LaunchOutcome.Started;
@@ -40,14 +40,14 @@ public sealed class ProfileLauncher(EdgeEnvironment environment, ProfileDiscover
     public void Start(EdgeProfile profile)
     {
         var exe = environment.FindExecutable(profile.Channel)
-            ?? throw new InvalidOperationException($"Edge {profile.Channel} Anwendung nicht gefunden.");
+            ?? throw new InvalidOperationException($"Edge {profile.Channel} application not found.");
         Process.Start(new ProcessStartInfo(exe) { ArgumentList = { $"--profile-directory={profile.Folder}" }, UseShellExecute = false })?.Dispose();
-        Log?.Invoke($"Gestartet: Edge {profile.Channel} – {profile.Name} ({profile.Folder})");
+        Log?.Invoke($"Started: Edge {profile.Channel} – {profile.Name} ({profile.Folder})");
     }
 
     /// <summary>
-    /// Zuletzt aktives Fenster des Profils. Ist es bereits im Vordergrund, wird zum nächsten
-    /// Fenster desselben Profils gewechselt, damit wiederholte Klicks durch die Fenster blättern.
+    /// Most recently active window of the profile. If it is already in the foreground, switches to the next
+    /// window of the same profile so that repeated clicks cycle through the windows.
     /// </summary>
     private static EdgeWindow PickWindow(IReadOnlyList<EdgeWindow> windows)
     {
@@ -88,20 +88,20 @@ public sealed class ProfileLauncher(EdgeEnvironment environment, ProfileDiscover
             if (desktops.GetWindowDesktop(window.Handle) != desktop) desktops.MoveWindowToDesktop(window.Handle, desktop);
             if (desktops.CurrentDesktop != desktop) desktops.GoToDesktop(desktop);
             Activate(window.Handle);
-            Log?.Invoke($"Fenster von {profile.Name} auf Desktop {desktop + 1} verschoben.");
+            Log?.Invoke($"Moved window of {profile.Name} to desktop {desktop + 1}.");
             return;
         }
-        Log?.Invoke($"Neues Fenster von {profile.Name} nicht innerhalb von {NewWindowTimeout.TotalSeconds:0} s gefunden.");
+        Log?.Invoke($"New window of {profile.Name} not found within {NewWindowTimeout.TotalSeconds:0} s.");
     }
 
-    /// <summary>Holt ein fremdes Fenster zuverlässig in den Vordergrund.</summary>
+    /// <summary>Reliably brings another process's window to the foreground.</summary>
     public static void Activate(nint hwnd)
     {
         if (Native.IsIconic(hwnd)) Native.ShowWindow(hwnd, Native.SW_RESTORE);
         if (Native.SetForegroundWindow(hwnd)) return;
 
-        // Fallback: an den Eingabe-Thread des Vordergrundfensters anhängen bzw. Alt-Taste simulieren,
-        // damit Windows die Vordergrundsperre aufhebt.
+        // Fallback: attach to the input thread of the foreground window and simulate the Alt key
+        // so that Windows lifts the foreground lock.
         var foregroundThread = Native.GetWindowThreadProcessId(Native.GetForegroundWindow(), out _);
         var currentThread = Native.GetCurrentThreadId();
         var attached = foregroundThread != currentThread && Native.AttachThreadInput(currentThread, foregroundThread, true);

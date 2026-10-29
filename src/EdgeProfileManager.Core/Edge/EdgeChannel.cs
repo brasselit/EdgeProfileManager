@@ -6,7 +6,7 @@ public static class EdgeChannels
 {
     public static IReadOnlyList<EdgeChannel> All { get; } = [EdgeChannel.Stable, EdgeChannel.Beta, EdgeChannel.Dev, EdgeChannel.Canary];
 
-    /// <summary>Verzeichnisname unter %LOCALAPPDATA%\Microsoft bzw. Program Files\Microsoft.</summary>
+    /// <summary>Directory name under %LOCALAPPDATA%\Microsoft or Program Files\Microsoft.</summary>
     public static string DirName(this EdgeChannel channel) => channel switch
     {
         EdgeChannel.Stable => "Edge",
@@ -19,7 +19,7 @@ public static class EdgeChannels
     public static bool TryParse(string? value, out EdgeChannel channel) =>
         Enum.TryParse(value, ignoreCase: true, out channel) && Enum.IsDefined(channel);
 
-    /// <summary>Bestimmt den Channel anhand des Pfads von msedge.exe.</summary>
+    /// <summary>Determines the channel from the path of msedge.exe.</summary>
     public static EdgeChannel? FromExecutablePath(string? path)
     {
         if (string.IsNullOrEmpty(path)) return null;
@@ -31,7 +31,7 @@ public static class EdgeChannels
     }
 }
 
-/// <summary>Pfade einer Edge-Installation; für Tests mit anderen Wurzeln überschreibbar.</summary>
+/// <summary>Paths of an Edge installation; roots can be overridden for tests.</summary>
 public sealed class EdgeEnvironment
 {
     public static EdgeEnvironment Default { get; } = new();

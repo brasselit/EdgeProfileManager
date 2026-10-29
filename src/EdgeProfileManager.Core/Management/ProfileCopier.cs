@@ -4,18 +4,18 @@ namespace EdgeProfileManager.Core.Management;
 
 public interface IProfileCopier
 {
-    /// <summary>Kopiert einen Ordner rekursiv; ohne <paramref name="includeCaches"/> ohne Cache-Ordner.</summary>
+    /// <summary>Copies a folder recursively; without <paramref name="includeCaches"/>, cache folders are skipped.</summary>
     void Copy(string source, string destination, bool includeCaches);
 }
 
-/// <summary>Port von Copy-ProfileFolder: robocopy, unabhängig von PATH.</summary>
+/// <summary>Copies with robocopy from the system directory, independent of PATH.</summary>
 public sealed class RobocopyProfileCopier : IProfileCopier
 {
     public void Copy(string source, string destination, bool includeCaches)
     {
         var robocopy = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "robocopy.exe");
         if (!File.Exists(robocopy))
-            throw new FileNotFoundException($"Windows-Kopierprogramm nicht gefunden: {robocopy}. Bitte die Windows-Installation prüfen.");
+            throw new FileNotFoundException($"Windows copy tool not found: {robocopy}. Please check the Windows installation.");
 
         var start = new ProcessStartInfo(robocopy)
         {
@@ -32,11 +32,11 @@ public sealed class RobocopyProfileCopier : IProfileCopier
             foreach (var directory in ProfileManager.CacheDirs) start.ArgumentList.Add(Path.Combine(source, directory));
         }
 
-        using var process = Process.Start(start) ?? throw new InvalidOperationException("robocopy konnte nicht gestartet werden.");
+        using var process = Process.Start(start) ?? throw new InvalidOperationException("robocopy could not be started.");
         var output = process.StandardOutput.ReadToEndAsync();
         process.StandardError.ReadToEnd();
         process.WaitForExit();
-        // robocopy: Exitcodes ab 8 bedeuten Fehler.
-        if (process.ExitCode >= 8) throw new IOException($"Robocopy-Fehler ({process.ExitCode}): {output.Result.Trim()}");
+        // robocopy: exit codes of 8 and above indicate errors.
+        if (process.ExitCode >= 8) throw new IOException($"Robocopy error ({process.ExitCode}): {output.Result.Trim()}");
     }
 }

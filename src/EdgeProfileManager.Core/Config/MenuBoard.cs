@@ -4,31 +4,31 @@ namespace EdgeProfileManager.Core.Config;
 
 public enum LaneKind { Root, Group, Unassigned }
 
-/// <summary>Eine Spalte im Menü-Board: Hauptmenü, eine Gruppe der obersten Ebene oder "Nicht zugeordnet".</summary>
+/// <summary>A column in the menu board: main menu, a top-level group or "Unassigned".</summary>
 public sealed record BoardLane(LaneKind Kind, string Title, MenuEntry? Group, IReadOnlyList<BoardItem> Items)
 {
-    public const string RootTitle = "Hauptmenü";
+    public const string RootTitle = "Main menu";
 }
 
 public abstract record BoardItem(int Depth);
 
-/// <summary>Profilkarte. <see cref="Entry"/> null = nicht zugeordnet, <see cref="Profile"/> null = Verweis ins Leere.</summary>
+/// <summary>Profile card. <see cref="Entry"/> null = unassigned, <see cref="Profile"/> null = dangling reference.</summary>
 public sealed record BoardCard(MenuEntry? Entry, EdgeProfile? Profile, string Reference, int Depth) : BoardItem(Depth)
 {
     public string Title => Entry?.Label ?? Profile?.Name ?? Reference;
 }
 
-/// <summary>Untergruppe innerhalb einer Spalte; ihre Einträge folgen mit grösserer Tiefe.</summary>
+/// <summary>Subgroup within a column; its entries follow with greater depth.</summary>
 public sealed record BoardHeader(MenuEntry Group, int Depth) : BoardItem(Depth);
 
 public sealed record BoardSeparator(MenuEntry Entry, int Depth) : BoardItem(Depth);
 
-/// <summary>Gruppe mit Pfad für Auswahllisten, z.B. "Kunden › Archiv".</summary>
+/// <summary>Group with path for selection lists, e.g. "Customers › Archive".</summary>
 public sealed record BoardGroup(MenuEntry Group, string Path);
 
 /// <summary>
-/// Sicht des Menübaums als Board (Spalte = Gruppe der obersten Ebene) und Bearbeitungsfunktionen darauf.
-/// Alle Änderungen wirken direkt auf die übergebene Konfiguration.
+/// View of the menu tree as a board (column = top-level group) and editing operations on it.
+/// All changes apply directly to the given configuration.
 /// </summary>
 public static class MenuBoard
 {
@@ -73,7 +73,7 @@ public static class MenuBoard
         }
     }
 
-    /// <summary>Alle Gruppen in Menüreihenfolge, verschachtelte mit Pfad.</summary>
+    /// <summary>All groups in menu order, nested ones with their path.</summary>
     public static IReadOnlyList<BoardGroup> GetGroups(AppConfig config)
     {
         var result = new List<BoardGroup>();
@@ -92,10 +92,10 @@ public static class MenuBoard
         }
     }
 
-    /// <summary>Liste, in die ein Eintrag der Gruppe gehört; null = Hauptmenü.</summary>
+    /// <summary>List that holds the entries of the group; null = main menu.</summary>
     public static List<MenuEntry> ChildrenOf(AppConfig config, MenuEntry? group) => group is null ? config.Menu : group.Children ??= [];
 
-    /// <summary>Liste, die den Eintrag enthält (Vergleich per Referenz).</summary>
+    /// <summary>List that contains the entry (compared by reference).</summary>
     public static List<MenuEntry>? FindParent(AppConfig config, MenuEntry entry)
     {
         return Find(config.Menu);
@@ -108,23 +108,23 @@ public static class MenuBoard
         }
     }
 
-    /// <summary>Gruppe, die den Eintrag direkt enthält; null = Hauptmenü oder nicht gefunden.</summary>
+    /// <summary>Group that directly contains the entry; null = main menu or not found.</summary>
     public static MenuEntry? FindParentGroup(AppConfig config, MenuEntry entry)
     {
         var parent = FindParent(config, entry);
         return GetGroups(config).FirstOrDefault(g => ReferenceEquals(g.Group.Children, parent))?.Group;
     }
 
-    /// <summary>Verschiebt einen Eintrag in <paramref name="target"/> vor <paramref name="before"/> (null = ans Ende).</summary>
+    /// <summary>Moves an entry into <paramref name="target"/> before <paramref name="before"/> (null = to the end).</summary>
     public static void Place(AppConfig config, MenuEntry entry, List<MenuEntry> target, MenuEntry? before)
     {
         if (ReferenceEquals(entry, before)) return;
-        if (entry.Group is not null && Contains(entry, target)) throw new InvalidOperationException("Eine Gruppe kann nicht in sich selbst verschoben werden.");
+        if (entry.Group is not null && Contains(entry, target)) throw new InvalidOperationException("A group cannot be moved into itself.");
         FindParent(config, entry)?.Remove(entry);
         Insert(target, entry, before);
     }
 
-    /// <summary>Nimmt ein Profil ins Menü auf.</summary>
+    /// <summary>Adds a profile to the menu.</summary>
     public static MenuEntry Add(List<MenuEntry> target, string profileKey, MenuEntry? before)
     {
         var entry = new MenuEntry { Profile = profileKey };
@@ -141,7 +141,7 @@ public static class MenuBoard
         return group;
     }
 
-    /// <summary>Verschiebt eine Gruppe der obersten Ebene um eine Position unter den Gruppen nach links (-1) oder rechts (+1).</summary>
+    /// <summary>Moves a top-level group one position among the groups to the left (-1) or right (+1).</summary>
     public static void MoveGroup(AppConfig config, MenuEntry group, int direction)
     {
         var groups = config.Menu.Where(e => e.Group is not null).ToList();

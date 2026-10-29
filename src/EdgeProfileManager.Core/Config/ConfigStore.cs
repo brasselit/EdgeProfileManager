@@ -4,7 +4,7 @@ using EdgeProfileManager.Core.Edge;
 
 namespace EdgeProfileManager.Core.Config;
 
-/// <summary>Lädt und speichert config.json und meldet Änderungen an der Datei.</summary>
+/// <summary>Loads and saves config.json and reports changes to the file.</summary>
 public sealed class ConfigStore : IDisposable
 {
     public static readonly JsonSerializerOptions JsonOptions = new()
@@ -30,15 +30,15 @@ public sealed class ConfigStore : IDisposable
     public string Path { get; }
 
     /// <summary>
-    /// Wird nach einer Änderung an der Datei ausgelöst (entprellt, auf einem Threadpool-Thread);
-    /// nicht für Änderungen, die <see cref="Save"/> selbst geschrieben hat.
+    /// Raised after the file changes (debounced, on a thread pool thread);
+    /// not for changes written by <see cref="Save"/> itself.
     /// </summary>
     public event Action? Changed;
 
     public static AppConfig Parse(string json) =>
-        JsonSerializer.Deserialize<AppConfig>(json, JsonOptions) ?? throw new JsonException("Konfiguration ist leer.");
+        JsonSerializer.Deserialize<AppConfig>(json, JsonOptions) ?? throw new JsonException("Configuration is empty.");
 
-    /// <summary>Lädt die Konfiguration. Fehlt die Datei, wird eine Standardkonfiguration erzeugt und gespeichert.</summary>
+    /// <summary>Loads the configuration. If the file is missing, a default configuration is created and saved.</summary>
     public AppConfig LoadOrCreate(Func<AppConfig> createDefault)
     {
         if (!File.Exists(Path))
@@ -82,7 +82,7 @@ public sealed class ConfigStore : IDisposable
         catch (IOException) { return false; }
     }
 
-    /// <summary>Standard: eine Gruppe pro Edge-Channel mit allen Profilen.</summary>
+    /// <summary>Default: one group per Edge channel containing all its profiles.</summary>
     public static AppConfig CreateDefault(IEnumerable<EdgeProfile> profiles) => new()
     {
         Menu = profiles

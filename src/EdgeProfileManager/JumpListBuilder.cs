@@ -5,12 +5,12 @@ using EdgeProfileManager.Core.Edge;
 namespace EdgeProfileManager;
 
 /// <summary>
-/// Schreibt die Profile in die Jump List der angehefteten Taskbar-Schaltfläche.
-/// Jump Lists kennen keine Untermenüs; verschachtelte Gruppen werden zu "Gruppe › Untergruppe".
+/// Writes the profiles to the jump list of the pinned taskbar button.
+/// Jump lists have no submenus; nested groups become "Group › Subgroup".
 /// </summary>
 public sealed class JumpListBuilder(EdgeEnvironment environment)
 {
-    private const string TopLevelCategory = "Profile";
+    private const string TopLevelCategory = "Profiles";
     private string? _signature;
 
     public void Update(ResolvedMenu menu, JumpListStyle style)
@@ -18,24 +18,24 @@ public sealed class JumpListBuilder(EdgeEnvironment environment)
         var tasks = MenuResolver.Flatten(menu.Nodes)
             .Where(entry => entry.Node.Settings.JumpList)
             .Select(entry => CreateTask(entry.Groups, entry.Node, style))
-            // Windows zeigt eigene Kategorien in umgekehrter Reihenfolge an (zuletzt angelegte oben);
-            // deshalb Kategorien umkehren, Einträge innerhalb einer Kategorie aber in Menüreihenfolge lassen.
+            // Windows shows custom categories in reverse order (most recently added on top);
+            // so reverse the categories but keep the entries within a category in menu order.
             .GroupBy(task => task.CustomCategory)
             .Reverse()
             .SelectMany(group => group)
             .ToList();
 
-        // Jump List nur neu schreiben, wenn sich etwas geändert hat.
+        // Only rewrite the jump list if something has changed.
         var signature = style + "\n" + string.Join("\n", tasks.Select(t => $"{t.CustomCategory}|{t.Title}|{t.Arguments}|{t.IconResourcePath}"));
         if (signature == _signature) return;
         _signature = signature;
 
         var jumpList = new JumpList(tasks, false, false);
-        jumpList.JumpItemsRejected += (_, e) => AppLog.Write($"Jump List: {e.RejectedItems.Count} Einträge abgelehnt.");
-        jumpList.JumpItemsRemovedByUser += (_, e) => AppLog.Write($"Jump List: {e.RemovedItems.Count} Einträge vom Benutzer entfernt.");
+        jumpList.JumpItemsRejected += (_, e) => AppLog.Write($"Jump list: {e.RejectedItems.Count} entries rejected.");
+        jumpList.JumpItemsRemovedByUser += (_, e) => AppLog.Write($"Jump list: {e.RemovedItems.Count} entries removed by the user.");
         JumpList.SetJumpList(System.Windows.Application.Current, jumpList);
         jumpList.Apply();
-        AppLog.Write($"Jump List aktualisiert ({tasks.Count} Profile, Stil {style}).");
+        AppLog.Write($"Jump list updated ({tasks.Count} profiles, style {style}).");
     }
 
     private JumpTask CreateTask(IReadOnlyList<string> groups, ProfileNode node, JumpListStyle style)

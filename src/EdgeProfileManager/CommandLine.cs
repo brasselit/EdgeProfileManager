@@ -3,8 +3,8 @@ namespace EdgeProfileManager;
 public enum CommandKind { ShowMenu, Background, Open, Manage, DumpWindows, Reload, Exit, Invalid }
 
 /// <summary>
-/// Befehlszeile. Ohne Argumente (z.B. Klick auf die angeheftete Taskbar-Schaltfläche) wird das
-/// Profilmenü an der Mausposition angezeigt.
+/// Command line. Without arguments (e.g. a click on the pinned taskbar button) the profile menu
+/// is shown at the mouse position.
 /// </summary>
 public sealed record CommandLine(CommandKind Kind, string? ProfileKey = null, bool NewWindow = false, string? Error = null)
 {
@@ -19,7 +19,7 @@ public sealed record CommandLine(CommandKind Kind, string? ProfileKey = null, bo
             switch (args[i].ToLowerInvariant())
             {
                 case "--open":
-                    if (i + 1 >= args.Count) return Invalid("--open erwartet eine Profilreferenz wie \"Stable/Profile 1\".");
+                    if (i + 1 >= args.Count) return Invalid("--open expects a profile reference such as \"Stable/Profile 1\".");
                     kind = CommandKind.Open;
                     profile = args[++i];
                     break;
@@ -30,7 +30,7 @@ public sealed record CommandLine(CommandKind Kind, string? ProfileKey = null, bo
                 case "--dump-windows": kind = CommandKind.DumpWindows; break;
                 case "--reload": kind = CommandKind.Reload; break;
                 case "--exit": kind = CommandKind.Exit; break;
-                default: return Invalid($"Unbekanntes Argument: {args[i]}");
+                default: return Invalid($"Unknown argument: {args[i]}");
             }
         }
         return new(kind, profile, newWindow);
@@ -40,11 +40,11 @@ public sealed record CommandLine(CommandKind Kind, string? ProfileKey = null, bo
 
     public static string Usage =>
         """
-        EdgeProfileManager.exe                     Profilmenü anzeigen (startet bei Bedarf im Tray)
-        EdgeProfileManager.exe --background        Nur im Tray starten (Autostart)
+        EdgeProfileManager.exe                     Show the profile menu (starts in the tray if needed)
+        EdgeProfileManager.exe --background        Start in the tray only (autostart)
         EdgeProfileManager.exe --open "Stable/Profile 1" [--new-window]
-        EdgeProfileManager.exe --manage            Verwaltungsfenster öffnen
-        EdgeProfileManager.exe --dump-windows      Edge-Fenster mit Profil und AUMID auflisten
+        EdgeProfileManager.exe --manage            Open the management window
+        EdgeProfileManager.exe --dump-windows      List Edge windows with profile and AUMID
         EdgeProfileManager.exe --reload | --exit
         """;
 }

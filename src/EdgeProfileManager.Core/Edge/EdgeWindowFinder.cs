@@ -4,10 +4,10 @@ namespace EdgeProfileManager.Core.Edge;
 
 public sealed record EdgeWindow(nint Handle, uint ProcessId, EdgeChannel Channel, string Title, string? AppUserModelId, bool IsCloaked);
 
-/// <summary>Findet die Browserfenster aller Edge-Channels und ordnet sie Profilen zu.</summary>
+/// <summary>Finds the browser windows of all Edge channels and maps them to profiles.</summary>
 public sealed class EdgeWindowFinder
 {
-    /// <summary>Alle Edge-Browserfenster in Z-Reihenfolge (zuletzt aktives zuerst).</summary>
+    /// <summary>All Edge browser windows in Z order (most recently active first).</summary>
     public IReadOnlyList<EdgeWindow> GetWindows()
     {
         var pathCache = new Dictionary<uint, EdgeChannel?>();
@@ -29,7 +29,7 @@ public sealed class EdgeWindowFinder
             }
             if (channel is null) return true;
             var aumid = Native.GetAppUserModelId(hwnd);
-            // Installierte Web-Apps (PWAs) haben eine eigene AUMID mit "_crx_" und sind keine Browserfenster.
+            // Installed web apps (PWAs) have their own AUMID containing "_crx_" and are not browser windows.
             if (aumid?.Contains("_crx_", StringComparison.OrdinalIgnoreCase) == true) return true;
             windows.Add(new EdgeWindow(hwnd, pid, channel.Value, title, aumid, Native.IsCloaked(hwnd)));
             return true;
@@ -42,16 +42,16 @@ public sealed class EdgeWindowFinder
 }
 
 /// <summary>
-/// Zuordnung Fenster → Profil. Primär über die AppUserModelID, die Edge pro Profil setzt:
-/// "MSEdge" bzw. "MSEdgeBeta" für Default, "MSEdge.UserData.Profile1" für "Profile 1".
-/// Fallback über den Fenstertitel "... – {Profilname} – Microsoft Edge".
+/// Maps windows to profiles. Primarily via the AppUserModelID that Edge sets per profile:
+/// "MSEdge" or "MSEdgeBeta" for Default, "MSEdge.UserData.Profile1" for "Profile 1".
+/// Falls back to the window title "... – {profile name} – Microsoft Edge".
 /// </summary>
 public static class ProfileWindowMatcher
 {
     public static bool Matches(EdgeWindow window, EdgeProfile profile, IReadOnlyList<EdgeProfile> channelProfiles) =>
         window.Channel == profile.Channel && FindProfile(window, channelProfiles)?.Folder == profile.Folder;
 
-    /// <summary>Profil eines Fensters; <paramref name="profiles"/> darf Profile aller Channels enthalten.</summary>
+    /// <summary>Profile of a window; <paramref name="profiles"/> may contain profiles of all channels.</summary>
     public static EdgeProfile? FindProfile(EdgeWindow window, IReadOnlyList<EdgeProfile> profiles)
     {
         var channelProfiles = profiles.Where(p => p.Channel == window.Channel).ToList();
@@ -63,7 +63,7 @@ public static class ProfileWindowMatcher
         if (string.IsNullOrEmpty(aumid)) return null;
         const string marker = ".UserData.";
         var index = aumid.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
-        // Kein Profil-Suffix → Default-Profil, sofern vorhanden.
+        // No profile suffix → Default profile, if present.
         if (index < 0) return channelProfiles.FirstOrDefault(p => p.Folder == "Default");
         var suffix = aumid[(index + marker.Length)..];
         return channelProfiles.FirstOrDefault(p => p.Folder.Replace(" ", string.Empty).Equals(suffix, StringComparison.OrdinalIgnoreCase));
@@ -71,8 +71,8 @@ public static class ProfileWindowMatcher
 
     internal static EdgeProfile? MatchByTitle(string title, IReadOnlyList<EdgeProfile> channelProfiles)
     {
-        // Edge trennt mit " – " (Halbgeviertstrich) und schreibt "Microsoft​ Edge";
-        // deshalb beide Trennzeichen zulassen und nur auf "Microsoft" prüfen.
+        // Edge separates with " – " (en dash) and writes "Microsoft​ Edge" (with a zero-width space);
+        // so accept both separators and only check for "Microsoft".
         return channelProfiles
             .OrderByDescending(p => p.Name.Length)
             .FirstOrDefault(p =>

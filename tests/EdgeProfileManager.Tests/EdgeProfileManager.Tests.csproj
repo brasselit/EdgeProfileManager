@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Bewusst ohne NuGet-Pakete (auf dem Entwicklungsrechner ist keine Paketquelle konfiguriert).
-       Ausführen siehe README (dotnet run im Testprojekt). -->
+  <!-- Intentionally without NuGet packages; uses a minimal built-in test runner.
+       Run with "dotnet run" in this project (see README). -->
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>

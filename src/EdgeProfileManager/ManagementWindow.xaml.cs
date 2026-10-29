@@ -15,13 +15,13 @@ using EdgeProfileManager.Dialogs;
 namespace EdgeProfileManager;
 
 /// <summary>
-/// Profile und Menü in einem Fenster: Board mit einer Spalte pro Menügruppe, rechts die Details
-/// der gewählten Karte, getrennt in Edge-Profil (ändert Edge) und Menü-Eintrag (ändert config.json).
+/// Profiles and menu in one window: a board with one column per menu group, on the right the details
+/// of the selected card, split into Edge profile (changes Edge) and menu entry (changes config.json).
 /// </summary>
 public partial class ManagementWindow : Window
 {
-    private const string NewProfile = "Neues Profil";
-    private const string NoDesktop = "— kein Desktop";
+    private const string NewProfile = "New profile";
+    private const string NoDesktop = "— no desktop";
     private const string DragFormat = "EdgeProfileManager.BoardCard";
     private const double LaneWidth = 230;
 
@@ -29,7 +29,7 @@ public partial class ManagementWindow : Window
         Line = Hex("#DDE4E6"), LaneBackground = Hex("#E6ECEE"), DropBackground = Hex("#D3E8EA"), Neutral = Hex("#E3EAEC"),
         Running = Hex("#1E6B3A"), Warning = Hex("#A4262C");
 
-    private static readonly string[] ModeLabels = ["Standard", "Zum Desktop wechseln", "Hierher holen", "Auf zugewiesenen Desktop verschieben"];
+    private static readonly string[] ModeLabels = ["Default", "Switch to desktop", "Bring here", "Move to assigned desktop"];
 
     private readonly App _app;
     private readonly List<(BoardCard Card, Border View)> _cardViews = [];
@@ -70,7 +70,7 @@ public partial class ManagementWindow : Window
         {
             if (!_busy) return;
             e.Cancel = true;
-            MessageBox.Show(this, "Bitte die laufende Aktion abwarten.", Title, MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, "Please wait for the running action to finish.", Title, MessageBoxButton.OK, MessageBoxImage.Information);
         };
         Closed += (_, _) =>
         {
@@ -91,7 +91,7 @@ public partial class ManagementWindow : Window
 
     private void OnStateChanged()
     {
-        // Während eines Drags nicht neu aufbauen; das Board folgt nach dem Drop.
+        // Do not rebuild during a drag; the board catches up after the drop.
         if (_dragCard is null) RebuildBoard();
     }
 
@@ -108,7 +108,7 @@ public partial class ManagementWindow : Window
 
     private void BuildFilters()
     {
-        var all = new ToggleButton { Content = "Alle Instanzen", Style = (Style)Resources["FilterChip"], IsChecked = true };
+        var all = new ToggleButton { Content = "All channels", Style = (Style)Resources["FilterChip"], IsChecked = true };
         Filters.Children.Add(all);
         foreach (var channel in EdgeChannels.All)
             Filters.Children.Add(new ToggleButton { Content = channel.ToString(), Style = (Style)Resources["FilterChip"], Tag = channel });
@@ -128,7 +128,7 @@ public partial class ManagementWindow : Window
         _lanes = MenuBoard.Build(_app.Config, _app.Profiles);
         _groups = MenuBoard.GetGroups(_app.Config);
         var cards = _lanes.SelectMany(l => l.Items.OfType<BoardCard>()).ToList();
-        // Auswahl behalten: zuerst derselbe Menüeintrag, sonst dasselbe Profil (z.B. nach dem Neuladen der Datei).
+        // Keep the selection: first the same menu entry, otherwise the same profile (e.g. after reloading the file).
         _selected = _selected is null ? null
             : cards.FirstOrDefault(c => c.Entry is not null && ReferenceEquals(c.Entry, _selected.Entry))
               ?? cards.FirstOrDefault(c => string.Equals(c.Reference, _selected.Reference, StringComparison.OrdinalIgnoreCase));
@@ -172,8 +172,8 @@ public partial class ManagementWindow : Window
             TextTrimming = TextTrimming.CharacterEllipsis,
             ToolTip = lane.Kind switch
             {
-                LaneKind.Root => "Profile direkt im Tray-Menü, ohne Gruppe (unterhalb der Gruppen).",
-                LaneKind.Unassigned => "Profile, die nicht im Menü stehen. Hierher ziehen = aus dem Menü entfernen.",
+                LaneKind.Root => "Profiles directly in the tray menu, without a group (below the groups).",
+                LaneKind.Unassigned => "Profiles not in the menu. Drag here = remove from menu.",
                 _ => null,
             },
         });
@@ -207,7 +207,7 @@ public partial class ManagementWindow : Window
         {
             items.Children.Add(new TextBlock
             {
-                Text = unassigned ? "Alle Profile stehen im Menü." : "Profile hierher ziehen",
+                Text = unassigned ? "All profiles are in the menu." : "Drag profiles here",
                 Foreground = Muted,
                 FontSize = 12,
                 HorizontalAlignment = HorizontalAlignment.Center,
@@ -240,17 +240,17 @@ public partial class ManagementWindow : Window
             Height = 24,
             Background = Brushes.Transparent,
             BorderBrush = Brushes.Transparent,
-            ToolTip = "Gruppe bearbeiten",
+            ToolTip = "Edit group",
         };
         DockPanel.SetDock(button, Dock.Right);
         var menu = new ContextMenu();
-        AddMenuItem(menu, "Umbenennen …", () => RenameGroup(lane.Group!));
-        AddMenuItem(menu, "Nach links", () => _app.UpdateConfig(c => MenuBoard.MoveGroup(c, lane.Group!, -1)));
-        AddMenuItem(menu, "Nach rechts", () => _app.UpdateConfig(c => MenuBoard.MoveGroup(c, lane.Group!, +1)));
-        AddMenuItem(menu, "Trennlinie anhängen", () => _app.UpdateConfig(c => MenuBoard.ChildrenOf(c, lane.Group).Add(new MenuEntry { Separator = true })));
-        AddMenuItem(menu, "Untergruppe anlegen …", () => AddGroup(lane.Group));
+        AddMenuItem(menu, "Rename …", () => RenameGroup(lane.Group!));
+        AddMenuItem(menu, "Move left", () => _app.UpdateConfig(c => MenuBoard.MoveGroup(c, lane.Group!, -1)));
+        AddMenuItem(menu, "Move right", () => _app.UpdateConfig(c => MenuBoard.MoveGroup(c, lane.Group!, +1)));
+        AddMenuItem(menu, "Add separator", () => _app.UpdateConfig(c => MenuBoard.ChildrenOf(c, lane.Group).Add(new MenuEntry { Separator = true })));
+        AddMenuItem(menu, "Add subgroup …", () => AddGroup(lane.Group));
         menu.Items.Add(new Separator());
-        AddMenuItem(menu, "Gruppe löschen …", () => DeleteGroup(lane));
+        AddMenuItem(menu, "Delete group …", () => DeleteGroup(lane));
         button.Click += (_, _) =>
         {
             menu.PlacementTarget = button;
@@ -286,7 +286,7 @@ public partial class ManagementWindow : Window
         });
         titles.Children.Add(new TextBlock
         {
-            Text = profile is null ? $"{card.Reference} – nicht gefunden" : $"Edge {profile.Channel}",
+            Text = profile is null ? $"{card.Reference} – not found" : $"Edge {profile.Channel}",
             FontSize = 11,
             Foreground = Muted,
             TextTrimming = TextTrimming.CharacterEllipsis,
@@ -296,8 +296,8 @@ public partial class ManagementWindow : Window
 
         var tags = new WrapPanel { Margin = new Thickness(0, 6, 0, 0) };
         if (card.Entry?.Desktop is { } desktop) tags.Children.Add(CreateTag($"▣ {desktop}", Hex("#E1EEF0"), Hex("#0F4F55")));
-        if (isRunning) tags.Children.Add(CreateTag("● läuft", Hex("#E3F1E7"), Running));
-        if (card.Entry?.JumpList == false) tags.Children.Add(CreateTag("ohne Jump List", Neutral, Hex("#2E4247")));
+        if (isRunning) tags.Children.Add(CreateTag("● running", Hex("#E3F1E7"), Running));
+        if (card.Entry?.JumpList == false) tags.Children.Add(CreateTag("no Jump List", Neutral, Hex("#2E4247")));
         if (tags.Children.Count > 0) body.Children.Add(tags);
 
         var content = new DockPanel();
@@ -315,7 +315,7 @@ public partial class ManagementWindow : Window
             Child = content,
             Cursor = Cursors.Hand,
             AllowDrop = true,
-            ToolTip = profile is null ? null : $"{profile.Name}\n{profile.Key}{(profile.User is null ? "" : $"\n{profile.User}")}\nDoppelklick öffnet das Profil.",
+            ToolTip = profile is null ? null : $"{profile.Name}\n{profile.Key}{(profile.User is null ? "" : $"\n{profile.User}")}\nDouble-click opens the profile.",
         };
         _cardViews.Add((card, view));
 
@@ -457,12 +457,12 @@ public partial class ManagementWindow : Window
         }
     }
 
-    // ---------- Gruppen ----------
+    // ---------- Groups ----------
 
     private void AddGroup(MenuEntry? parent)
     {
-        var values = FieldsDialog.Show(this, parent is null ? "Neue Gruppe" : $"Untergruppe in „{parent.Group}“",
-            new Field("Name", "Name der Gruppe") { Required = true });
+        var values = FieldsDialog.Show(this, parent is null ? "New group" : $"Subgroup in “{parent.Group}”",
+            new Field("Name", "Group name") { Required = true });
         if (values is null) return;
         _app.UpdateConfig(c =>
         {
@@ -473,14 +473,14 @@ public partial class ManagementWindow : Window
 
     private void RenameGroup(MenuEntry group)
     {
-        var values = FieldsDialog.Show(this, "Gruppe umbenennen", new Field("Name", "Name der Gruppe") { Value = group.Group, Required = true });
+        var values = FieldsDialog.Show(this, "Rename group", new Field("Name", "Group name") { Value = group.Group, Required = true });
         if (values is not null) _app.UpdateConfig(_ => group.Group = values["Name"]);
     }
 
     private void DeleteGroup(BoardLane lane)
     {
         var count = lane.Items.OfType<BoardCard>().Count();
-        if (count > 0 && !Confirm($"Gruppe „{lane.Title}“ löschen? Ihre {count} Profil(e) werden aus dem Menü entfernt (die Edge-Profile bleiben erhalten).")) return;
+        if (count > 0 && !Confirm($"Delete group “{lane.Title}”? Its {count} profile(s) will be removed from the menu (the Edge profiles are kept).")) return;
         _app.UpdateConfig(c => MenuBoard.Remove(c, lane.Group!));
     }
 
@@ -522,12 +522,12 @@ public partial class ManagementWindow : Window
         RemoveFromMenuButton.Click += (_, _) => EditEntry((c, entry) => MenuBoard.Remove(c, entry));
         AddToMenuButton.Click += (_, _) => Invoke(() =>
         {
-            var card = _selected ?? throw new InvalidOperationException("Bitte zuerst eine Karte auswählen.");
+            var card = _selected ?? throw new InvalidOperationException("Please select a card first.");
             _app.UpdateConfig(c => MenuBoard.Add(MenuBoard.ChildrenOf(c, GroupAt(AddToGroupCombo.SelectedIndex)), card.Reference, null));
         });
     }
 
-    /// <summary>Index 0 = Hauptmenü, danach die Gruppen in Menüreihenfolge.</summary>
+    /// <summary>Index 0 = main menu, followed by the groups in menu order.</summary>
     private MenuEntry? GroupAt(int index) => index <= 0 || index > _groups.Count ? null : _groups[index - 1].Group;
 
     private List<string> GroupLabels() => [BoardLane.RootTitle, .. _groups.Select(g => g.Path)];
@@ -545,7 +545,7 @@ public partial class ManagementWindow : Window
                 DetailSubtitle.Text = "";
                 return;
             }
-            DetailSubtitle.Text = card.Entry is null ? "nicht im Menü" : $"Karte „{card.Title}“";
+            DetailSubtitle.Text = card.Entry is null ? "not in menu" : $"Card “{card.Title}”";
             ShowProfile(card);
 
             InMenuPanel.Visibility = card.Entry is null ? Visibility.Collapsed : Visibility.Visible;
@@ -558,7 +558,7 @@ public partial class ManagementWindow : Window
                 LabelBox.Text = entry.Label ?? "";
                 ShowDesktop(entry.Desktop);
                 ModeCombo.SelectedIndex = entry.DesktopMode is { } mode ? (int)mode + 1 : 0;
-                ModeCombo.ToolTip = $"Standard: {(entry.Desktop is not null ? ModeLabels[3] : ModeLabels[(int)_app.Config.DefaultDesktopMode + 1])}";
+                ModeCombo.ToolTip = $"Default: {(entry.Desktop is not null ? ModeLabels[3] : ModeLabels[(int)_app.Config.DefaultDesktopMode + 1])}";
                 JumpListCheck.IsChecked = entry.JumpList != false;
             }
             else
@@ -582,13 +582,13 @@ public partial class ManagementWindow : Window
         AvatarImage.Source = LoadImage(profile?.IconPath);
         AvatarInitials.Text = AvatarImage.Source is null ? Initials(profile?.Name ?? card.Title) : "";
         AvatarInitials.Foreground = color is null ? Hex("#2E4247") : Brushes.White;
-        ProfileNameText.Text = profile?.Name ?? "Profil nicht gefunden";
+        ProfileNameText.Text = profile?.Name ?? "Profile not found";
         ProfileUserText.Text = profile?.User ?? (profile is null ? card.Reference : "");
         var running = profile is not null && _running.Contains(profile.Key);
-        RunningText.Text = profile is null ? "" : running ? "● läuft" : "geschlossen";
+        RunningText.Text = profile is null ? "" : running ? "● running" : "closed";
         RunningText.Foreground = running ? Running : Muted;
         ColorSwatch.Fill = color ?? Brushes.Transparent;
-        ColorText.Text = profile?.Color is { } value ? $"#{value:X6}" : "keine";
+        ColorText.Text = profile?.Color is { } value ? $"#{value:X6}" : "none";
         ChannelText.Text = profile is null ? "–" : $"Edge {profile.Channel}";
         FolderText.Text = profile?.Folder ?? "";
         PathText.Text = profile?.Path ?? "";
@@ -609,7 +609,7 @@ public partial class ManagementWindow : Window
         };
     }
 
-    /// <summary>"2 · Kunden" oder "2" → Nummer 2; anderer Text → Name; leer → kein Desktop.</summary>
+    /// <summary>"2 · Customers" or "2" → number 2; other text → name; empty → no desktop.</summary>
     private static DesktopTarget? ParseDesktop(string text)
     {
         text = text.Trim();
@@ -618,7 +618,7 @@ public partial class ManagementWindow : Window
         return number.Success ? new DesktopTarget(int.Parse(number.Groups[1].Value), null) : new DesktopTarget(null, text);
     }
 
-    /// <summary>Leer oder gleich dem Edge-Namen = kein eigenes Label.</summary>
+    /// <summary>Empty or equal to the Edge name = no custom label.</summary>
     private void ApplyLabel()
     {
         var label = LabelBox.Text.Trim();
@@ -632,7 +632,7 @@ public partial class ManagementWindow : Window
         EditEntry((_, entry) => entry.Desktop = target, onlyIfChanged: () => target != _selected?.Entry?.Desktop);
     }
 
-    /// <summary>Ändert den Menüeintrag der gewählten Karte und speichert die Konfiguration.</summary>
+    /// <summary>Changes the menu entry of the selected card and saves the configuration.</summary>
     private void EditEntry(Action<AppConfig, MenuEntry> change, Func<bool>? onlyIfChanged = null)
     {
         if (_loadingDetail || _selected?.Entry is not { } entry) return;
@@ -642,16 +642,16 @@ public partial class ManagementWindow : Window
 
     private void EditSettings()
     {
-        const string yes = "Ja", no = "Nein";
+        const string yes = "Yes", no = "No";
         var config = _app.Config;
-        var values = FieldsDialog.Show(this, "Einstellungen",
-            new Field("Mode", "Wenn ein Fenster schon offen ist (Standard)", FieldType.Combo) { Options = ModeLabels[1..], Value = ModeLabels[(int)config.DefaultDesktopMode + 1] },
-            new Field("Unassigned", "Nicht zugeordnete Profile im Tray-Menü zeigen", FieldType.Combo) { Options = [yes, no], Value = config.ShowUnassigned ? yes : no },
-            new Field("JumpUnassigned", "… und in der Jump List", FieldType.Combo) { Options = [yes, no], Value = config.JumpListUnassigned ? yes : no },
+        var values = FieldsDialog.Show(this, "Settings",
+            new Field("Mode", "If a window is already open (default)", FieldType.Combo) { Options = ModeLabels[1..], Value = ModeLabels[(int)config.DefaultDesktopMode + 1] },
+            new Field("Unassigned", "Show unassigned profiles in tray menu", FieldType.Combo) { Options = [yes, no], Value = config.ShowUnassigned ? yes : no },
+            new Field("JumpUnassigned", "… and in the Jump List", FieldType.Combo) { Options = [yes, no], Value = config.JumpListUnassigned ? yes : no },
             new Field("JumpStyle", "Jump List", FieldType.Combo)
             {
-                Options = ["Kategorien pro Gruppe (max. ca. 10 Einträge)", "Aufgaben (alle Profile, ungruppiert)"],
-                Value = config.JumpListStyle == JumpListStyle.Categories ? "Kategorien pro Gruppe (max. ca. 10 Einträge)" : "Aufgaben (alle Profile, ungruppiert)",
+                Options = ["Categories per group (max. ~10 entries)", "Tasks (all profiles, ungrouped)"],
+                Value = config.JumpListStyle == JumpListStyle.Categories ? "Categories per group (max. ~10 entries)" : "Tasks (all profiles, ungrouped)",
             });
         if (values is null) return;
         _app.UpdateConfig(c =>
@@ -659,7 +659,7 @@ public partial class ManagementWindow : Window
             c.DefaultDesktopMode = (DesktopMode)(Array.IndexOf(ModeLabels, values["Mode"]) - 1);
             c.ShowUnassigned = values["Unassigned"] == yes;
             c.JumpListUnassigned = values["JumpUnassigned"] == yes;
-            c.JumpListStyle = values["JumpStyle"].StartsWith("Kategorien", StringComparison.Ordinal) ? JumpListStyle.Categories : JumpListStyle.Tasks;
+            c.JumpListStyle = values["JumpStyle"].StartsWith("Categories", StringComparison.Ordinal) ? JumpListStyle.Categories : JumpListStyle.Tasks;
         });
     }
 
@@ -698,16 +698,16 @@ public partial class ManagementWindow : Window
         try { await action(); }
         catch (Exception ex)
         {
-            Report($"Fehler: {ex.Message}");
-            MessageBox.Show(this, ex.Message, "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+            Report($"Error: {ex.Message}");
+            MessageBox.Show(this, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
     private void Invoke(Action action) => Invoke(() => { action(); return Task.CompletedTask; });
 
-    // ---------- Edge-Aktionen ----------
+    // ---------- Edge actions ----------
 
-    private EdgeProfile SelectedProfile => _selected?.Profile ?? throw new InvalidOperationException("Bitte zuerst ein vorhandenes Profil auswählen.");
+    private EdgeProfile SelectedProfile => _selected?.Profile ?? throw new InvalidOperationException("Please select an existing profile first.");
 
     private EdgeChannel ActiveChannel => _selected?.Profile?.Channel ?? _filter ?? EdgeChannels.All.FirstOrDefault(IsInstalled);
 
@@ -716,55 +716,55 @@ public partial class ManagementWindow : Window
     private async Task CreateAsync()
     {
         var channels = ChannelsStartingWith(ActiveChannel);
-        var values = FieldsDialog.Show(this, "Neues Profil",
-            new Field("Channel", "Instanz", FieldType.Combo) { Options = channels },
-            new Field("Name", "Profilname") { Required = true },
-            new Field("User", "E-Mail") { Required = true },
-            new Field("Avatar", "Avatar (optional, PNG)", FieldType.File) { Filter = "PNG-Bild|*.png" });
+        var values = FieldsDialog.Show(this, "New profile",
+            new Field("Channel", "Channel", FieldType.Combo) { Options = channels },
+            new Field("Name", "Profile name") { Required = true },
+            new Field("User", "Email") { Required = true },
+            new Field("Avatar", "Avatar (optional, PNG)", FieldType.File) { Filter = "PNG image|*.png" });
         if (values is null) return;
         var channel = Enum.Parse<EdgeChannel>(values["Channel"]);
-        var created = await RunAsync("Profil erstellen", m => m.Create(channel, values["Name"], values["User"], values["Avatar"]));
+        var created = await RunAsync("Create profile", m => m.Create(channel, values["Name"], values["User"], values["Avatar"]));
         if (created is not null) SelectProfile(created.Key);
     }
 
     private async Task RenameAsync()
     {
         var selected = SelectedProfile;
-        var values = FieldsDialog.Show(this, "Profil umbenennen", new Field("Name", "Neuer Name in Edge") { Value = selected.Name, Required = true });
-        if (values is not null) await RunAsync("Profil umbenennen", m => m.Rename(selected.Channel, selected.Folder, values["Name"]));
+        var values = FieldsDialog.Show(this, "Rename profile", new Field("Name", "New name in Edge") { Value = selected.Name, Required = true });
+        if (values is not null) await RunAsync("Rename profile", m => m.Rename(selected.Channel, selected.Folder, values["Name"]));
     }
 
     private async Task AvatarAsync()
     {
         var selected = SelectedProfile;
-        var values = FieldsDialog.Show(this, "Profilavatar",
-            new Field("Avatar", "PNG-Datei", FieldType.File) { Filter = "PNG-Bild|*.png", Required = true });
-        if (values is not null) await RunAsync("Avatar setzen", m => m.SetAvatar(selected.Channel, selected.Folder, values["Avatar"]));
+        var values = FieldsDialog.Show(this, "Profile avatar",
+            new Field("Avatar", "PNG file", FieldType.File) { Filter = "PNG image|*.png", Required = true });
+        if (values is not null) await RunAsync("Set avatar", m => m.SetAvatar(selected.Channel, selected.Folder, values["Avatar"]));
     }
 
     private async Task ColorAsync()
     {
         var selected = SelectedProfile;
         if (ProfileColorDialog.Show(this, selected.Name, selected.Color) is { } choice)
-            await RunAsync(choice.Rgb is null ? "Farbe entfernen" : "Farbe setzen", m => m.SetColor(selected.Channel, selected.Folder, choice.Rgb));
+            await RunAsync(choice.Rgb is null ? "Remove color" : "Set color", m => m.SetColor(selected.Channel, selected.Folder, choice.Rgb));
     }
 
     private async Task DeleteAsync()
     {
         var selected = SelectedProfile;
-        if (!Confirm($"Profil '{selected.Name}' ({selected.Channel} / {selected.Folder}) samt allen lokalen Daten dauerhaft löschen?")) return;
-        await RunAsync("Profil löschen", m => m.Delete(selected.Channel, selected.Folder));
+        if (!Confirm($"Permanently delete profile '{selected.Name}' ({selected.Channel} / {selected.Folder}) including all local data?")) return;
+        await RunAsync("Delete profile", m => m.Delete(selected.Channel, selected.Folder));
     }
 
     private async Task BackupAsync() => await BackupAsync(singleOnly: false);
 
     private async Task BackupAsync(bool singleOnly)
     {
-        const string single = "Ausgewähltes Profil", instance = "Instanz des ausgewählten Profils", all = "Alle Instanzen";
+        const string single = "Selected profile", instance = "Channel of selected profile", all = "All channels";
         var fields = new List<Field>();
-        if (!singleOnly) fields.Add(new Field("Scope", "Umfang", FieldType.Combo) { Options = _selected?.Profile is null ? [all] : [all, instance, single] });
-        fields.Add(new Field("Path", "Backup-Ordner", FieldType.Folder) { Value = Environment.ExpandEnvironmentVariables(_app.Config.BackupPath), Required = true });
-        var values = FieldsDialog.Show(this, singleOnly ? $"Backup von „{SelectedProfile.Name}“" : "Backup erstellen", [.. fields]);
+        if (!singleOnly) fields.Add(new Field("Scope", "Scope", FieldType.Combo) { Options = _selected?.Profile is null ? [all] : [all, instance, single] });
+        fields.Add(new Field("Path", "Backup folder", FieldType.Folder) { Value = Environment.ExpandEnvironmentVariables(_app.Config.BackupPath), Required = true });
+        var values = FieldsDialog.Show(this, singleOnly ? $"Backup of “{SelectedProfile.Name}”" : "Create backup", [.. fields]);
         if (values is null) return;
 
         var path = values["Path"];
@@ -775,11 +775,11 @@ public partial class ManagementWindow : Window
             instance => _app.Discovery.GetProfiles(SelectedProfile.Channel),
             _ => _app.Discovery.GetProfiles(),
         };
-        if (targets.Count == 0) throw new InvalidOperationException("Keine Profile für das Backup gefunden.");
+        if (targets.Count == 0) throw new InvalidOperationException("No profiles found to back up.");
         var options = Options;
         var perChannel = scope != single;
         _app.UpdateConfig(c => c.BackupPath = path);
-        await RunAsync("Backup erstellen", m =>
+        await RunAsync("Create backup", m =>
         {
             foreach (var p in targets) m.Backup(p.Channel, p.Folder, perChannel ? Path.Combine(path, p.Channel.ToString()) : path, options);
         });
@@ -787,14 +787,14 @@ public partial class ManagementWindow : Window
 
     private async Task RestoreAsync()
     {
-        var values = FieldsDialog.Show(this, "Backup wiederherstellen",
-            new Field("Zip", "Backup-ZIP", FieldType.File) { Filter = "Edge-Backup|*.zip", Required = true },
-            new Field("Channel", "Zielinstanz", FieldType.Combo) { Options = ChannelsStartingWith(ActiveChannel) });
+        var values = FieldsDialog.Show(this, "Restore backup",
+            new Field("Zip", "Backup ZIP", FieldType.File) { Filter = "Edge backup|*.zip", Required = true },
+            new Field("Channel", "Target channel", FieldType.Combo) { Options = ChannelsStartingWith(ActiveChannel) });
         if (values is null) return;
         var channel = Enum.Parse<EdgeChannel>(values["Channel"]);
         var options = Options;
-        if (SelectTargetFolder(channel, options, "Backup wiederherstellen") is not { } target) return;
-        var folder = await RunAsync("Backup wiederherstellen", m =>
+        if (SelectTargetFolder(channel, options, "Restore backup") is not { } target) return;
+        var folder = await RunAsync("Restore backup", m =>
             m.Restore(channel, values["Zip"], target.Folder, options with { ReplaceExisting = target.Folder is not null }));
         if (folder is not null) SelectProfile($"{channel}/{folder}");
     }
@@ -802,50 +802,50 @@ public partial class ManagementWindow : Window
     private async Task TransferDialogAsync()
     {
         var selected = SelectedProfile;
-        var values = FieldsDialog.Show(this, $"„{selected.Name}“ übertragen",
-            new Field("Channel", "Zielinstanz", FieldType.Combo) { Options = EdgeChannels.All.Where(c => c != selected.Channel).Select(c => c.ToString()).ToList() },
-            new Field("Mode", "Aktion", FieldType.Combo) { Options = ["Kopieren", "Verschieben"] });
+        var values = FieldsDialog.Show(this, $"Transfer “{selected.Name}”",
+            new Field("Channel", "Target channel", FieldType.Combo) { Options = EdgeChannels.All.Where(c => c != selected.Channel).Select(c => c.ToString()).ToList() },
+            new Field("Mode", "Action", FieldType.Combo) { Options = ["Copy", "Verified move"] });
         if (values is null) return;
         var channel = Enum.Parse<EdgeChannel>(values["Channel"]);
         var options = Options;
-        if (values["Mode"] == "Verschieben")
+        if (values["Mode"] == "Verified move")
         {
             if (options.LocalOnly || options.AllowRunningSource)
-                throw new InvalidOperationException("Zum Verschieben bitte \"Nur lokale Daten\" und \"Quelle darf laufen\" ausschalten.");
-            if (!Confirm($"Profil '{selected.Name}' von {selected.Channel} nach {channel} verschieben?\n\nDie Quelle wird erst nach erfolgreicher SHA256-Prüfung gelöscht. Caches werden nur mit der entsprechenden Option übernommen. Menüeinträge werden auf das neue Profil umgestellt.")) return;
-            var folder = await RunAsync("Profil verschieben", m => m.MoveVerified(selected.Channel, channel, selected.Folder, options));
+                throw new InvalidOperationException("To move, please turn off \"Local data only\" and \"Allow running source\".");
+            if (!Confirm($"Move profile '{selected.Name}' from {selected.Channel} to {channel}?\n\nThe source is deleted only after a successful SHA256 check. Caches are only carried over with the corresponding option. Menu entries are switched to the new profile.")) return;
+            var folder = await RunAsync("Move profile", m => m.MoveVerified(selected.Channel, channel, selected.Folder, options));
             if (folder is null) return;
             var newKey = $"{channel}/{folder}";
             var updated = _app.ReplaceProfileReference(selected.Key, newKey);
-            if (updated > 0) Report($"Konfiguration: {updated} Verweis(e) von {selected.Key} auf {newKey} umgestellt.");
+            if (updated > 0) Report($"Configuration: {updated} reference(s) switched from {selected.Key} to {newKey}.");
             SelectProfile(newKey);
             return;
         }
 
-        if (SelectTargetFolder(channel, options, "Profil kopieren") is not { } target) return;
-        var copied = await RunAsync("Profil kopieren", m =>
+        if (SelectTargetFolder(channel, options, "Copy profile") is not { } target) return;
+        var copied = await RunAsync("Copy profile", m =>
             m.Copy(selected.Channel, channel, selected.Folder, target.Folder, options with { ReplaceExisting = target.Folder is not null }));
         if (copied is not null) SelectProfile($"{channel}/{copied}");
     }
 
-    /// <summary>Fragt nach dem Zielprofil: neu oder vorhandenes ersetzen bzw. lokale Daten zusammenführen.</summary>
+    /// <summary>Asks for the target profile: a new one, or replace an existing one (or merge local data into it).</summary>
     private TargetChoice? SelectTargetFolder(EdgeChannel channel, TransferOptions options, string title)
     {
         var profiles = _app.Discovery.GetProfiles(channel);
         var labels = new List<string> { NewProfile };
         labels.AddRange(profiles.Select(p => $"{p.Folder} | {p.Name}"));
-        var values = FieldsDialog.Show(this, "Zielprofil", new Field("Target", "Zielprofil", FieldType.Combo) { Options = labels });
+        var values = FieldsDialog.Show(this, "Target profile", new Field("Target", "Target profile", FieldType.Combo) { Options = labels });
         if (values is null) return null;
         if (values["Target"] == NewProfile) return new TargetChoice(null);
 
         var target = profiles[labels.IndexOf(values["Target"]) - 1];
         var effect = options.LocalOnly
-            ? $"Lokale Daten in '{target.Name}' zusammenführen? Vorhandene Dateien können ersetzt werden."
-            : $"Das vorhandene Profil '{target.Name}' ({channel} / {target.Folder}) wird vollständig ersetzt.";
-        return Confirm($"{title}: {effect}\n\nFortfahren?") ? new TargetChoice(target.Folder) : null;
+            ? $"Merge local data into '{target.Name}'? Existing files may be replaced."
+            : $"The existing profile '{target.Name}' ({channel} / {target.Folder}) will be completely replaced.";
+        return Confirm($"{title}: {effect}\n\nContinue?") ? new TargetChoice(target.Folder) : null;
     }
 
-    /// <summary>Gewähltes Zielprofil; <see cref="Folder"/> null = neues Profil anlegen.</summary>
+    /// <summary>Chosen target profile; <see cref="Folder"/> null = create a new profile.</summary>
     private sealed record TargetChoice(string? Folder);
 
     private void SelectProfile(string key)
@@ -856,18 +856,18 @@ public partial class ManagementWindow : Window
         if (card is not null) Select(card);
     }
 
-    // ---------- Ausführung ----------
+    // ---------- Execution ----------
 
     private Task RunAsync(string label, Action<ProfileManager> work) =>
         RunAsync<object>(label, m => { work(m); return new object(); });
 
     /// <summary>
-    /// Führt eine Verwaltungsaktion im Hintergrund aus. Läuft Edge noch, wird nachgefragt, ob die
-    /// Instanz beendet werden soll, und die Aktion danach wiederholt.
+    /// Runs a management action in the background. If Edge is still running, asks whether to close
+    /// that channel and then retries the action.
     /// </summary>
     private async Task<T?> RunAsync<T>(string label, Func<ProfileManager, T> work) where T : class
     {
-        if (_busy) throw new InvalidOperationException("Es läuft bereits eine Aktion.");
+        if (_busy) throw new InvalidOperationException("An action is already running.");
         _busy = true;
         WorkArea.IsEnabled = DetailContent.IsEnabled = false;
         Report($"{label} …");
@@ -875,8 +875,8 @@ public partial class ManagementWindow : Window
         {
             for (var attempt = 0; ; attempt++)
             {
-                // EdgeRunningException schon im Hintergrund abfangen: Würde sie Task.Run verlassen,
-                // hielte der Debugger (Just My Code) sie für unbehandelt, obwohl hier nachgefragt wird.
+                // Catch EdgeRunningException in the background already: if it left Task.Run, the debugger
+                // (Just My Code) would treat it as unhandled even though we prompt for it here.
                 var (result, running) = await Task.Run<(T?, EdgeRunningException?)>(() =>
                 {
                     try { return (work(_app.Manager), null); }
@@ -884,19 +884,19 @@ public partial class ManagementWindow : Window
                 });
                 if (running is null)
                 {
-                    Status.Text = $"{label}: abgeschlossen.";
+                    Status.Text = $"{label}: done.";
                     return result;
                 }
                 if (attempt >= 3) throw running;
-                if (!Confirm($"Edge {running.Channel} läuft noch.\n\nEdge {running.Channel} jetzt beenden und fortfahren? Nicht gespeicherte Eingaben können verloren gehen.")) throw running;
-                Report($"Beende Edge {running.Channel} …");
+                if (!Confirm($"Edge {running.Channel} is still running.\n\nClose Edge {running.Channel} now and continue? Unsaved input may be lost.")) throw running;
+                Report($"Closing Edge {running.Channel} …");
                 await Task.Run(() => _app.Guard.Close(running.Channel));
             }
         }
         catch (Exception ex)
         {
-            Report($"Fehler: {ex.Message}");
-            MessageBox.Show(this, ex.Message, "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+            Report($"Error: {ex.Message}");
+            MessageBox.Show(this, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             return null;
         }
         finally
