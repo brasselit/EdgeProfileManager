@@ -153,7 +153,7 @@ Das Testprojekt hat keine NuGet-Abhängigkeiten und bringt einen minimalen eigen
 
 ## Lizenz
 
-[Apache License 2.0](LICENSE), Copyright 2026 brassel-it. Hinweise zu mitgelieferten Fremdkomponenten stehen in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+[Apache License 2.0](LICENSE), Copyright 2026 Brassel IT. Hinweise zu mitgelieferten Fremdkomponenten stehen in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 ## Nächste Schritte
 
