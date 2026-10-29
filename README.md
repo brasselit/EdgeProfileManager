@@ -151,6 +151,10 @@ Das Testprojekt hat keine NuGet-Abhängigkeiten und bringt einen minimalen eigen
   - Launcher, Konfiguration, virtuelle Desktops
 - `src/EdgeProfileManager`: WPF/WinForms-Tray-App mit Tray-Menü, Jump List, Single Instance, Autostart und Startmenü-Verknüpfung
 
+## Lizenz
+
+[Apache License 2.0](LICENSE), Copyright 2026 brassel-it. Hinweise zu mitgelieferten Fremdkomponenten stehen in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
 ## Nächste Schritte
 
 - **Phasen 3–5:** erledigt (siehe „Profile und Menü verwalten“).
