@@ -1,5 +1,7 @@
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
+using EdgeProfileManager.Resources;
 using Microsoft.Win32;
 
 namespace EdgeProfileManager.Dialogs;
@@ -64,7 +66,7 @@ public static class FieldsDialog
                     {
                         if (field.Type == FieldType.File)
                         {
-                            var open = new OpenFileDialog { Filter = field.Filter ?? "All files|*.*", FileName = pathBox.Text };
+                            var open = new OpenFileDialog { Filter = field.Filter ?? Strings.Fields_AllFiles + "|*.*", FileName = pathBox.Text };
                             if (open.ShowDialog(dialog) == true) pathBox.Text = open.FileName;
                         }
                         else
@@ -87,8 +89,8 @@ public static class FieldsDialog
         }
 
         var buttons = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 6, 0, 0) };
-        var ok = new Button { Content = "OK", IsDefault = true, Width = 90, Margin = new Thickness(0, 0, 8, 0), Padding = new Thickness(8, 5, 8, 5) };
-        var cancel = new Button { Content = "Cancel", IsCancel = true, Width = 90, Padding = new Thickness(8, 5, 8, 5) };
+        var ok = new Button { Content = Strings.Fields_Ok, IsDefault = true, Width = 90, Margin = new Thickness(0, 0, 8, 0), Padding = new Thickness(8, 5, 8, 5) };
+        var cancel = new Button { Content = Strings.Fields_Cancel, IsCancel = true, Width = 90, Padding = new Thickness(8, 5, 8, 5) };
         buttons.Children.Add(ok);
         buttons.Children.Add(cancel);
         panel.Children.Add(buttons);
@@ -100,7 +102,7 @@ public static class FieldsDialog
             var missing = fields.FirstOrDefault(f => f.Required && string.IsNullOrWhiteSpace(values[f.Key]));
             if (missing is not null)
             {
-                MessageBox.Show(dialog, $"Please fill in \"{missing.Label}\".", title, MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(dialog, string.Format(CultureInfo.CurrentCulture, Strings.Fields_FillIn, missing.Label), title, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
             result = values;

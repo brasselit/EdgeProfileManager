@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Board_MainMenu" xml:space="preserve">
+    <value>Main menu</value>
+  </data>
+  <data name="Menu_Unassigned" xml:space="preserve">
+    <value>Unassigned</value>
+  </data>
+  <data name="Menu_NotFound" xml:space="preserve">
+    <value>{0} (not found)</value>
+  </data>
+  <data name="Error_GroupIntoItself" xml:space="preserve">
+    <value>A group cannot be moved into itself.</value>
+  </data>
+  <data name="Config_Empty" xml:space="preserve">
+    <value>Configuration is empty.</value>
+  </data>
+  <data name="Config_DesktopInvalid" xml:space="preserve">
+    <value>desktop must be a number or a name.</value>
+  </data>
+  <data name="Desktops_DllNotFound" xml:space="preserve">
+    <value>{0} not found ({1}). Desktop assignment is disabled.</value>
+  </data>
+  <data name="Desktops_NoDesktop" xml:space="preserve">
+    <value>GetDesktopCount returned no desktop.</value>
+  </data>
+  <data name="Desktops_LoadFailed" xml:space="preserve">
+    <value>{0} could not be loaded: {1}</value>
+  </data>
+  <data name="Error_EdgeAppNotFound" xml:space="preserve">
+    <value>Edge {0} application not found.</value>
+  </data>
+  <data name="Log_Started" xml:space="preserve">
+    <value>Started: Edge {0} – {1} ({2})</value>
+  </data>
+  <data name="Log_WindowMoved" xml:space="preserve">
+    <value>Moved window of {0} to desktop {1}.</value>
+  </data>
+  <data name="Log_WindowNotFound" xml:space="preserve">
+    <value>New window of {0} not found within {1:0} s.</value>
+  </data>
+  <data name="Error_EdgeRunning" xml:space="preserve">
+    <value>Edge {0} is still running. Please close it or let it be terminated.</value>
+  </data>
+  <data name="Error_RobocopyNotFound" xml:space="preserve">
+    <value>Windows copy tool not found: {0}. Please check the Windows installation.</value>
+  </data>
+  <data name="Error_RobocopyNotStarted" xml:space="preserve">
+    <value>robocopy could not be started.</value>
+  </data>
+  <data name="Error_Robocopy" xml:space="preserve">
+    <value>Robocopy error ({0}): {1}</value>
+  </data>
+  <data name="Error_ProfileNotFound" xml:space="preserve">
+    <value>Profile '{0}' not found in {1}.</value>
+  </data>
+  <data name="Error_CreateRequiresNameAndEmail" xml:space="preserve">
+    <value>Profile name and email are required to create a profile.</value>
+  </data>
+  <data name="Error_StartEdgeFirst" xml:space="preserve">
+    <value>Start Edge {0} once first.</value>
+  </data>
+  <data name="Error_ProfileExists" xml:space="preserve">
+    <value>Profile '{0}' already exists in {1}.</value>
+  </data>
+  <data name="Log_ProfileCreated" xml:space="preserve">
+    <value>Profile '{0}' ({1}/{2}) created. Sign in to Edge as {3} to enable sync.</value>
+  </data>
+  <data name="Error_NewNameMissing" xml:space="preserve">
+    <value>New name is missing.</value>
+  </data>
+  <data name="Error_ProfileNotInitialized" xml:space="preserve">
+    <value>Profile '{0}' has not been initialized by Edge yet.</value>
+  </data>
+  <data name="Error_ProfileNotRegistered" xml:space="preserve">
+    <value>Profile '{0}' is not registered.</value>
+  </data>
+  <data name="Log_ProfileRenamed" xml:space="preserve">
+    <value>Profile '{0}' in Edge {1} is now named '{2}'.</value>
+  </data>
+  <data name="Error_ProfileNotInLocalState" xml:space="preserve">
+    <value>Profile '{0}' is not registered in Local State.</value>
+  </data>
+  <data name="Log_AvatarSet" xml:space="preserve">
+    <value>Custom avatar set for Edge {0}/{1}.</value>
+  </data>
+  <data name="Log_ColorSet" xml:space="preserve">
+    <value>Color #{0:X6} set for Edge {1}/{2}.</value>
+  </data>
+  <data name="Log_ColorRemoved" xml:space="preserve">
+    <value>Color removed for Edge {0}/{1}.</value>
+  </data>
+  <data name="Log_ProfileDeleted" xml:space="preserve">
+    <value>Profile '{0}' deleted from Edge {1}.</value>
+  </data>
+  <data name="Log_BackingUp" xml:space="preserve">
+    <value>Backing up Edge {0} – {1} ({2}) …</value>
+  </data>
+  <data name="Log_BackupCreated" xml:space="preserve">
+    <value>Backup created: {0}</value>
+  </data>
+  <data name="Log_DpapiNote" xml:space="preserve">
+    <value>Note: Saved passwords/cookies are encrypted with DPAPI and cannot be read on another PC or by another user.</value>
+  </data>
+  <data name="Error_BackupFileNotFound" xml:space="preserve">
+    <value>Backup file '{0}' not found.</value>
+  </data>
+  <data name="Error_EdgeNotInstalled" xml:space="preserve">
+    <value>Edge {0} is not installed or has never been started.</value>
+  </data>
+  <data name="Log_ExtractingBackup" xml:space="preserve">
+    <value>Extracting backup: {0}</value>
+  </data>
+  <data name="Log_CopyingProfile" xml:space="preserve">
+    <value>Copying profile to Edge {0}/{1} …</value>
+  </data>
+  <data name="Log_ProfileRestored" xml:space="preserve">
+    <value>Profile '{0}' restored to Edge {1}/{2}.</value>
+  </data>
+  <data name="Error_SourceEqualsTarget" xml:space="preserve">
+    <value>Source and target are identical.</value>
+  </data>
+  <data name="Log_Transferring" xml:space="preserve">
+    <value>Transferring {0} from Edge {1} to {2}/{3} …</value>
+  </data>
+  <data name="Log_ProfileCopied" xml:space="preserve">
+    <value>Profile '{0}' copied from {1} to {2}/{3}.</value>
+  </data>
+  <data name="Error_MoveRequiresFullProfile" xml:space="preserve">
+    <value>Moving requires a complete profile and closed Edge instances.</value>
+  </data>
+  <data name="Error_MoveReparsePoints" xml:space="preserve">
+    <value>For safety reasons, profiles containing symbolic links or directory junctions are not moved.</value>
+  </data>
+  <data name="Log_ComputingChecksums" xml:space="preserve">
+    <value>Computing source checksums …</value>
+  </data>
+  <data name="Error_TargetNotRegistered" xml:space="preserve">
+    <value>Target profile not registered. Source is kept.</value>
+  </data>
+  <data name="Log_VerifyingCopy" xml:space="preserve">
+    <value>Verifying target copy …</value>
+  </data>
+  <data name="Error_SourceChanged" xml:space="preserve">
+    <value>Source files have changed. Source is kept.</value>
+  </data>
+  <data name="Error_VerificationFailed" xml:space="preserve">
+    <value>Verification failed: {0}. Source is kept.</value>
+  </data>
+  <data name="Error_EdgeStartedDuringVerification" xml:space="preserve">
+    <value>Edge was started during verification. Source is kept.</value>
+  </data>
+  <data name="Log_ProfileMoved" xml:space="preserve">
+    <value>Profile moved to {0}/{1}; target copy verified with SHA256.</value>
+  </data>
+  <data name="Log_EdgeRunningWarning" xml:space="preserve">
+    <value>Warning: Edge {0} is still running. The profile copy may be incomplete or inconsistent.</value>
+  </data>
+  <data name="Error_TargetExists" xml:space="preserve">
+    <value>Target profile '{0}' already exists. Confirm to replace it.</value>
+  </data>
+  <data name="Error_TargetNotProfile" xml:space="preserve">
+    <value>Target folder '{0}' is not an existing Edge profile.</value>
+  </data>
+  <data name="Error_NoLocalState" xml:space="preserve">
+    <value>No 'Local State' file found in {0}. Start Edge once.</value>
+  </data>
+  <data name="Log_TransferringLocalData" xml:space="preserve">
+    <value>Transferring local data to Edge {0}/{1} …</value>
+  </data>
+  <data name="Log_AccountToSignIn" xml:space="preserve">
+    <value>Account to sign in again: {0}</value>
+  </data>
+  <data name="Log_NewProfileWithoutSignIn" xml:space="preserve">
+    <value>New profile created without sign-in. Start Edge {0}/{1} and sign in to enable sync.</value>
+  </data>
+  <data name="Log_LocalDataTransferred" xml:space="preserve">
+    <value>Local data transferred to Edge {0}/{1}.</value>
+  </data>
+  <data name="Log_CopyingDirectory" xml:space="preserve">
+    <value>  Copying {0} …</value>
+  </data>
+  <data name="Log_NoLocalStateWarning" xml:space="preserve">
+    <value>Warning: No 'Local State' file found in {0} – start Edge once.</value>
+  </data>
+  <data name="Error_AvatarNotFound" xml:space="preserve">
+    <value>Avatar file '{0}' not found.</value>
+  </data>
+  <data name="Error_AvatarNotPng" xml:space="preserve">
+    <value>The profile avatar must be a PNG file.</value>
+  </data>
+  <data name="Error_AvatarInvalidPng" xml:space="preserve">
+    <value>The avatar file is not a valid PNG.</value>
+  </data>
+  <data name="Error_NotJsonObject" xml:space="preserve">
+    <value>{0} does not contain a JSON object.</value>
+  </data>
+</root>

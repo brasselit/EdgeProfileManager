@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <!-- Header / toolbar -->
+  <data name="Header_Title" xml:space="preserve">
+    <value>Menu board</value>
+  </data>
+  <data name="Header_Hint" xml:space="preserve">
+    <value>Column = group in tray menu · drag card = change group</value>
+  </data>
+  <data name="Header_AddGroup" xml:space="preserve">
+    <value>+ Group</value>
+  </data>
+  <data name="Header_NewProfile" xml:space="preserve">
+    <value>+ New profile</value>
+  </data>
+  <data name="Header_Restore" xml:space="preserve">
+    <value>Restore</value>
+  </data>
+  <data name="Header_Backup" xml:space="preserve">
+    <value>Backup …</value>
+  </data>
+  <data name="Header_Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Header_Refresh" xml:space="preserve">
+    <value>Refresh profiles</value>
+  </data>
+  <data name="Filter_AllChannels" xml:space="preserve">
+    <value>All channels</value>
+  </data>
+  <!-- Status line -->
+  <data name="Status_Log" xml:space="preserve">
+    <value>Log</value>
+  </data>
+  <data name="Status_Ready" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="Status_Done" xml:space="preserve">
+    <value>{0}: done.</value>
+  </data>
+  <data name="Status_Closing" xml:space="preserve">
+    <value>Closing Edge {0} …</value>
+  </data>
+  <data name="Status_Error" xml:space="preserve">
+    <value>Error: {0}</value>
+  </data>
+  <data name="Status_ReferencesSwitched" xml:space="preserve">
+    <value>Configuration: {0} reference(s) switched from {1} to {2}.</value>
+  </data>
+  <data name="Message_ErrorTitle" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Message_WaitForAction" xml:space="preserve">
+    <value>Please wait for the running action to finish.</value>
+  </data>
+  <!-- Lanes -->
+  <data name="Lane_RootToolTip" xml:space="preserve">
+    <value>Profiles directly in the tray menu, without a group (below the groups).</value>
+  </data>
+  <data name="Lane_UnassignedToolTip" xml:space="preserve">
+    <value>Profiles not in the menu. Drag here = remove from menu.</value>
+  </data>
+  <data name="Lane_AllAssigned" xml:space="preserve">
+    <value>All profiles are in the menu.</value>
+  </data>
+  <data name="Lane_DropHere" xml:space="preserve">
+    <value>Drag profiles here</value>
+  </data>
+  <data name="Lane_EditGroup" xml:space="preserve">
+    <value>Edit group</value>
+  </data>
+  <data name="Lane_RenameGroup" xml:space="preserve">
+    <value>Rename …</value>
+  </data>
+  <data name="Lane_MoveLeft" xml:space="preserve">
+    <value>Move left</value>
+  </data>
+  <data name="Lane_MoveRight" xml:space="preserve">
+    <value>Move right</value>
+  </data>
+  <data name="Lane_AddSeparator" xml:space="preserve">
+    <value>Add separator</value>
+  </data>
+  <data name="Lane_AddSubgroup" xml:space="preserve">
+    <value>Add subgroup …</value>
+  </data>
+  <data name="Lane_DeleteGroup" xml:space="preserve">
+    <value>Delete group …</value>
+  </data>
+  <!-- Cards -->
+  <data name="Card_NotFound" xml:space="preserve">
+    <value>{0} – not found</value>
+  </data>
+  <data name="Card_Running" xml:space="preserve">
+    <value>● running</value>
+  </data>
+  <data name="Card_NoJumpList" xml:space="preserve">
+    <value>no Jump List</value>
+  </data>
+  <data name="Card_DoubleClickHint" xml:space="preserve">
+    <value>Double-click opens the profile.</value>
+  </data>
+  <!-- Details pane -->
+  <data name="Detail_Title" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Detail_EmptyHint" xml:space="preserve">
+    <value>Select a card to edit its profile and menu entry.</value>
+  </data>
+  <data name="Detail_SubtitleNotInMenu" xml:space="preserve">
+    <value>not in menu</value>
+  </data>
+  <data name="Detail_SubtitleCard" xml:space="preserve">
+    <value>Card “{0}”</value>
+  </data>
+  <data name="Detail_ProfileHeader" xml:space="preserve">
+    <value>EDGE PROFILE</value>
+  </data>
+  <data name="Detail_ProfileNote" xml:space="preserve">
+    <value>changes Edge itself</value>
+  </data>
+  <data name="Detail_ChangeAvatar" xml:space="preserve">
+    <value>Change avatar</value>
+  </data>
+  <data name="Detail_Rename" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="Detail_ProfileNotFound" xml:space="preserve">
+    <value>Profile not found</value>
+  </data>
+  <data name="Detail_Closed" xml:space="preserve">
+    <value>closed</value>
+  </data>
+  <data name="Detail_Color" xml:space="preserve">
+    <value>Color</value>
+  </data>
+  <data name="Detail_ChangeColor" xml:space="preserve">
+    <value>Change color</value>
+  </data>
+  <data name="Detail_NoColor" xml:space="preserve">
+    <value>none</value>
+  </data>
+  <data name="Detail_Channel" xml:space="preserve">
+    <value>Channel</value>
+  </data>
+  <data name="Detail_Transfer" xml:space="preserve">
+    <value>Transfer to another channel (copy or move)</value>
+  </data>
+  <data name="Detail_Folder" xml:space="preserve">
+    <value>Folder</value>
+  </data>
+  <data name="Detail_OpenFolder" xml:space="preserve">
+    <value>Open profile folder</value>
+  </data>
+  <data name="Detail_DeleteProfile" xml:space="preserve">
+    <value>Delete profile</value>
+  </data>
+  <data name="Detail_Backup" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="Detail_NewWindow" xml:space="preserve">
+    <value>New window</value>
+  </data>
+  <data name="Detail_Open" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="Detail_MenuHeader" xml:space="preserve">
+    <value>MENU ENTRY</value>
+  </data>
+  <data name="Detail_MenuNote" xml:space="preserve">
+    <value>tray menu and Jump List only</value>
+  </data>
+  <data name="Detail_Group" xml:space="preserve">
+    <value>Group</value>
+  </data>
+  <data name="Detail_Label" xml:space="preserve">
+    <value>Label</value>
+  </data>
+  <data name="Detail_LabelToolTip" xml:space="preserve">
+    <value>Defaults to the Edge profile name (grey). Clear the field to reset it.</value>
+  </data>
+  <data name="Detail_Desktop" xml:space="preserve">
+    <value>Desktop</value>
+  </data>
+  <data name="Detail_DesktopToolTip" xml:space="preserve">
+    <value>Number or name of the virtual desktop</value>
+  </data>
+  <data name="Detail_IfWindowOpen" xml:space="preserve">
+    <value>If window is open</value>
+  </data>
+  <data name="Detail_ModeDefault" xml:space="preserve">
+    <value>Default: {0}</value>
+  </data>
+  <data name="Detail_RemoveFromMenu" xml:space="preserve">
+    <value>Remove from menu</value>
+  </data>
+  <data name="Detail_InJumpList" xml:space="preserve">
+    <value>In Jump List</value>
+  </data>
+  <data name="Detail_NotInMenu" xml:space="preserve">
+    <value>This profile is not in the menu.</value>
+  </data>
+  <data name="Detail_AddTo" xml:space="preserve">
+    <value>Add to</value>
+  </data>
+  <data name="Detail_Add" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="Desktop_None" xml:space="preserve">
+    <value>— no desktop</value>
+  </data>
+  <!-- "If window is open" modes -->
+  <data name="Mode_Default" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="Mode_SwitchToDesktop" xml:space="preserve">
+    <value>Switch to desktop</value>
+  </data>
+  <data name="Mode_BringHere" xml:space="preserve">
+    <value>Bring here</value>
+  </data>
+  <data name="Mode_MoveToAssigned" xml:space="preserve">
+    <value>Move to assigned desktop</value>
+  </data>
+  <!-- Transfer options -->
+  <data name="Option_LocalOnly" xml:space="preserve">
+    <value>Local data only</value>
+  </data>
+  <data name="Option_LocalOnlyToolTip" xml:space="preserve">
+    <value>Only Local Storage, IndexedDB etc. instead of the whole profile.</value>
+  </data>
+  <data name="Option_IncludeCaches" xml:space="preserve">
+    <value>Include caches</value>
+  </data>
+  <data name="Option_AllowRunning" xml:space="preserve">
+    <value>Allow running source</value>
+  </data>
+  <data name="Option_AllowRunningToolTip" xml:space="preserve">
+    <value>Back up or copy while Edge is open; the copy may be inconsistent.</value>
+  </data>
+  <!-- Settings -->
+  <data name="Settings_Title" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Settings_Language" xml:space="preserve">
+    <value>Language (applies after restarting the tool)</value>
+  </data>
+  <data name="Settings_SystemLanguage" xml:space="preserve">
+    <value>Windows display language</value>
+  </data>
+  <data name="Settings_Mode" xml:space="preserve">
+    <value>If a window is already open (default)</value>
+  </data>
+  <data name="Settings_ShowUnassigned" xml:space="preserve">
+    <value>Show unassigned profiles in tray menu</value>
+  </data>
+  <data name="Settings_JumpListUnassigned" xml:space="preserve">
+    <value>… and in the Jump List</value>
+  </data>
+  <data name="Settings_JumpListStyle" xml:space="preserve">
+    <value>Jump List</value>
+  </data>
+  <data name="Settings_JumpListCategories" xml:space="preserve">
+    <value>Categories per group (max. ~10 entries)</value>
+  </data>
+  <data name="Settings_JumpListTasks" xml:space="preserve">
+    <value>Tasks (all profiles, ungrouped)</value>
+  </data>
+  <data name="Settings_Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="Settings_No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <!-- Dialogs -->
+  <data name="Dialog_NewGroupTitle" xml:space="preserve">
+    <value>New group</value>
+  </data>
+  <data name="Dialog_SubgroupTitle" xml:space="preserve">
+    <value>Subgroup in “{0}”</value>
+  </data>
+  <data name="Dialog_RenameGroupTitle" xml:space="preserve">
+    <value>Rename group</value>
+  </data>
+  <data name="Dialog_GroupName" xml:space="preserve">
+    <value>Group name</value>
+  </data>
+  <data name="Dialog_NewProfileTitle" xml:space="preserve">
+    <value>New profile</value>
+  </data>
+  <data name="Dialog_Channel" xml:space="preserve">
+    <value>Channel</value>
+  </data>
+  <data name="Dialog_ProfileName" xml:space="preserve">
+    <value>Profile name</value>
+  </data>
+  <data name="Dialog_Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Dialog_AvatarOptional" xml:space="preserve">
+    <value>Avatar (optional, PNG)</value>
+  </data>
+  <data name="Dialog_PngFilter" xml:space="preserve">
+    <value>PNG image</value>
+  </data>
+  <data name="Dialog_RenameProfileTitle" xml:space="preserve">
+    <value>Rename profile</value>
+  </data>
+  <data name="Dialog_NewName" xml:space="preserve">
+    <value>New name in Edge</value>
+  </data>
+  <data name="Dialog_AvatarTitle" xml:space="preserve">
+    <value>Profile avatar</value>
+  </data>
+  <data name="Dialog_PngFile" xml:space="preserve">
+    <value>PNG file</value>
+  </data>
+  <data name="Dialog_BackupScope" xml:space="preserve">
+    <value>Scope</value>
+  </data>
+  <data name="Dialog_BackupScopeAll" xml:space="preserve">
+    <value>All channels</value>
+  </data>
+  <data name="Dialog_BackupScopeChannel" xml:space="preserve">
+    <value>Channel of selected profile</value>
+  </data>
+  <data name="Dialog_BackupScopeSingle" xml:space="preserve">
+    <value>Selected profile</value>
+  </data>
+  <data name="Dialog_BackupFolder" xml:space="preserve">
+    <value>Backup folder</value>
+  </data>
+  <data name="Dialog_BackupOfTitle" xml:space="preserve">
+    <value>Backup of “{0}”</value>
+  </data>
+  <data name="Dialog_BackupZip" xml:space="preserve">
+    <value>Backup ZIP</value>
+  </data>
+  <data name="Dialog_BackupFilter" xml:space="preserve">
+    <value>Edge backup</value>
+  </data>
+  <data name="Dialog_TargetChannel" xml:space="preserve">
+    <value>Target channel</value>
+  </data>
+  <data name="Dialog_TransferTitle" xml:space="preserve">
+    <value>Transfer “{0}”</value>
+  </data>
+  <data name="Dialog_TransferAction" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="Dialog_TransferCopy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="Dialog_TransferVerifiedMove" xml:space="preserve">
+    <value>Verified move</value>
+  </data>
+  <data name="Dialog_TargetProfile" xml:space="preserve">
+    <value>Target profile</value>
+  </data>
+  <data name="Dialog_TargetNewProfile" xml:space="preserve">
+    <value>New profile</value>
+  </data>
+  <!-- Actions (status line, dialog titles) -->
+  <data name="Action_CreateProfile" xml:space="preserve">
+    <value>Create profile</value>
+  </data>
+  <data name="Action_RenameProfile" xml:space="preserve">
+    <value>Rename profile</value>
+  </data>
+  <data name="Action_SetAvatar" xml:space="preserve">
+    <value>Set avatar</value>
+  </data>
+  <data name="Action_SetColor" xml:space="preserve">
+    <value>Set color</value>
+  </data>
+  <data name="Action_RemoveColor" xml:space="preserve">
+    <value>Remove color</value>
+  </data>
+  <data name="Action_DeleteProfile" xml:space="preserve">
+    <value>Delete profile</value>
+  </data>
+  <data name="Action_CreateBackup" xml:space="preserve">
+    <value>Create backup</value>
+  </data>
+  <data name="Action_RestoreBackup" xml:space="preserve">
+    <value>Restore backup</value>
+  </data>
+  <data name="Action_MoveProfile" xml:space="preserve">
+    <value>Move profile</value>
+  </data>
+  <data name="Action_CopyProfile" xml:space="preserve">
+    <value>Copy profile</value>
+  </data>
+  <!-- Confirmations -->
+  <data name="Confirm_DeleteGroup" xml:space="preserve">
+    <value>Delete group “{0}”? Its {1} profile(s) will be removed from the menu (the Edge profiles are kept).</value>
+  </data>
+  <data name="Confirm_DeleteProfile" xml:space="preserve">
+    <value>Permanently delete profile '{0}' ({1} / {2}) including all local data?</value>
+  </data>
+  <data name="Confirm_MoveProfile" xml:space="preserve">
+    <value>Move profile '{0}' from {1} to {2}?
+
+The source is deleted only after a successful SHA256 check. Caches are only carried over with the corresponding option. Menu entries are switched to the new profile.</value>
+  </data>
+  <data name="Confirm_MergeLocal" xml:space="preserve">
+    <value>Merge local data into '{0}'? Existing files may be replaced.</value>
+  </data>
+  <data name="Confirm_ReplaceProfile" xml:space="preserve">
+    <value>The existing profile '{0}' ({1} / {2}) will be completely replaced.</value>
+  </data>
+  <data name="Confirm_TargetContinue" xml:space="preserve">
+    <value>{0}: {1}
+
+Continue?</value>
+  </data>
+  <data name="Confirm_CloseEdge" xml:space="preserve">
+    <value>Edge {0} is still running.
+
+Close Edge {0} now and continue? Unsaved input may be lost.</value>
+  </data>
+  <!-- Errors -->
+  <data name="Error_SelectCard" xml:space="preserve">
+    <value>Please select a card first.</value>
+  </data>
+  <data name="Error_SelectProfile" xml:space="preserve">
+    <value>Please select an existing profile first.</value>
+  </data>
+  <data name="Error_NoProfilesToBackUp" xml:space="preserve">
+    <value>No profiles found to back up.</value>
+  </data>
+  <data name="Error_VerifiedMoveOptions" xml:space="preserve">
+    <value>A verified move always transfers the whole, closed profile. Turn off "Local data only" and "Allow running source".</value>
+  </data>
+  <data name="Error_ActionRunning" xml:space="preserve">
+    <value>An action is already running.</value>
+  </data>
+</root>
