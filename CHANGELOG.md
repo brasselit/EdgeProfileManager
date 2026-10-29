@@ -12,9 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Contribution guidelines, code of conduct, security policy, issue and pull request templates.
 - CI workflow that builds and tests every pull request.
 - Dependabot updates for NuGet packages and GitHub Actions.
+- [User manual](https://github.com/brasselit/EdgeProfileManager/wiki) in the GitHub wiki.
 
 ### Changed
 
+- The README is shortened to overview, installation and development; usage details moved to the wiki.
 - Release notes are taken from this changelog; a release fails if its version has no section here.
 - The release workflow uses the `vpk` version that matches the Velopack package.
 - Release workflow actions updated to versions running on Node.js 24.

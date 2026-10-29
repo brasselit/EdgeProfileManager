@@ -37,7 +37,7 @@ We use [GitHub Flow](https://docs.github.com/get-started/using-github/github-flo
 - **Style:** Match the surrounding code: naming, comment density and idioms. Keep UI logic out of `EdgeProfileManager.Core`.
 - **Tests:** Add or adjust tests for logic in `EdgeProfileManager.Core`. The test project uses a small built-in runner without NuGet packages.
 - **Dependencies:** Discuss new NuGet packages in an issue first.
-- **Documentation:** Update the [README](README.md) when behavior or configuration changes.
+- **Documentation:** The [user manual](https://github.com/brasselit/EdgeProfileManager/wiki) lives in the wiki. When behavior, UI texts or configuration change, mention the affected wiki pages in the pull request; the wiki is updated when the change is merged. The [README](README.md) only covers overview, installation and development.
 - **Changelog:** Add an entry under `## [Unreleased]` in [CHANGELOG.md](CHANGELOG.md) for every user-visible change (sections *Added*, *Changed*, *Fixed*, *Removed*). Purely internal changes need no entry.
 
 ## Releases (maintainers)
