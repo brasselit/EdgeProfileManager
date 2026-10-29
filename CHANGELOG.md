@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- New app icon with a gear, so the tool can be told apart from Edge in the taskbar and tray.
 - The README is shortened to overview, installation and development; usage details moved to the wiki.
 - Release notes are taken from this changelog; a release fails if its version has no section here.
 - The release workflow uses the `vpk` version that matches the Velopack package.
