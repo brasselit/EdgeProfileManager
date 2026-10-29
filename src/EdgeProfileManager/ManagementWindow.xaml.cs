@@ -82,12 +82,43 @@ public partial class ManagementWindow : Window
         RebuildBoard();
     }
 
-    private TransferOptions Options => new()
+    /// <summary>Transfer options last used in a dialog; preselected the next time.</summary>
+    private TransferOptions _options = new();
+
+    /// <summary>Checkbox fields for the transfer options a dialog needs.</summary>
+    private Field[] OptionFields(bool localOnly = true, bool allowRunning = true)
     {
-        LocalOnly = LocalOption.IsChecked == true,
-        IncludeCaches = CacheOption.IsChecked == true,
-        AllowRunningSource = RunningOption.IsChecked == true,
-    };
+        var fields = new List<Field>();
+        if (localOnly) fields.Add(new Field("LocalOnly", "Local data only", FieldType.Check)
+        {
+            Value = _options.LocalOnly.ToString(),
+            ToolTip = "Only Local Storage, IndexedDB etc. instead of the whole profile.",
+        });
+        fields.Add(new Field("IncludeCaches", "Include caches", FieldType.Check) { Value = _options.IncludeCaches.ToString() });
+        if (allowRunning) fields.Add(new Field("AllowRunning", "Allow running source", FieldType.Check)
+        {
+            Value = _options.AllowRunningSource.ToString(),
+            ToolTip = "Back up or copy while Edge is open; the copy may be inconsistent.",
+        });
+        return [.. fields];
+    }
+
+    /// <summary>Reads the option checkboxes of a dialog and remembers them.</summary>
+    private TransferOptions ReadOptions(Dictionary<string, string> values)
+    {
+        bool Get(string key, bool current) => values.TryGetValue(key, out var v) ? v == bool.TrueString : current;
+        _options = new TransferOptions
+        {
+            LocalOnly = Get("LocalOnly", _options.LocalOnly),
+            IncludeCaches = Get("IncludeCaches", _options.IncludeCaches),
+            AllowRunningSource = Get("AllowRunning", _options.AllowRunningSource),
+        };
+        return _options with
+        {
+            LocalOnly = values.ContainsKey("LocalOnly") && _options.LocalOnly,
+            AllowRunningSource = values.ContainsKey("AllowRunning") && _options.AllowRunningSource,
+        };
+    }
 
     private void OnStateChanged()
     {
@@ -512,6 +543,7 @@ public partial class ManagementWindow : Window
         GroupCombo.SelectionChanged += (_, _) => EditEntry((c, entry) =>
             MenuBoard.Place(c, entry, MenuBoard.ChildrenOf(c, GroupAt(GroupCombo.SelectedIndex)), null));
         LabelBox.LostFocus += (_, _) => ApplyLabel();
+        LabelBox.TextChanged += (_, _) => UpdateLabelStyle();
         LabelBox.KeyDown += (_, e) => { if (e.Key == Key.Enter) ApplyLabel(); };
         DesktopCombo.SelectionChanged += (_, _) => Dispatcher.BeginInvoke(ApplyDesktop);
         DesktopCombo.LostFocus += (_, _) => ApplyDesktop();
@@ -555,7 +587,7 @@ public partial class ManagementWindow : Window
                 GroupCombo.ItemsSource = GroupLabels();
                 var parent = MenuBoard.FindParentGroup(_app.Config, entry);
                 GroupCombo.SelectedIndex = parent is null ? 0 : _groups.ToList().FindIndex(g => ReferenceEquals(g.Group, parent)) + 1;
-                LabelBox.Text = entry.Label ?? "";
+                LabelBox.Text = entry.Label ?? DefaultLabel;
                 ShowDesktop(entry.Desktop);
                 ModeCombo.SelectedIndex = entry.DesktopMode is { } mode ? (int)mode + 1 : 0;
                 ModeCombo.ToolTip = $"Default: {(entry.Desktop is not null ? ModeLabels[3] : ModeLabels[(int)_app.Config.DefaultDesktopMode + 1])}";
@@ -618,12 +650,23 @@ public partial class ManagementWindow : Window
         return number.Success ? new DesktopTarget(int.Parse(number.Groups[1].Value), null) : new DesktopTarget(null, text);
     }
 
-    /// <summary>Empty or equal to the Edge name = no custom label.</summary>
+    /// <summary>Label shown when none is configured: the Edge profile name (not saved).</summary>
+    private string DefaultLabel => _selected?.Profile?.Name ?? "";
+
+    /// <summary>Empty or equal to the Edge name = no custom label; the field then shows the default again.</summary>
     private void ApplyLabel()
     {
         var label = LabelBox.Text.Trim();
-        var value = label.Length == 0 || label == _selected?.Profile?.Name ? null : label;
+        var value = label.Length == 0 || label == DefaultLabel ? null : label;
+        if (value is null && !_loadingDetail) LabelBox.Text = DefaultLabel;
         EditEntry((_, entry) => entry.Label = value, onlyIfChanged: () => value != _selected?.Entry?.Label);
+    }
+
+    /// <summary>Shows the default label greyed out, a custom one in normal color.</summary>
+    private void UpdateLabelStyle()
+    {
+        if (LabelBox.Text.Trim() == DefaultLabel) LabelBox.Foreground = Muted;
+        else LabelBox.ClearValue(ForegroundProperty);
     }
 
     private void ApplyDesktop()
@@ -764,6 +807,7 @@ public partial class ManagementWindow : Window
         var fields = new List<Field>();
         if (!singleOnly) fields.Add(new Field("Scope", "Scope", FieldType.Combo) { Options = _selected?.Profile is null ? [all] : [all, instance, single] });
         fields.Add(new Field("Path", "Backup folder", FieldType.Folder) { Value = Environment.ExpandEnvironmentVariables(_app.Config.BackupPath), Required = true });
+        fields.AddRange(OptionFields());
         var values = FieldsDialog.Show(this, singleOnly ? $"Backup of “{SelectedProfile.Name}”" : "Create backup", [.. fields]);
         if (values is null) return;
 
@@ -776,7 +820,7 @@ public partial class ManagementWindow : Window
             _ => _app.Discovery.GetProfiles(),
         };
         if (targets.Count == 0) throw new InvalidOperationException("No profiles found to back up.");
-        var options = Options;
+        var options = ReadOptions(values);
         var perChannel = scope != single;
         _app.UpdateConfig(c => c.BackupPath = path);
         await RunAsync("Create backup", m =>
@@ -788,11 +832,14 @@ public partial class ManagementWindow : Window
     private async Task RestoreAsync()
     {
         var values = FieldsDialog.Show(this, "Restore backup",
+        [
             new Field("Zip", "Backup ZIP", FieldType.File) { Filter = "Edge backup|*.zip", Required = true },
-            new Field("Channel", "Target channel", FieldType.Combo) { Options = ChannelsStartingWith(ActiveChannel) });
+            new Field("Channel", "Target channel", FieldType.Combo) { Options = ChannelsStartingWith(ActiveChannel) },
+            .. OptionFields(allowRunning: false),
+        ]);
         if (values is null) return;
         var channel = Enum.Parse<EdgeChannel>(values["Channel"]);
-        var options = Options;
+        var options = ReadOptions(values);
         if (SelectTargetFolder(channel, options, "Restore backup") is not { } target) return;
         var folder = await RunAsync("Restore backup", m =>
             m.Restore(channel, values["Zip"], target.Folder, options with { ReplaceExisting = target.Folder is not null }));
@@ -803,15 +850,18 @@ public partial class ManagementWindow : Window
     {
         var selected = SelectedProfile;
         var values = FieldsDialog.Show(this, $"Transfer “{selected.Name}”",
+        [
             new Field("Channel", "Target channel", FieldType.Combo) { Options = EdgeChannels.All.Where(c => c != selected.Channel).Select(c => c.ToString()).ToList() },
-            new Field("Mode", "Action", FieldType.Combo) { Options = ["Copy", "Verified move"] });
+            new Field("Mode", "Action", FieldType.Combo) { Options = ["Copy", "Verified move"] },
+            .. OptionFields(),
+        ]);
         if (values is null) return;
         var channel = Enum.Parse<EdgeChannel>(values["Channel"]);
-        var options = Options;
+        var options = ReadOptions(values);
         if (values["Mode"] == "Verified move")
         {
             if (options.LocalOnly || options.AllowRunningSource)
-                throw new InvalidOperationException("To move, please turn off \"Local data only\" and \"Allow running source\".");
+                throw new InvalidOperationException("A verified move always transfers the whole, closed profile. Turn off \"Local data only\" and \"Allow running source\".");
             if (!Confirm($"Move profile '{selected.Name}' from {selected.Channel} to {channel}?\n\nThe source is deleted only after a successful SHA256 check. Caches are only carried over with the corresponding option. Menu entries are switched to the new profile.")) return;
             var folder = await RunAsync("Move profile", m => m.MoveVerified(selected.Channel, channel, selected.Folder, options));
             if (folder is null) return;

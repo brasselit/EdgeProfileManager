@@ -4,17 +4,19 @@ using Microsoft.Win32;
 
 namespace EdgeProfileManager.Dialogs;
 
-public enum FieldType { Text, Combo, File, Folder }
+public enum FieldType { Text, Combo, File, Folder, Check }
 
+/// <summary>Input field; a <see cref="FieldType.Check"/> field uses "True"/"False" as value.</summary>
 public sealed record Field(string Key, string Label, FieldType Type = FieldType.Text)
 {
     public string? Value { get; init; }
     public IReadOnlyList<string>? Options { get; init; }
     public bool Required { get; init; }
     public string? Filter { get; init; }
+    public string? ToolTip { get; init; }
 }
 
-/// <summary>Simple input dialog built from a list of fields (port of Show-GuiFields).</summary>
+/// <summary>Simple input dialog built from a list of fields.</summary>
 public static class FieldsDialog
 {
     public static Dictionary<string, string>? Show(Window owner, string title, params Field[] fields)
@@ -37,7 +39,14 @@ public static class FieldsDialog
 
         foreach (var field in fields)
         {
-            panel.Children.Add(new TextBlock { Text = field.Label, Margin = new Thickness(0, 0, 0, 5) });
+            if (field.Type == FieldType.Check)
+            {
+                var check = new CheckBox { Content = field.Label, ToolTip = field.ToolTip, IsChecked = field.Value == bool.TrueString, Margin = new Thickness(0, 0, 0, 10) };
+                panel.Children.Add(check);
+                getters[field.Key] = () => (check.IsChecked == true).ToString();
+                continue;
+            }
+            panel.Children.Add(new TextBlock { Text = field.Label, ToolTip = field.ToolTip, Margin = new Thickness(0, 0, 0, 5) });
             switch (field.Type)
             {
                 case FieldType.Combo:
