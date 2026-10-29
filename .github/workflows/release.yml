@@ -1,5 +1,6 @@
 # Builds a release when a version tag (v1.2.3) is pushed:
 # tests, publish, Velopack setup and update packages, upload to GitHub Releases.
+# The release notes come from the matching section in CHANGELOG.md.
 name: Release
 
 on:
@@ -10,7 +11,6 @@ permissions:
   contents: write
 
 env:
-  VPK_VERSION: 1.2.161   # keep in sync with the Velopack package in EdgeProfileManager.csproj
   REPO_URL: https://github.com/${{ github.repository }}
 
 jobs:
@@ -31,14 +31,28 @@ jobs:
           $version = '${{ github.ref_name }}'.TrimStart('v')
           "VERSION=$version" >> $env:GITHUB_ENV
 
+      - name: Release notes from changelog
+        run: |
+          $changelog = Get-Content CHANGELOG.md -Raw
+          $pattern = '(?ms)^## \[' + [regex]::Escape($env:VERSION) + '\][^\n]*\n(.*?)(?=^## \[|^\[[^\]]+\]: |\z)'
+          $match = [regex]::Match($changelog, $pattern)
+          if (-not $match.Success -or -not $match.Groups[1].Value.Trim()) {
+            throw "CHANGELOG.md has no section '## [$env:VERSION]'. Add it before tagging the release."
+          }
+          Set-Content release-notes.md $match.Groups[1].Value.Trim()
+
       - name: Test
         run: dotnet run --project tests/EdgeProfileManager.Tests -c Release
 
       - name: Publish
         run: dotnet publish src/EdgeProfileManager -c Release -r win-x64 --self-contained false -p:Version=$env:VERSION -o publish
 
+      # vpk must match the Velopack package version used by the app.
       - name: Install vpk
-        run: dotnet tool install -g vpk --version $env:VPK_VERSION
+        run: |
+          $version = ([xml](Get-Content src/EdgeProfileManager/EdgeProfileManager.csproj)).Project.ItemGroup.PackageReference |
+            Where-Object Include -eq 'Velopack' | Select-Object -ExpandProperty Version
+          dotnet tool install -g vpk --version $version
 
       # Previous release for delta updates; there is none before the first release.
       - name: Download previous release
@@ -51,7 +65,7 @@ jobs:
           vpk pack -u EdgeProfileManager -v $env:VERSION -p publish -e EdgeProfileManager.exe -o releases
           -r win-x64 --framework net10.0-x64-desktop
           --packTitle "Edge Profile Manager" --packAuthors "Brassel IT"
-          -i src/EdgeProfileManager/Assets/app.ico --shortcuts ""
+          -i src/EdgeProfileManager/Assets/app.ico --shortcuts "" --releaseNotes release-notes.md
 
       - name: Upload release
         run: >
