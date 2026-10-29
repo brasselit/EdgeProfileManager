@@ -1,3 +1,4 @@
+using EdgeProfileManager.Core.Resources;
 using EdgeProfileManager.Core.Edge;
 
 namespace EdgeProfileManager.Core.Config;
@@ -7,7 +8,7 @@ public enum LaneKind { Root, Group, Unassigned }
 /// <summary>A column in the menu board: main menu, a top-level group or "Unassigned".</summary>
 public sealed record BoardLane(LaneKind Kind, string Title, MenuEntry? Group, IReadOnlyList<BoardItem> Items)
 {
-    public const string RootTitle = "Main menu";
+    public static string RootTitle => Strings.Board_MainMenu;
 }
 
 public abstract record BoardItem(int Depth);

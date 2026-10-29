@@ -685,9 +685,12 @@ public partial class ManagementWindow : Window
 
     private void EditSettings()
     {
-        const string yes = "Yes", no = "No";
+        const string yes = "Yes", no = "No", systemLanguage = "Windows display language";
         var config = _app.Config;
+        string[] languages = [systemLanguage, .. Localization.Languages.Select(l => l.Name)];
+        var currentLanguage = Localization.Languages.FirstOrDefault(l => string.Equals(l.Code, config.Language, StringComparison.OrdinalIgnoreCase)).Name ?? systemLanguage;
         var values = FieldsDialog.Show(this, "Settings",
+            new Field("Language", "Language (applies after restarting the tool)", FieldType.Combo) { Options = languages, Value = currentLanguage },
             new Field("Mode", "If a window is already open (default)", FieldType.Combo) { Options = ModeLabels[1..], Value = ModeLabels[(int)config.DefaultDesktopMode + 1] },
             new Field("Unassigned", "Show unassigned profiles in tray menu", FieldType.Combo) { Options = [yes, no], Value = config.ShowUnassigned ? yes : no },
             new Field("JumpUnassigned", "… and in the Jump List", FieldType.Combo) { Options = [yes, no], Value = config.JumpListUnassigned ? yes : no },
@@ -697,8 +700,10 @@ public partial class ManagementWindow : Window
                 Value = config.JumpListStyle == JumpListStyle.Categories ? "Categories per group (max. ~10 entries)" : "Tasks (all profiles, ungrouped)",
             });
         if (values is null) return;
+        var languageIndex = Array.IndexOf(languages, values["Language"]);
         _app.UpdateConfig(c =>
         {
+            c.Language = languageIndex > 0 ? Localization.Languages[languageIndex - 1].Code : null;
             c.DefaultDesktopMode = (DesktopMode)(Array.IndexOf(ModeLabels, values["Mode"]) - 1);
             c.ShowUnassigned = values["Unassigned"] == yes;
             c.JumpListUnassigned = values["JumpUnassigned"] == yes;

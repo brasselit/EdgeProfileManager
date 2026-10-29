@@ -1,3 +1,4 @@
+using EdgeProfileManager.Core.Resources;
 using EdgeProfileManager.Core.Edge;
 
 namespace EdgeProfileManager.Core.Config;
@@ -12,7 +13,7 @@ public sealed record ProfileSettings(DesktopTarget? Desktop, DesktopMode Mode, b
 
 public sealed record ResolvedMenu(IReadOnlyList<MenuNode> Nodes, IReadOnlyDictionary<string, ProfileSettings> SettingsByKey)
 {
-    public const string UnassignedTitle = "Unassigned";
+    public static string UnassignedTitle => Strings.Menu_Unassigned;
 }
 
 /// <summary>Combines the configured menu tree with the discovered profiles.</summary>

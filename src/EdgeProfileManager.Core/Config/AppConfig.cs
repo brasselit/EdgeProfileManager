@@ -18,6 +18,9 @@ public sealed class AppConfig
 
     public JumpListStyle JumpListStyle { get; set; } = JumpListStyle.Categories;
 
+    /// <summary>UI language, e.g. "en" or "de"; empty = Windows display language. Applied at start.</summary>
+    public string? Language { get; set; }
+
     /// <summary>Check the GitHub releases for a new version at start and once a day.</summary>
     public bool CheckForUpdates { get; set; } = true;
 

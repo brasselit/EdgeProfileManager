@@ -46,6 +46,9 @@ internal static class TestRunner
 {
     private static int Main(string[] args)
     {
+        // Assertions expect the English texts, regardless of the Windows display language.
+        System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
+        System.Globalization.CultureInfo.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
         var filter = args.FirstOrDefault();
         var tests = typeof(TestRunner).Assembly.GetTypes()
             .SelectMany(t => t.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance)
