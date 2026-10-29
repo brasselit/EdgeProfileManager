@@ -105,13 +105,6 @@
             </DockPanel>
             <DockPanel Grid.Row="1" Margin="0,0,0,10">
                 <StackPanel x:Name="Filters" Orientation="Horizontal" VerticalAlignment="Center"/>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <CheckBox x:Name="LocalOption" Content="Local data only" Margin="0,0,16,0"
-                              ToolTip="Backup, restore and transfer: only Local Storage, IndexedDB etc. instead of the whole profile."/>
-                    <CheckBox x:Name="CacheOption" Content="Include caches" Margin="0,0,16,0"/>
-                    <CheckBox x:Name="RunningOption" Content="Allow running source"
-                              ToolTip="Backup/copy while Edge is open; the copy may be inconsistent."/>
-                </StackPanel>
             </DockPanel>
             <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
                 <StackPanel x:Name="Lanes" Orientation="Horizontal"/>
@@ -228,7 +221,7 @@
                                         </StackPanel>
                                         <StackPanel Grid.Column="2">
                                             <TextBlock Text="Label" Style="{StaticResource FieldLabel}"/>
-                                            <TextBox x:Name="LabelBox" ToolTip="Empty = name of the Edge profile"/>
+                                            <TextBox x:Name="LabelBox" ToolTip="Defaults to the Edge profile name (grey). Clear the field to reset it."/>
                                         </StackPanel>
                                     </Grid>
                                     <Grid Margin="0,10,0,0">

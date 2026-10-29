@@ -43,7 +43,7 @@ Clicking a card shows its details on the right, split into two sections.
 | Open, New window | Starts the profile or switches to its window (also by double-clicking the card) |
 | Backup, Profile folder, Delete | Backup as ZIP including `meta.json`. Delete asks for confirmation first. |
 
-**Menu entry** – changes `config.json` only: group, label (empty = Edge name), desktop, behavior when a window is already open, Jump List, “Remove from menu”. For unassigned profiles this section offers “Add to …”.
+**Menu entry** – changes `config.json` only: group, label (shows the Edge profile name in grey until you enter your own; clearing the field resets it), desktop, behavior when a window is already open, Jump List, “Remove from menu”. For unassigned profiles this section offers “Add to …”.
 
 In the header:
 - **+ New profile**: name, email and an optional PNG avatar; the email is stored in `customer-profile.json`
@@ -51,7 +51,7 @@ In the header:
 - **Backup …**: scope is all channels, the channel of the selected profile, or only the selected profile
 - **Settings** (gear): default behavior and Jump List
 
-These options apply to backup, restore and transfer:
+The backup, restore and transfer dialogs offer these options where they apply (the last choice is preselected):
 - **Local data only**: transfers Local Storage, IndexedDB etc. instead of the whole profile.
 - **Include caches**
 - **Allow running source**: allows a backup or copy while Edge is open.
