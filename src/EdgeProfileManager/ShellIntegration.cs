@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using EdgeProfileManager.Core.Edge;
 using Microsoft.Win32;
@@ -11,31 +12,140 @@ public static class ShellIntegration
     private const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
     private const string RunValue = "EdgeProfileManager";
 
+    /// <summary>
+    /// Fixed AppUserModelID for process and Start menu shortcut. The taskbar uses it to match the
+    /// running app with the pinned shortcut and its Jump List, regardless of the install location.
+    /// </summary>
+    public const string AppUserModelId = "BrasselIT.EdgeProfileManager";
+
     public static string ExecutablePath { get; } = Environment.ProcessPath ?? throw new InvalidOperationException("Process path unknown.");
 
     public static string StartMenuShortcutPath { get; } = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.Programs), "Edge Profile Manager.lnk");
 
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+    private static extern int SetCurrentProcessExplicitAppUserModelID(string appId);
+
+    /// <summary>Must be called before the first window or Jump List is created.</summary>
+    public static void SetProcessAppUserModelId() => SetCurrentProcessExplicitAppUserModelID(AppUserModelId);
+
     /// <summary>
-    /// Creates the Start menu shortcut or fixes its target, e.g. after the application was moved.
-    /// The file is overwritten rather than deleted so that existing pins are kept.
+    /// Creates the Start menu shortcut or fixes its target and AppUserModelID, e.g. after the application
+    /// was moved. The file is overwritten rather than deleted so that existing pins are kept.
     /// </summary>
     public static void EnsureStartMenuShortcut(bool force = false)
     {
-        var shellType = Type.GetTypeFromProgID("WScript.Shell") ?? throw new InvalidOperationException("WScript.Shell not available.");
-        dynamic shell = Activator.CreateInstance(shellType)!;
+        if (!force && IsShortcutCurrent()) return;
+        var link = (IShellLinkW)new ShellLink();
         try
         {
-            dynamic link = shell.CreateShortcut(StartMenuShortcutPath);
-            if (!force && File.Exists(StartMenuShortcutPath) && string.Equals((string)link.TargetPath, ExecutablePath, StringComparison.OrdinalIgnoreCase)) return;
-            link.TargetPath = ExecutablePath;
-            link.WorkingDirectory = Path.GetDirectoryName(ExecutablePath);
-            link.Description = "Launch Edge profiles or switch to their windows";
-            link.IconLocation = $"{ExecutablePath},0";
-            link.Save();
+            var file = (IPersistFile)link;
+            var properties = (IPropertyStore)link;
+            link.SetPath(ExecutablePath);
+            link.SetWorkingDirectory(Path.GetDirectoryName(ExecutablePath)!);
+            link.SetDescription("Launch Edge profiles or switch to their windows");
+            link.SetIconLocation(ExecutablePath, 0);
+            SetAppUserModelId(properties, AppUserModelId);
+            file.Save(StartMenuShortcutPath, true);
             AppLog.Write($"Start menu shortcut created: {StartMenuShortcutPath}");
         }
-        finally { Marshal.FinalReleaseComObject(shell); }
+        finally { Marshal.FinalReleaseComObject(link); }
+    }
+
+    /// <summary>Does the shortcut exist with the right target and AppUserModelID?</summary>
+    private static bool IsShortcutCurrent()
+    {
+        if (!File.Exists(StartMenuShortcutPath)) return false;
+        var link = (IShellLinkW)new ShellLink();
+        try
+        {
+            ((IPersistFile)link).Load(StartMenuShortcutPath, 0);
+            var target = new StringBuilder(1024);
+            link.GetPath(target, target.Capacity, IntPtr.Zero, 0);
+            return string.Equals(target.ToString(), ExecutablePath, StringComparison.OrdinalIgnoreCase) &&
+                GetAppUserModelId((IPropertyStore)link) == AppUserModelId;
+        }
+        finally { Marshal.FinalReleaseComObject(link); }
+    }
+
+    /// <summary>Removes shortcut and autostart entry; called by the uninstaller.</summary>
+    public static void RemoveIntegration()
+    {
+        try { File.Delete(StartMenuShortcutPath); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+        if (IsAutostartEnabled()) SetAutostart(false);
+    }
+
+    private static readonly PropertyKey AppUserModelIdKey = new(new Guid("9F4C2855-9F79-4B39-A8D0-E1D42DE1D5F3"), 5);
+    private const ushort VT_LPWSTR = 31;
+
+    private static string? GetAppUserModelId(IPropertyStore properties)
+    {
+        var key = AppUserModelIdKey;
+        properties.GetValue(ref key, out var value);
+        try { return value.Type == VT_LPWSTR ? Marshal.PtrToStringUni(value.Pointer) : null; }
+        finally { PropVariantClear(ref value); }
+    }
+
+    private static void SetAppUserModelId(IPropertyStore properties, string appId)
+    {
+        var key = AppUserModelIdKey;
+        var value = new PropVariant { Type = VT_LPWSTR, Pointer = Marshal.StringToCoTaskMemUni(appId) };
+        try
+        {
+            properties.SetValue(ref key, ref value);
+            properties.Commit();
+        }
+        finally { PropVariantClear(ref value); }
+    }
+
+    [DllImport("ole32.dll")] private static extern int PropVariantClear(ref PropVariant value);
+
+    [ComImport, Guid("00021401-0000-0000-C000-000000000046")]
+    private class ShellLink;
+
+    [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("000214F9-0000-0000-C000-000000000046")]
+    private interface IShellLinkW
+    {
+        void GetPath([MarshalAs(UnmanagedType.LPWStr)] StringBuilder file, int size, IntPtr findData, uint flags);
+        void GetIDList(out IntPtr idList);
+        void SetIDList(IntPtr idList);
+        void GetDescription([MarshalAs(UnmanagedType.LPWStr)] StringBuilder name, int size);
+        void SetDescription([MarshalAs(UnmanagedType.LPWStr)] string name);
+        void GetWorkingDirectory([MarshalAs(UnmanagedType.LPWStr)] StringBuilder dir, int size);
+        void SetWorkingDirectory([MarshalAs(UnmanagedType.LPWStr)] string dir);
+        void GetArguments([MarshalAs(UnmanagedType.LPWStr)] StringBuilder args, int size);
+        void SetArguments([MarshalAs(UnmanagedType.LPWStr)] string args);
+        void GetHotkey(out short hotkey);
+        void SetHotkey(short hotkey);
+        void GetShowCmd(out int showCmd);
+        void SetShowCmd(int showCmd);
+        void GetIconLocation([MarshalAs(UnmanagedType.LPWStr)] StringBuilder path, int size, out int index);
+        void SetIconLocation([MarshalAs(UnmanagedType.LPWStr)] string path, int index);
+        void SetRelativePath([MarshalAs(UnmanagedType.LPWStr)] string path, uint reserved);
+        void Resolve(IntPtr hwnd, uint flags);
+        void SetPath([MarshalAs(UnmanagedType.LPWStr)] string file);
+    }
+
+    [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("886D8EEB-8CF2-4446-8D02-CDBA1DBDCF99")]
+    private interface IPropertyStore
+    {
+        void GetCount(out uint count);
+        void GetAt(uint index, out PropertyKey key);
+        void GetValue(ref PropertyKey key, out PropVariant value);
+        void SetValue(ref PropertyKey key, ref PropVariant value);
+        void Commit();
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private readonly record struct PropertyKey(Guid FormatId, uint PropertyId);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct PropVariant
+    {
+        public ushort Type;
+        private ushort _reserved1, _reserved2, _reserved3;
+        public IntPtr Pointer;
+        private IntPtr _padding;
     }
 
     [DllImport("shlwapi.dll", CharSet = CharSet.Unicode)]

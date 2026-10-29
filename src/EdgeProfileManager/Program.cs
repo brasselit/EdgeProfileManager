@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using EdgeProfileManager.Core.Edge;
+using Velopack;
 
 namespace EdgeProfileManager;
 
@@ -15,8 +16,18 @@ internal static class Program
     [STAThread]
     private static int Main(string[] args)
     {
+        // Velopack runs its install/update/uninstall hooks here and exits the process afterwards.
+        var firstRun = false;
+        VelopackApp.Build()
+            .SetAppUserModelId(ShellIntegration.AppUserModelId)
+            .OnBeforeUninstallFastCallback(_ => ShellIntegration.RemoveIntegration())
+            .OnFirstRun(_ => firstRun = true)
+            .Run();
+        ShellIntegration.SetProcessAppUserModelId();
         RemoveInheritedVsCodeEnvironment();
-        var command = CommandLine.Parse(args);
+
+        // The setup starts the app right after installing: only go to the tray instead of showing the menu.
+        var command = firstRun ? new CommandLine(CommandKind.Background) : CommandLine.Parse(args);
         switch (command.Kind)
         {
             case CommandKind.Invalid:
@@ -36,7 +47,7 @@ internal static class Program
         }
         if (command.Kind == CommandKind.Exit) return 0;
 
-        return new App(command, instance).Run();
+        return new App(command, instance, firstRun).Run();
     }
 
     /// <summary>

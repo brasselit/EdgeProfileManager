@@ -1,0 +1,59 @@
+# Builds a release when a version tag (v1.2.3) is pushed:
+# tests, publish, Velopack setup and update packages, upload to GitHub Releases.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+env:
+  VPK_VERSION: 1.2.161   # keep in sync with the Velopack package in EdgeProfileManager.csproj
+  REPO_URL: https://github.com/${{ github.repository }}
+
+jobs:
+  release:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Version from tag
+        run: |
+          $version = '${{ github.ref_name }}'.TrimStart('v')
+          "VERSION=$version" >> $env:GITHUB_ENV
+
+      - name: Test
+        run: dotnet run --project tests/EdgeProfileManager.Tests -c Release
+
+      - name: Publish
+        run: dotnet publish src/EdgeProfileManager -c Release -r win-x64 --self-contained false -p:Version=$env:VERSION -o publish
+
+      - name: Install vpk
+        run: dotnet tool install -g vpk --version $env:VPK_VERSION
+
+      # Previous release for delta updates; there is none before the first release.
+      - name: Download previous release
+        continue-on-error: true
+        run: vpk download github --repoUrl $env:REPO_URL --token ${{ secrets.GITHUB_TOKEN }} -o releases
+
+      # No Velopack shortcuts: the app maintains its own Start menu shortcut with its AppUserModelID.
+      - name: Pack
+        run: >
+          vpk pack -u EdgeProfileManager -v $env:VERSION -p publish -e EdgeProfileManager.exe -o releases
+          -r win-x64 --framework net10.0-x64-desktop
+          --packTitle "Edge Profile Manager" --packAuthors "Brassel IT"
+          -i src/EdgeProfileManager/Assets/app.ico --shortcuts ""
+
+      - name: Upload release
+        run: >
+          vpk upload github --repoUrl $env:REPO_URL --token ${{ secrets.GITHUB_TOKEN }} -o releases
+          --publish --releaseName "Edge Profile Manager $env:VERSION" --tag ${{ github.ref_name }}

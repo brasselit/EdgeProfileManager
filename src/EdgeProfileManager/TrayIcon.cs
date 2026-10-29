@@ -38,7 +38,17 @@ public sealed class TrayIcon : IDisposable
         {
             if (e.Button == MouseButtons.Left) ShowMenu();
         };
+        _notifyIcon.BalloonTipClicked += (_, _) =>
+        {
+            var action = _balloonAction;
+            _balloonAction = null;
+            action?.Invoke();
+        };
+        _notifyIcon.BalloonTipClosed += (_, _) => _balloonAction = null;
     }
+
+    /// <summary>Action for a click on the currently shown notification.</summary>
+    private Action? _balloonAction;
 
     public void ShowMenu()
     {
@@ -46,8 +56,14 @@ public sealed class TrayIcon : IDisposable
         else _menu.Show(Cursor.Position);
     }
 
-    public void ShowError(string message) => _notifyIcon.ShowBalloonTip(5000, "Edge Profile Manager", message, ToolTipIcon.Error);
-    public void ShowInfo(string message) => _notifyIcon.ShowBalloonTip(2000, "Edge Profile Manager", message, ToolTipIcon.Info);
+    public void ShowError(string message) => ShowBalloon(message, ToolTipIcon.Error, 5000, null);
+    public void ShowInfo(string message, int timeout = 2000, Action? onClick = null) => ShowBalloon(message, ToolTipIcon.Info, timeout, onClick);
+
+    private void ShowBalloon(string message, ToolTipIcon icon, int timeout, Action? onClick)
+    {
+        _balloonAction = onClick;
+        _notifyIcon.ShowBalloonTip(timeout, "Edge Profile Manager", message, icon);
+    }
 
     private void Build()
     {
@@ -135,6 +151,13 @@ public sealed class TrayIcon : IDisposable
             ? $"Virtual desktops: {_app.Desktops.DesktopCount} (current {_app.Desktops.CurrentDesktop + 1})"
             : "Virtual desktops: not available";
         settings.DropDownItems.Add(new ToolStripMenuItem(desktopState) { Enabled = false });
+        settings.DropDownItems.Add(new ToolStripSeparator());
+
+        settings.DropDownItems.Add("Check for updates…", null, (_, _) => _ = _app.CheckForUpdatesAsync(interactive: true));
+        var autoUpdate = new ToolStripMenuItem("Check for updates automatically") { Checked = _app.Config.CheckForUpdates };
+        autoUpdate.Click += (_, _) => _app.UpdateConfig(c => c.CheckForUpdates = !autoUpdate.Checked);
+        settings.DropDownItems.Add(autoUpdate);
+        settings.DropDownItems.Add(new ToolStripMenuItem($"Version {_app.Updater.Version}{(_app.Updater.IsInstalled ? "" : " (not installed)")}") { Enabled = false });
         return settings;
     }
 

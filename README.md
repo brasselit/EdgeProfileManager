@@ -58,6 +58,18 @@ The backup, restore and transfer dialogs offer these options where they apply (t
 
 If an affected Edge channel is running, the tool asks whether it should be closed. It first closes the windows normally and then ends any remaining processes.
 
+## Installation
+
+Download `EdgeProfileManager-win-Setup.exe` from the [latest release](https://github.com/brasselit/EdgeProfileManager/releases/latest) and run it.
+
+- Installs per user to `%LOCALAPPDATA%\EdgeProfileManager`; no administrator rights needed.
+- Installs the .NET 10 Desktop Runtime if it is missing.
+- After installation the tool starts in the tray. Pin it via **Settings › Pin to taskbar…** and enable autostart under **Settings › Start with Windows**.
+- **Updates:** The tool checks the GitHub releases at start and once a day and shows a notification when a new version is available; clicking it installs the update and restarts the tool. **Settings › Check for updates…** checks manually; automatic checks can be turned off there as well.
+- Uninstall via Windows **Settings › Apps**. This also removes the Start menu shortcut and the autostart entry; `config.json` is kept.
+
+The setup is not code-signed yet, so Windows SmartScreen may warn on first start (**More info › Run anyway**).
+
 ## Build and run
 
 ```powershell
@@ -65,13 +77,16 @@ dotnet build
 .\src\EdgeProfileManager\bin\Debug\net10.0-windows\EdgeProfileManager.exe
 ```
 
-For a fixed install location:
+A build started this way points the Start menu shortcut to itself; updates are only available in the installed version.
+
+### Release
+
+Pushing a version tag builds and publishes a release with GitHub Actions ([release.yml](.github/workflows/release.yml)): tests, `dotnet publish`, setup and update packages with [Velopack](https://velopack.io), upload to GitHub Releases.
 
 ```powershell
-dotnet publish src/EdgeProfileManager -c Release -o "$env:LOCALAPPDATA\Programs\EdgeProfileManager"
+git tag v0.1.0
+git push origin v0.1.0
 ```
-
-Then start it from there. The Start menu shortcut is automatically pointed to the new path. Enable autostart in the tray under **Settings › Start with Windows**.
 
 ### Command line
 
@@ -96,6 +111,7 @@ File: `%APPDATA%\EdgeProfileManager\config.json`. On first start it is created w
   "showUnassigned": true,             // profiles not in the menu appear under "Unassigned"
   "jumpListUnassigned": false,        // ... and in the Jump List as well
   "jumpListStyle": "categories",      // categories | tasks
+  "checkForUpdates": true,            // look for new releases at start and once a day
   "menu": [
     { "group": "Customers", "children": [
       { "profile": "Stable/Profile 3", "label": "Customer A", "desktop": 2 },

@@ -11,21 +11,31 @@ namespace EdgeProfileManager;
 /// <summary>Tray application: keeps configuration, profiles, tray menu and jump list up to date.</summary>
 public sealed class App : Application
 {
+    private static readonly TimeSpan UpdateCheckDelay = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan UpdateCheckInterval = TimeSpan.FromDays(1);
+
     private readonly CommandLine _initialCommand;
     private readonly SingleInstance _instance;
+    private readonly bool _firstRun;
     private readonly List<FileSystemWatcher> _profileWatchers = [];
     private ConfigStore _configStore = null!;
     private JumpListBuilder _jumpList = null!;
     private TrayIcon _tray = null!;
     private Timer? _profileDebounce;
+    private Timer? _updateTimer;
+    private string? _notifiedVersion;
+    private bool _updating;
     private ManagementWindow? _managementWindow;
 
-    public App(CommandLine initialCommand, SingleInstance instance)
+    public App(CommandLine initialCommand, SingleInstance instance, bool firstRun)
     {
         _initialCommand = initialCommand;
         _instance = instance;
+        _firstRun = firstRun;
         ShutdownMode = ShutdownMode.OnExplicitShutdown;
     }
+
+    public Updater Updater { get; } = new();
 
     public EdgeEnvironment Environment { get; } = EdgeEnvironment.Default;
     public ProfileDiscovery Discovery { get; private set; } = null!;
@@ -45,7 +55,7 @@ public sealed class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
-        AppLog.Write($"Start ({ShellIntegration.ExecutablePath})");
+        AppLog.Write($"Start {Updater.Version} ({ShellIntegration.ExecutablePath})");
         DispatcherUnhandledException += (_, args) =>
         {
             AppLog.Write($"Unhandled error: {args.Exception}");
@@ -74,12 +84,25 @@ public sealed class App : Application
 
         _instance.StartServer(args => Dispatcher.BeginInvoke(() => Execute(CommandLine.Parse(args))));
         Execute(_initialCommand);
+
+        if (_firstRun)
+        {
+            _tray.ShowInfo("Edge Profile Manager is running in the tray. Use Settings › Pin to taskbar… to pin it.", 10000);
+        }
+        if (Updater.IsInstalled)
+        {
+            _updateTimer = new Timer(_ => Dispatcher.BeginInvoke(async () =>
+            {
+                if (Config.CheckForUpdates) await CheckForUpdatesAsync(interactive: false);
+            }), null, UpdateCheckDelay, UpdateCheckInterval);
+        }
     }
 
     protected override void OnExit(ExitEventArgs e)
     {
         foreach (var watcher in _profileWatchers) watcher.Dispose();
         _profileDebounce?.Dispose();
+        _updateTimer?.Dispose();
         _configStore.Dispose();
         _tray.Dispose();
         AppLog.Write("Exited");
@@ -139,6 +162,55 @@ public sealed class App : Application
         }
         if (_managementWindow.WindowState == WindowState.Minimized) _managementWindow.WindowState = WindowState.Normal;
         _managementWindow.Activate();
+    }
+
+    /// <summary>
+    /// Looks for a new release. In the background only a notification is shown (once per version);
+    /// clicking it, or a manual check, asks whether to install and restart.
+    /// </summary>
+    public async Task CheckForUpdatesAsync(bool interactive)
+    {
+        if (_updating) return;
+        if (!Updater.IsInstalled)
+        {
+            if (interactive) MessageBox.Show("Updates are only available in the installed version (Setup.exe from the GitHub releases).",
+                "Edge Profile Manager", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+        _updating = true;
+        try
+        {
+            var update = await Updater.CheckAsync();
+            if (update is null)
+            {
+                if (interactive) _tray.ShowInfo($"Edge Profile Manager {Updater.Version} is up to date.");
+                return;
+            }
+            var version = update.TargetFullRelease.Version.ToString();
+            AppLog.Write($"Update available: {version}");
+            if (!interactive)
+            {
+                if (_notifiedVersion == version) return;
+                _notifiedVersion = version;
+                _tray.ShowInfo($"Version {version} is available. Click here to install it.", 15000,
+                    () => _ = CheckForUpdatesAsync(interactive: true));
+                return;
+            }
+            if (MessageBox.Show($"Install Edge Profile Manager {version} now (currently {Updater.Version})?\n\nThe app restarts in the tray afterwards.",
+                    "Edge Profile Manager", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
+            _tray.ShowInfo($"Downloading version {version} …");
+            AppLog.Write($"Installing update {version}");
+            await Updater.InstallAsync(update);
+        }
+        catch (Exception ex)
+        {
+            AppLog.Write($"Update check failed: {ex}");
+            if (interactive) _tray.ShowError($"Update failed: {ex.Message}");
+        }
+        finally
+        {
+            _updating = false;
+        }
     }
 
     /// <summary>Changes the configuration, saves it and updates menu and jump list.</summary>
