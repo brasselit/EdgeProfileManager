@@ -18,6 +18,9 @@ public sealed class AppConfig
 
     public JumpListStyle JumpListStyle { get; set; } = JumpListStyle.Categories;
 
+    /// <summary>Check the GitHub releases for a new version at start and once a day.</summary>
+    public bool CheckForUpdates { get; set; } = true;
+
     /// <summary>Program for "Edit configuration"; empty = file association, VS Code or Notepad.</summary>
     public string? Editor { get; set; }
 

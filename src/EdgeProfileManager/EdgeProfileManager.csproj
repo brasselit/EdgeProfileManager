@@ -15,6 +15,10 @@
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
     <AssemblyTitle>Edge Profile Manager</AssemblyTitle>
     <Product>Edge Profile Manager</Product>
+    <!-- The release workflow overrides the version from the Git tag (v1.2.3 → 1.2.3). -->
+    <Version>0.1.0</Version>
+    <Company>Brassel IT</Company>
+    <Copyright>Copyright 2026 Brassel IT</Copyright>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <!-- DPI awareness deliberately comes from the manifest, since WPF and not WinForms starts the application. -->
     <NoWarn>$(NoWarn);WFO0003</NoWarn>
@@ -35,15 +39,17 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Velopack" Version="1.2.161" />
+  </ItemGroup>
+
   <!--
     A running tray instance from this output folder locks the DLLs. Stop it before deleting (Clean,
     Rebuild) and before copying, whether the build comes from VS Code, C# Dev Kit or the
     console. Instances in other locations (e.g. an installed release version) are left alone.
   -->
-  <Target Name="StopRunningInstance" BeforeTargets="CoreClean;_CopyFilesMarkedCopyLocal;CopyFilesToOutputDirectory"
-          Condition="'$(OS)' == 'Windows_NT' And '$(DesignTimeBuild)' != 'true' And Exists('$(TargetDir)$(TargetName).exe')">
-    <Exec Command="powershell.exe -NoProfile -NonInteractive -Command &quot;Get-Process '$(TargetName)' -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq '$(TargetDir)$(TargetName).exe' } | ForEach-Object { $_.Kill(); [void]$_.WaitForExit(5000) }; exit 0&quot;"
-          ContinueOnError="true" StandardOutputImportance="low" />
+  <Target Name="StopRunningInstance" BeforeTargets="CoreClean;_CopyFilesMarkedCopyLocal;CopyFilesToOutputDirectory" Condition="'$(OS)' == 'Windows_NT' And '$(DesignTimeBuild)' != 'true' And Exists('$(TargetDir)$(TargetName).exe')">
+    <Exec Command="powershell.exe -NoProfile -NonInteractive -Command &quot;Get-Process '$(TargetName)' -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq '$(TargetDir)$(TargetName).exe' } | ForEach-Object { $_.Kill(); [void]$_.WaitForExit(5000) }; exit 0&quot;" ContinueOnError="true" StandardOutputImportance="low" />
   </Target>
 
 </Project>
