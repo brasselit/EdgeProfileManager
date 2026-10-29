@@ -58,7 +58,7 @@ public sealed class TrayIcon : IDisposable
         if (_app.Menu.Nodes.Count == 0) _menu.Items.Add(new ToolStripMenuItem("Keine Edge-Profile gefunden") { Enabled = false });
 
         _menu.Items.Add(new ToolStripSeparator());
-        _menu.Items.Add("Profile verwalten…", null, (_, _) => _app.ShowManagementWindow());
+        _menu.Items.Add("Profile und Menü verwalten…", null, (_, _) => _app.ShowManagementWindow());
         _menu.Items.Add(BuildSettingsMenu());
         _menu.Items.Add("Beenden", null, (_, _) => _app.Shutdown());
         _menu.ResumeLayout();

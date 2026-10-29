@@ -15,7 +15,8 @@ public static class ProfileColorDialog
         ("Grün", 0x107C10), ("Türkis", 0x038387), ("Grau", 0x69797E), ("Marine", 0x243A5E),
     ];
 
-    public static int? Show(Window owner, string profileName, int? current)
+    /// <summary>Liefert die gewählte Farbe (<c>Rgb</c> null = „Keine Farbe“) oder null bei Abbruch.</summary>
+    public static ProfileColorChoice? Show(Window owner, string profileName, int? current)
     {
         var dialog = new Window
         {
@@ -28,11 +29,11 @@ public static class ProfileColorDialog
             FontSize = owner.FontSize,
             ShowInTaskbar = false,
         };
-        int? result = null;
+        ProfileColorChoice? result = null;
         var panel = new StackPanel { Margin = new Thickness(20) };
         panel.Children.Add(new TextBlock
         {
-            Text = "Setzt das Farbdesign und die Profilfarbe in Edge. Edge muss dafür geschlossen sein.",
+            Text = "Setzt das Farbdesign und die Profilfarbe in Edge oder entfernt sie mit „Keine Farbe“. Edge muss dafür geschlossen sein.",
             TextWrapping = TextWrapping.Wrap,
             MaxWidth = 360,
             Margin = new Thickness(0, 0, 0, 12),
@@ -52,7 +53,7 @@ public static class ProfileColorDialog
                 BorderBrush = rgb == current ? Brushes.Black : Brushes.White,
                 Cursor = System.Windows.Input.Cursors.Hand,
             };
-            swatch.Click += (_, _) => { result = rgb; dialog.DialogResult = true; };
+            swatch.Click += (_, _) => { result = new ProfileColorChoice(rgb); dialog.DialogResult = true; };
             swatches.Children.Add(swatch);
         }
         panel.Children.Add(swatches);
@@ -64,10 +65,20 @@ public static class ProfileColorDialog
             using var picker = new System.Windows.Forms.ColorDialog { FullOpen = true, AnyColor = true };
             if (current is { } c) picker.Color = System.Drawing.Color.FromArgb(c | unchecked((int)0xFF000000));
             if (picker.ShowDialog() != System.Windows.Forms.DialogResult.OK) return;
-            result = picker.Color.ToArgb() & 0xFFFFFF;
+            result = new ProfileColorChoice(picker.Color.ToArgb() & 0xFFFFFF);
             dialog.DialogResult = true;
         };
+        var none = new Button
+        {
+            Content = "Keine Farbe",
+            Padding = new Thickness(10, 5, 10, 5),
+            Margin = new Thickness(0, 0, 8, 0),
+            ToolTip = "Farbdesign entfernen und zum Standarddesign von Edge zurückkehren",
+            IsEnabled = current is not null,
+        };
+        none.Click += (_, _) => { result = new ProfileColorChoice(null); dialog.DialogResult = true; };
         var cancel = new Button { Content = "Abbrechen", IsCancel = true, Padding = new Thickness(10, 5, 10, 5) };
+        buttons.Children.Add(none);
         buttons.Children.Add(custom);
         buttons.Children.Add(cancel);
         panel.Children.Add(buttons);
@@ -78,3 +89,6 @@ public static class ProfileColorDialog
 
     public static Color ToColor(int rgb) => Color.FromRgb((byte)(rgb >> 16), (byte)(rgb >> 8), (byte)rgb);
 }
+
+/// <summary>Ergebnis des Farbdialogs; <see cref="Rgb"/> null = keine Farbe.</summary>
+public sealed record ProfileColorChoice(int? Rgb);

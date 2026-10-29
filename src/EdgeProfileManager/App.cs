@@ -39,6 +39,9 @@ public sealed class App : Application
     public IReadOnlyList<EdgeProfile> Profiles { get; private set; } = [];
     public ResolvedMenu Menu { get; private set; } = new([], new Dictionary<string, ProfileSettings>());
 
+    /// <summary>Nach jeder Aktualisierung von Konfiguration oder Profilen (auf dem UI-Thread).</summary>
+    public event Action? StateChanged;
+
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
@@ -138,11 +141,12 @@ public sealed class App : Application
         _managementWindow.Activate();
     }
 
-    /// <summary>Ändert die Konfiguration und speichert sie; der Datei-Watcher lädt sie danach neu.</summary>
+    /// <summary>Ändert die Konfiguration, speichert sie und aktualisiert Menü und Jump List.</summary>
     public void UpdateConfig(Action<AppConfig> change)
     {
         change(Config);
         _configStore.Save(Config);
+        RefreshProfiles();
     }
 
     /// <summary>Stellt Verweise in der Konfiguration um, z.B. nach dem Verschieben eines Profils.</summary>
@@ -150,7 +154,6 @@ public sealed class App : Application
     {
         var count = 0;
         UpdateConfig(c => count = MenuResolver.ReplaceProfileReference(c, oldKey, newKey));
-        RefreshProfiles();
         return count;
     }
 
@@ -182,6 +185,7 @@ public sealed class App : Application
         Menu = MenuResolver.Resolve(Config, Profiles);
         try { _jumpList.Update(Menu, Config.JumpListStyle); }
         catch (Exception ex) { AppLog.Write($"Jump List fehlgeschlagen: {ex.Message}"); }
+        StateChanged?.Invoke();
     }
 
     public void OpenFile(string path)

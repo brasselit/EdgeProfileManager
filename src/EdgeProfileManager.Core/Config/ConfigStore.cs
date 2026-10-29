@@ -20,6 +20,7 @@ public sealed class ConfigStore : IDisposable
 
     private FileSystemWatcher? _watcher;
     private Timer? _debounce;
+    private string? _lastWritten;
 
     public ConfigStore(string path) => Path = path;
 
@@ -28,7 +29,10 @@ public sealed class ConfigStore : IDisposable
 
     public string Path { get; }
 
-    /// <summary>Wird nach einer Änderung an der Datei ausgelöst (entprellt, auf einem Threadpool-Thread).</summary>
+    /// <summary>
+    /// Wird nach einer Änderung an der Datei ausgelöst (entprellt, auf einem Threadpool-Thread);
+    /// nicht für Änderungen, die <see cref="Save"/> selbst geschrieben hat.
+    /// </summary>
     public event Action? Changed;
 
     public static AppConfig Parse(string json) =>
@@ -49,13 +53,18 @@ public sealed class ConfigStore : IDisposable
     public void Save(AppConfig config)
     {
         Directory.CreateDirectory(System.IO.Path.GetDirectoryName(Path)!);
-        File.WriteAllText(Path, JsonSerializer.Serialize(config, JsonOptions));
+        var json = JsonSerializer.Serialize(config, JsonOptions);
+        _lastWritten = json;
+        File.WriteAllText(Path, json);
     }
 
     public void Watch()
     {
         if (_watcher is not null) return;
-        _debounce = new Timer(_ => Changed?.Invoke());
+        _debounce = new Timer(_ =>
+        {
+            if (!IsOwnWrite()) Changed?.Invoke();
+        });
         _watcher = new FileSystemWatcher(System.IO.Path.GetDirectoryName(Path)!, System.IO.Path.GetFileName(Path))
         {
             NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size,
@@ -65,6 +74,12 @@ public sealed class ConfigStore : IDisposable
         _watcher.Created += handler;
         _watcher.Renamed += (_, _) => _debounce.Change(500, Timeout.Infinite);
         _watcher.EnableRaisingEvents = true;
+    }
+
+    private bool IsOwnWrite()
+    {
+        try { return _lastWritten is not null && File.ReadAllText(Path) == _lastWritten; }
+        catch (IOException) { return false; }
     }
 
     /// <summary>Standard: eine Gruppe pro Edge-Channel mit allen Profilen.</summary>

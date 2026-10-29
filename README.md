@@ -17,19 +17,39 @@ Ein Tray- und Taskbar-Tool, um Edge-Profile aller Channels (Stable, Beta, Dev, C
   - Änderungen an `config.json` werden sofort übernommen.
   - Neue oder umbenannte Edge-Profile werden erkannt, weil das Tool die `Local State`-Dateien überwacht.
 
-## Profilverwaltung (Phase 3)
+## Profile und Menü verwalten (Phasen 3–5)
 
-Tray-Menü › **Profile verwalten…** oder `EdgeProfileManager.exe --manage` öffnet ein Fenster mit den Profilen aller Instanzen in Spalten. Profilfarben werden dort als farbiger Balken angezeigt.
+Tray-Menü › **Profile und Menü verwalten…** oder `EdgeProfileManager.exe --manage` öffnet das Menü-Board:
+
+- **Spalten** sind die Gruppen des Tray-Menüs: links „Hauptmenü“ (Profile ohne Gruppe), rechts „Nicht zugeordnet“.
+- **Karten** sind Profile, mit Profilfarbe, Avatar, Instanz, zugewiesenem Desktop und dem Hinweis „läuft“.
+- **Karte ziehen:**
+  - in eine andere Spalte: Gruppe wechseln
+  - auf eine Karte: davor einsortieren
+  - nach „Nicht zugeordnet“: aus dem Menü entfernen
+- **Gruppen:** Das Menü ⋯ einer Spalte bietet Umbenennen, Verschieben, Trennlinie, Untergruppe und Löschen. Neue Gruppen legst du mit **+ Gruppe** an.
+- Oben lässt sich die Ansicht auf eine Instanz filtern.
+- Jede Änderung wird sofort in `config.json` gespeichert; Tray-Menü und Jump List folgen direkt.
+
+Ein Klick auf eine Karte zeigt rechts die Details, getrennt in zwei Abschnitte.
+
+**Edge-Profil** – ändert Edge selbst, Edge muss dafür geschlossen sein (das Tool fragt nach):
 
 | Aktion | Beschreibung |
 |---|---|
-| Öffnen | Profil starten oder zu dessen Fenster wechseln (auch per Doppelklick) |
-| Neues Profil | Name, E-Mail und optional ein PNG-Avatar; die E-Mail landet in `customer-profile.json` |
-| Umbenennen, Avatar | Wie im Script: Änderungen in `Preferences` und `Local State` |
-| **Farbe** | Setzt das Farbdesign des Profils (wie „Darstellung › Farbe“ in Edge) sowie die Avatar- und Hervorhebungsfarbe. Auswahl aus einer Palette oder frei. Die Farbe erscheint auch als Punkt am Profil-Icon im Tray-Menü. |
-| Übertragen | Kopieren in eine andere Instanz (neues oder vorhandenes Zielprofil) oder **geprüft verschieben**: Jede Datei wird mit SHA256 geprüft, die Quelle erst danach gelöscht. Verweise in `config.json` werden automatisch nachgeführt. Auch per Drag-and-drop zwischen den Spalten möglich; Strg erzwingt Kopieren. |
-| Backup, Wiederherstellen | ZIP mit `meta.json`, kompatibel zu den Backups des Scripts. Umfang: ausgewähltes Profil, aktive Instanz oder alle Instanzen. |
-| Profilordner, Löschen | Profilordner im Explorer öffnen bzw. Profil löschen und aus `Local State` austragen. Löschen erst nach Rückfrage. |
+| Umbenennen, Avatar | Edit-Button neben Name bzw. Avatar; Änderungen in `Preferences` und `Local State` |
+| **Farbe** | Setzt das Farbdesign des Profils (wie „Darstellung › Farbe“ in Edge) sowie die Avatar- und Hervorhebungsfarbe. Auswahl aus einer Palette oder frei; „Keine Farbe“ stellt das Standarddesign wieder her. |
+| Übertragen ⇄ | Kopieren in eine andere Instanz (neues oder vorhandenes Zielprofil) oder **geprüft verschieben**: Jede Datei wird mit SHA256 geprüft, die Quelle erst danach gelöscht. Menüeinträge werden automatisch umgestellt. |
+| Öffnen, Neues Fenster | Profil starten bzw. zum Fenster wechseln (auch per Doppelklick auf die Karte) |
+| Backup, Profilordner, Löschen | Backup als ZIP mit `meta.json`, kompatibel zum Script. Löschen erst nach Rückfrage. |
+
+**Menü-Eintrag** – ändert nur `config.json`: Gruppe, Bezeichnung (leer = Edge-Name), Desktop, Verhalten bei offenem Fenster, Jump List, „Aus Menü entfernen“. Bei nicht zugeordneten Profilen steht hier „Aufnehmen in …“.
+
+In der Kopfzeile:
+- **+ Neues Profil**: Name, E-Mail und optional ein PNG-Avatar; die E-Mail landet in `customer-profile.json`
+- **Wiederherstellen**
+- **Backup …**: Umfang alle Instanzen, Instanz des ausgewählten Profils oder nur das ausgewählte Profil
+- **Einstellungen** (Zahnrad): Standardverhalten und Jump List
 
 Diese Optionen gelten für Backup, Restore und Übertragen:
 - **Nur lokale Daten**: überträgt Local Storage, IndexedDB usw. statt des ganzen Profils.
@@ -134,5 +154,5 @@ Das Testprojekt hat keine NuGet-Abhängigkeiten und bringt einen minimalen eigen
 
 ## Nächste Schritte
 
-- **Phase 3:** erledigt (siehe Profilverwaltung).
-- **Phase 4:** Grafischer Editor für den Menübaum.
+- **Phasen 3–5:** erledigt (siehe „Profile und Menü verwalten“).
+- **Phase 6:** Erster Release mit Setup und GitHub-Repository.
