@@ -1,0 +1,43 @@
+name: Bug report
+description: Something does not work as expected
+labels: [bug]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open the menu board
+        2. Drag a card to …
+        3. …
+  - type: input
+    id: version
+    attributes:
+      label: Edge Profile Manager version
+      description: Tray › Settings shows the version.
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      placeholder: "Windows 11 24H2"
+  - type: input
+    id: edge
+    attributes:
+      label: Edge channel(s) and version
+      placeholder: "Stable 141, Dev 143"
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: Relevant lines from tray › Settings › Open log. Remove anything private, such as profile names or email addresses.
+      render: text

@@ -81,12 +81,7 @@ A build started this way points the Start menu shortcut to itself; updates are o
 
 ### Release
 
-Pushing a version tag builds and publishes a release with GitHub Actions ([release.yml](.github/workflows/release.yml)): tests, `dotnet publish`, setup and update packages with [Velopack](https://velopack.io), upload to GitHub Releases.
-
-```powershell
-git tag v0.1.0
-git push origin v0.1.0
-```
+Pushing a version tag builds and publishes a release with GitHub Actions ([release.yml](.github/workflows/release.yml)): tests, `dotnet publish`, setup and update packages with [Velopack](https://velopack.io), upload to GitHub Releases. The release notes come from [CHANGELOG.md](CHANGELOG.md); see [CONTRIBUTING.md](CONTRIBUTING.md#releases-maintainers) for the steps.
 
 ### Command line
 
@@ -166,6 +161,10 @@ The test project has no NuGet dependencies and comes with a minimal test runner 
   - window lookup via AppUserModelID (`MSEdge`, `MSEdge.UserData.Profile1`, …)
   - launcher, configuration, virtual desktops, profile management
 - `src/EdgeProfileManager`: WPF/WinForms tray app with tray menu, Jump List, management window, single instance, autostart and Start menu shortcut
+
+## Contributing
+
+Bug reports, ideas and pull requests are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md). Changes per version are listed in the [CHANGELOG](CHANGELOG.md).
 
 ## License
 
