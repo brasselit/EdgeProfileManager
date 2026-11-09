@@ -1,7 +1,9 @@
 using System.Drawing;
+using System.Globalization;
 using System.Windows.Forms;
 using System.Reflection;
 using EdgeProfileManager.Core.Config;
+using EdgeProfileManager.Resources;
 
 namespace EdgeProfileManager;
 
@@ -71,12 +73,12 @@ public sealed class TrayIcon : IDisposable
         _menu.Items.Clear();
         var running = _app.GetRunningProfileKeys();
         AddNodes(_menu.Items, _app.Menu.Nodes, running);
-        if (_app.Menu.Nodes.Count == 0) _menu.Items.Add(new ToolStripMenuItem("No Edge profiles found") { Enabled = false });
+        if (_app.Menu.Nodes.Count == 0) _menu.Items.Add(new ToolStripMenuItem(Strings.Tray_NoProfiles) { Enabled = false });
 
         _menu.Items.Add(new ToolStripSeparator());
-        _menu.Items.Add("Manage profiles and menu…", null, (_, _) => _app.ShowManagementWindow());
+        _menu.Items.Add(Strings.Tray_ManageProfiles, null, (_, _) => _app.ShowManagementWindow());
         _menu.Items.Add(BuildSettingsMenu());
-        _menu.Items.Add("Exit", null, (_, _) => _app.Shutdown());
+        _menu.Items.Add(Strings.Tray_Exit, null, (_, _) => _app.Shutdown());
         _menu.ResumeLayout();
     }
 
@@ -110,10 +112,10 @@ public sealed class TrayIcon : IDisposable
         var profile = node.Profile;
         var item = new ToolStripMenuItem(node.Title, GetIcon(profile.IconPath, profile.Color))
         {
-            ToolTipText = $"Edge {profile.Channel} – {profile.Folder}" +
+            ToolTipText = string.Format(CultureInfo.CurrentCulture, Strings.Tray_ProfileToolTip, profile.Channel, profile.Folder) +
                 (profile.User is null ? "" : $"\n{profile.User}") +
-                (node.Settings.Desktop is null ? "" : $"\nDesktop: {node.Settings.Desktop}") +
-                (isRunning ? "\nRunning – click switches to the window, Shift+click opens a new one." : ""),
+                (node.Settings.Desktop is null ? "" : "\n" + string.Format(CultureInfo.CurrentCulture, Strings.Tray_ProfileDesktop, node.Settings.Desktop)) +
+                (isRunning ? "\n" + Strings.Tray_ProfileRunning : ""),
         };
         if (isRunning) item.Font = _runningFont;
         item.Click += (_, _) => _app.Open(profile.Key, newWindow: (Control.ModifierKeys & Keys.Shift) != 0);
@@ -122,42 +124,42 @@ public sealed class TrayIcon : IDisposable
 
     private ToolStripMenuItem BuildSettingsMenu()
     {
-        var settings = new ToolStripMenuItem("Settings");
-        settings.DropDownItems.Add("Edit configuration", null, (_, _) => _app.EditFile(_app.ConfigPath));
-        settings.DropDownItems.Add("Open configuration folder", null, (_, _) => _app.OpenFile(Path.GetDirectoryName(_app.ConfigPath)!));
-        settings.DropDownItems.Add("Reload", null, (_, _) => _app.LoadConfig(initial: false));
+        var settings = new ToolStripMenuItem(Strings.Settings_Menu);
+        settings.DropDownItems.Add(Strings.Settings_EditConfiguration, null, (_, _) => _app.EditFile(_app.ConfigPath));
+        settings.DropDownItems.Add(Strings.Settings_OpenConfigurationFolder, null, (_, _) => _app.OpenFile(Path.GetDirectoryName(_app.ConfigPath)!));
+        settings.DropDownItems.Add(Strings.Settings_Reload, null, (_, _) => _app.LoadConfig(initial: false));
         settings.DropDownItems.Add(new ToolStripSeparator());
 
-        var autostart = new ToolStripMenuItem("Start with Windows") { Checked = ShellIntegration.IsAutostartEnabled() };
+        var autostart = new ToolStripMenuItem(Strings.Settings_StartWithWindows) { Checked = ShellIntegration.IsAutostartEnabled() };
         autostart.Click += (_, _) => ShellIntegration.SetAutostart(!autostart.Checked);
         settings.DropDownItems.Add(autostart);
         // Windows does not let programs pin themselves (access denied); so select the shortcut in
         // Explorer and show the required right-click command.
-        settings.DropDownItems.Add("Pin to Start…", null, (_, _) =>
-            RevealShortcut("Right-click \"Edge Profile Manager\" → \"Pin to Start\"."));
-        settings.DropDownItems.Add("Pin to taskbar…", null, (_, _) =>
-            RevealShortcut("Right-click \"Edge Profile Manager\" → \"Show more options\" → \"Pin to taskbar\"."));
+        settings.DropDownItems.Add(Strings.Settings_PinToStart, null, (_, _) => RevealShortcut(Strings.Pin_StartInstruction));
+        settings.DropDownItems.Add(Strings.Settings_PinToTaskbar, null, (_, _) => RevealShortcut(Strings.Pin_TaskbarInstruction));
         settings.DropDownItems.Add(new ToolStripSeparator());
 
-        settings.DropDownItems.Add("Window diagnostics", null, (_, _) =>
+        settings.DropDownItems.Add(Strings.Settings_WindowDiagnostics, null, (_, _) =>
         {
             var file = Path.Combine(AppLog.Directory, "windows.txt");
             Directory.CreateDirectory(AppLog.Directory);
             File.WriteAllText(file, ShellIntegration.DescribeWindows(_app.Discovery, _app.Finder));
             _app.EditFile(file);
         });
-        settings.DropDownItems.Add("Open log", null, (_, _) => _app.EditFile(AppLog.FilePath));
+        settings.DropDownItems.Add(Strings.Settings_OpenLog, null, (_, _) => _app.EditFile(AppLog.FilePath));
         var desktopState = _app.Desktops.IsAvailable
-            ? $"Virtual desktops: {_app.Desktops.DesktopCount} (current {_app.Desktops.CurrentDesktop + 1})"
-            : "Virtual desktops: not available";
+            ? string.Format(CultureInfo.CurrentCulture, Strings.Settings_VirtualDesktops, _app.Desktops.DesktopCount, _app.Desktops.CurrentDesktop + 1)
+            : Strings.Settings_VirtualDesktopsUnavailable;
         settings.DropDownItems.Add(new ToolStripMenuItem(desktopState) { Enabled = false });
         settings.DropDownItems.Add(new ToolStripSeparator());
 
-        settings.DropDownItems.Add("Check for updates…", null, (_, _) => _ = _app.CheckForUpdatesAsync(interactive: true));
-        var autoUpdate = new ToolStripMenuItem("Check for updates automatically") { Checked = _app.Config.CheckForUpdates };
+        settings.DropDownItems.Add(Strings.Settings_CheckForUpdates, null, (_, _) => _ = _app.CheckForUpdatesAsync(interactive: true));
+        var autoUpdate = new ToolStripMenuItem(Strings.Settings_CheckForUpdatesAutomatically) { Checked = _app.Config.CheckForUpdates };
         autoUpdate.Click += (_, _) => _app.UpdateConfig(c => c.CheckForUpdates = !autoUpdate.Checked);
         settings.DropDownItems.Add(autoUpdate);
-        settings.DropDownItems.Add(new ToolStripMenuItem($"Version {_app.Updater.Version}{(_app.Updater.IsInstalled ? "" : " (not installed)")}") { Enabled = false });
+        var version = string.Format(CultureInfo.CurrentCulture,
+            _app.Updater.IsInstalled ? Strings.Settings_Version : Strings.Settings_VersionNotInstalled, _app.Updater.Version);
+        settings.DropDownItems.Add(new ToolStripMenuItem(version) { Enabled = false });
         return settings;
     }
 
@@ -167,7 +169,7 @@ public sealed class TrayIcon : IDisposable
         {
             ShellIntegration.EnsureStartMenuShortcut(force: true);
             ShellIntegration.RevealInExplorer(ShellIntegration.StartMenuShortcutPath);
-            _notifyIcon.ShowBalloonTip(15000, "Pin", instruction, ToolTipIcon.Info);
+            _notifyIcon.ShowBalloonTip(15000, Strings.Pin_Title, instruction, ToolTipIcon.Info);
         }
         catch (Exception ex)
         {

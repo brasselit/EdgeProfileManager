@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using EdgeProfileManager.Core.Resources;
 
 namespace EdgeProfileManager.Core.Config;
 
@@ -17,6 +18,9 @@ public sealed class AppConfig
     public bool JumpListUnassigned { get; set; }
 
     public JumpListStyle JumpListStyle { get; set; } = JumpListStyle.Categories;
+
+    /// <summary>UI language, e.g. "en" or "de"; empty = Windows display language. Applied at start.</summary>
+    public string? Language { get; set; }
 
     /// <summary>Check the GitHub releases for a new version at start and once a day.</summary>
     public bool CheckForUpdates { get; set; } = true;
@@ -77,7 +81,7 @@ internal sealed class DesktopTargetConverter : JsonConverter<DesktopTarget>
         JsonTokenType.String when int.TryParse(reader.GetString(), out var n) => new DesktopTarget(n, null),
         JsonTokenType.String => new DesktopTarget(null, reader.GetString()),
         JsonTokenType.Null => null,
-        _ => throw new JsonException("desktop must be a number or a name."),
+        _ => throw new JsonException(Strings.Config_DesktopInvalid),
     };
 
     public override void Write(Utf8JsonWriter writer, DesktopTarget value, JsonSerializerOptions options)

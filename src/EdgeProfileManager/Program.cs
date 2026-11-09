@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using EdgeProfileManager.Core.Config;
 using EdgeProfileManager.Core.Edge;
 using Velopack;
 
@@ -25,6 +26,7 @@ internal static class Program
             .Run();
         ShellIntegration.SetProcessAppUserModelId();
         RemoveInheritedVsCodeEnvironment();
+        Localization.Apply(ConfigStore.ReadLanguage(ConfigStore.DefaultPath));
 
         // The setup starts the app right after installing: only go to the tray instead of showing the menu.
         var command = firstRun ? new CommandLine(CommandKind.Background) : CommandLine.Parse(args);

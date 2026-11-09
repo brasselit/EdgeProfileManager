@@ -2,6 +2,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using EdgeProfileManager.Core.Edge;
+using EdgeProfileManager.Resources;
 using Microsoft.Win32;
 
 namespace EdgeProfileManager;
@@ -43,7 +44,7 @@ public static class ShellIntegration
             var properties = (IPropertyStore)link;
             link.SetPath(ExecutablePath);
             link.SetWorkingDirectory(Path.GetDirectoryName(ExecutablePath)!);
-            link.SetDescription("Launch Edge profiles or switch to their windows");
+            link.SetDescription(Strings.Shortcut_Description);
             link.SetIconLocation(ExecutablePath, 0);
             SetAppUserModelId(properties, AppUserModelId);
             file.Save(StartMenuShortcutPath, true);

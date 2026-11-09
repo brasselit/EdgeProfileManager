@@ -1,7 +1,9 @@
 using System.Diagnostics;
+using System.Globalization;
 using EdgeProfileManager.Core.Config;
 using EdgeProfileManager.Core.Desktops;
 using EdgeProfileManager.Core.Interop;
+using EdgeProfileManager.Core.Resources;
 
 namespace EdgeProfileManager.Core.Edge;
 
@@ -40,9 +42,9 @@ public sealed class ProfileLauncher(EdgeEnvironment environment, ProfileDiscover
     public void Start(EdgeProfile profile)
     {
         var exe = environment.FindExecutable(profile.Channel)
-            ?? throw new InvalidOperationException($"Edge {profile.Channel} application not found.");
+            ?? throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Strings.Error_EdgeAppNotFound, profile.Channel));
         Process.Start(new ProcessStartInfo(exe) { ArgumentList = { $"--profile-directory={profile.Folder}" }, UseShellExecute = false })?.Dispose();
-        Log?.Invoke($"Started: Edge {profile.Channel} – {profile.Name} ({profile.Folder})");
+        Log?.Invoke(string.Format(CultureInfo.CurrentCulture, Strings.Log_Started, profile.Channel, profile.Name, profile.Folder));
     }
 
     /// <summary>
@@ -88,10 +90,10 @@ public sealed class ProfileLauncher(EdgeEnvironment environment, ProfileDiscover
             if (desktops.GetWindowDesktop(window.Handle) != desktop) desktops.MoveWindowToDesktop(window.Handle, desktop);
             if (desktops.CurrentDesktop != desktop) desktops.GoToDesktop(desktop);
             Activate(window.Handle);
-            Log?.Invoke($"Moved window of {profile.Name} to desktop {desktop + 1}.");
+            Log?.Invoke(string.Format(CultureInfo.CurrentCulture, Strings.Log_WindowMoved, profile.Name, desktop + 1));
             return;
         }
-        Log?.Invoke($"New window of {profile.Name} not found within {NewWindowTimeout.TotalSeconds:0} s.");
+        Log?.Invoke(string.Format(CultureInfo.CurrentCulture, Strings.Log_WindowNotFound, profile.Name, NewWindowTimeout.TotalSeconds));
     }
 
     /// <summary>Reliably brings another process's window to the foreground.</summary>

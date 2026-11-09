@@ -11,4 +11,15 @@
     <InternalsVisibleTo Include="EdgeProfileManager.Tests" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- User-visible texts; translations in Strings.<culture>.resx. The class is generated during the build. -->
+    <EmbeddedResource Update="Resources\Strings.resx">
+      <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+      <StronglyTypedNamespace>EdgeProfileManager.Core.Resources</StronglyTypedNamespace>
+      <StronglyTypedClassName>Strings</StronglyTypedClassName>
+      <StronglyTypedFileName>$(IntermediateOutputPath)Strings.g.cs</StronglyTypedFileName>
+      <PublicClass>true</PublicClass>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

@@ -1,3 +1,6 @@
+using System.Globalization;
+using EdgeProfileManager.Resources;
+
 namespace EdgeProfileManager;
 
 public enum CommandKind { ShowMenu, Background, Open, Manage, DumpWindows, Reload, Exit, Invalid }
@@ -19,7 +22,7 @@ public sealed record CommandLine(CommandKind Kind, string? ProfileKey = null, bo
             switch (args[i].ToLowerInvariant())
             {
                 case "--open":
-                    if (i + 1 >= args.Count) return Invalid("--open expects a profile reference such as \"Stable/Profile 1\".");
+                    if (i + 1 >= args.Count) return Invalid(Strings.CommandLine_OpenExpectsProfile);
                     kind = CommandKind.Open;
                     profile = args[++i];
                     break;
@@ -30,7 +33,7 @@ public sealed record CommandLine(CommandKind Kind, string? ProfileKey = null, bo
                 case "--dump-windows": kind = CommandKind.DumpWindows; break;
                 case "--reload": kind = CommandKind.Reload; break;
                 case "--exit": kind = CommandKind.Exit; break;
-                default: return Invalid($"Unknown argument: {args[i]}");
+                default: return Invalid(string.Format(CultureInfo.CurrentCulture, Strings.CommandLine_UnknownArgument, args[i]));
             }
         }
         return new(kind, profile, newWindow);
@@ -38,13 +41,5 @@ public sealed record CommandLine(CommandKind Kind, string? ProfileKey = null, bo
 
     private static CommandLine Invalid(string error) => new(CommandKind.Invalid, Error: error);
 
-    public static string Usage =>
-        """
-        EdgeProfileManager.exe                     Show the profile menu (starts in the tray if needed)
-        EdgeProfileManager.exe --background        Start in the tray only (autostart)
-        EdgeProfileManager.exe --open "Stable/Profile 1" [--new-window]
-        EdgeProfileManager.exe --manage            Open the management window
-        EdgeProfileManager.exe --dump-windows      List Edge windows with profile and AUMID
-        EdgeProfileManager.exe --reload | --exit
-        """;
+    public static string Usage => Strings.CommandLine_Usage;
 }

@@ -1,6 +1,8 @@
 using System.Diagnostics;
+using System.Globalization;
 using EdgeProfileManager.Core.Edge;
 using EdgeProfileManager.Core.Interop;
+using EdgeProfileManager.Core.Resources;
 
 namespace EdgeProfileManager.Core.Management;
 
@@ -14,7 +16,7 @@ public interface IEdgeProcessGuard
 }
 
 public sealed class EdgeRunningException(EdgeChannel channel)
-    : InvalidOperationException($"Edge {channel} is still running. Please close it or let it be terminated.")
+    : InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Strings.Error_EdgeRunning, channel))
 {
     public EdgeChannel Channel { get; } = channel;
 }

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using EdgeProfileManager.Core.Edge;
+using EdgeProfileManager.Core.Resources;
 
 namespace EdgeProfileManager.Core.Config;
 
@@ -36,7 +37,14 @@ public sealed class ConfigStore : IDisposable
     public event Action? Changed;
 
     public static AppConfig Parse(string json) =>
-        JsonSerializer.Deserialize<AppConfig>(json, JsonOptions) ?? throw new JsonException("Configuration is empty.");
+        JsonSerializer.Deserialize<AppConfig>(json, JsonOptions) ?? throw new JsonException(Strings.Config_Empty);
+
+    /// <summary>The configured UI language, read before the application starts; null if not set or unreadable.</summary>
+    public static string? ReadLanguage(string path)
+    {
+        try { return File.Exists(path) ? Parse(File.ReadAllText(path)).Language : null; }
+        catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException) { return null; }
+    }
 
     /// <summary>Loads the configuration. If the file is missing, a default configuration is created and saved.</summary>
     public AppConfig LoadOrCreate(Func<AppConfig> createDefault)

@@ -1,18 +1,20 @@
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using EdgeProfileManager.Resources;
 
 namespace EdgeProfileManager.Dialogs;
 
 /// <summary>Color picker for a profile: fixed palette and custom color.</summary>
 public static class ProfileColorDialog
 {
-    /// <summary>Easily distinguishable colors, based on the Edge color themes.</summary>
-    public static readonly (string Name, int Rgb)[] Palette =
+    /// <summary>Easily distinguishable colors, based on the Edge color themes; names in the UI language.</summary>
+    public static (string Name, int Rgb)[] Palette =>
     [
-        ("Blue", 0x0F6CBD), ("Indigo", 0x4F6BED), ("Purple", 0x8764B8), ("Pink", 0xE3008C),
-        ("Red", 0xD13438), ("Orange", 0xCA5010), ("Yellow", 0xC19C00), ("Lime", 0x73AA24),
-        ("Green", 0x107C10), ("Teal", 0x038387), ("Gray", 0x69797E), ("Navy", 0x243A5E),
+        (Strings.Color_Blue, 0x0F6CBD), (Strings.Color_Indigo, 0x4F6BED), (Strings.Color_Purple, 0x8764B8), (Strings.Color_Pink, 0xE3008C),
+        (Strings.Color_Red, 0xD13438), (Strings.Color_Orange, 0xCA5010), (Strings.Color_Yellow, 0xC19C00), (Strings.Color_Lime, 0x73AA24),
+        (Strings.Color_Green, 0x107C10), (Strings.Color_Teal, 0x038387), (Strings.Color_Gray, 0x69797E), (Strings.Color_Navy, 0x243A5E),
     ];
 
     /// <summary>Returns the chosen color (<c>Rgb</c> null = "No color") or null if canceled.</summary>
@@ -20,7 +22,7 @@ public static class ProfileColorDialog
     {
         var dialog = new Window
         {
-            Title = $"Color for {profileName}",
+            Title = string.Format(CultureInfo.CurrentCulture, Strings.Color_Title, profileName),
             Owner = owner,
             SizeToContent = SizeToContent.WidthAndHeight,
             ResizeMode = ResizeMode.NoResize,
@@ -33,7 +35,7 @@ public static class ProfileColorDialog
         var panel = new StackPanel { Margin = new Thickness(20) };
         panel.Children.Add(new TextBlock
         {
-            Text = "Sets the color theme and profile color in Edge, or removes them with \"No color\". Edge must be closed for this.",
+            Text = Strings.Color_Explanation,
             TextWrapping = TextWrapping.Wrap,
             MaxWidth = 360,
             Margin = new Thickness(0, 0, 0, 12),
@@ -47,7 +49,7 @@ public static class ProfileColorDialog
                 Width = 52,
                 Height = 52,
                 Margin = new Thickness(0, 0, 8, 8),
-                ToolTip = $"{name} (#{rgb:X6})",
+                ToolTip = string.Format(CultureInfo.CurrentCulture, Strings.Color_SwatchToolTip, name, rgb),
                 Background = new SolidColorBrush(ToColor(rgb)),
                 BorderThickness = new Thickness(rgb == current ? 3 : 1),
                 BorderBrush = rgb == current ? Brushes.Black : Brushes.White,
@@ -59,7 +61,7 @@ public static class ProfileColorDialog
         panel.Children.Add(swatches);
 
         var buttons = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 8, 0, 0) };
-        var custom = new Button { Content = "Custom color…", Padding = new Thickness(10, 5, 10, 5), Margin = new Thickness(0, 0, 8, 0) };
+        var custom = new Button { Content = Strings.Color_Custom, Padding = new Thickness(10, 5, 10, 5), Margin = new Thickness(0, 0, 8, 0) };
         custom.Click += (_, _) =>
         {
             using var picker = new System.Windows.Forms.ColorDialog { FullOpen = true, AnyColor = true };
@@ -70,14 +72,14 @@ public static class ProfileColorDialog
         };
         var none = new Button
         {
-            Content = "No color",
+            Content = Strings.Color_None,
             Padding = new Thickness(10, 5, 10, 5),
             Margin = new Thickness(0, 0, 8, 0),
-            ToolTip = "Remove the color theme and return to the default Edge theme",
+            ToolTip = Strings.Color_NoneToolTip,
             IsEnabled = current is not null,
         };
         none.Click += (_, _) => { result = new ProfileColorChoice(null); dialog.DialogResult = true; };
-        var cancel = new Button { Content = "Cancel", IsCancel = true, Padding = new Thickness(10, 5, 10, 5) };
+        var cancel = new Button { Content = Strings.Color_Cancel, IsCancel = true, Padding = new Thickness(10, 5, 10, 5) };
         buttons.Children.Add(none);
         buttons.Children.Add(custom);
         buttons.Children.Add(cancel);

@@ -1,6 +1,8 @@
+using System.Globalization;
 using System.Windows.Shell;
 using EdgeProfileManager.Core.Config;
 using EdgeProfileManager.Core.Edge;
+using EdgeProfileManager.Resources;
 
 namespace EdgeProfileManager;
 
@@ -10,7 +12,6 @@ namespace EdgeProfileManager;
 /// </summary>
 public sealed class JumpListBuilder(EdgeEnvironment environment)
 {
-    private const string TopLevelCategory = "Profiles";
     private string? _signature;
 
     public void Update(ResolvedMenu menu, JumpListStyle style)
@@ -44,12 +45,13 @@ public sealed class JumpListBuilder(EdgeEnvironment environment)
         return new JumpTask
         {
             Title = node.Title,
-            Description = $"Edge {profile.Channel} – {profile.Name} ({profile.Folder}){(profile.User is null ? "" : $"\n{profile.User}")}",
+            Description = string.Format(CultureInfo.CurrentCulture, Strings.JumpList_Description, profile.Channel, profile.Name, profile.Folder) +
+                (profile.User is null ? "" : $"\n{profile.User}"),
             ApplicationPath = ShellIntegration.ExecutablePath,
             Arguments = $"--open \"{profile.Key}\"",
             IconResourcePath = profile.IconPath ?? environment.FindExecutable(profile.Channel) ?? ShellIntegration.ExecutablePath,
             IconResourceIndex = 0,
-            CustomCategory = style == JumpListStyle.Tasks ? null : groups.Count == 0 ? TopLevelCategory : string.Join(" › ", groups),
+            CustomCategory = style == JumpListStyle.Tasks ? null : groups.Count == 0 ? Strings.JumpList_Profiles : string.Join(" › ", groups),
         };
     }
 }

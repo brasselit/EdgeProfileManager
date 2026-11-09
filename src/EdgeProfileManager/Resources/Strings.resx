@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="App_FirstRun" xml:space="preserve">
+    <value>Edge Profile Manager is running in the tray. Use Settings › Pin to taskbar… to pin it.</value>
+  </data>
+  <data name="App_InvalidCommandLine" xml:space="preserve">
+    <value>Invalid command line.</value>
+  </data>
+  <data name="App_ProfileNotFound" xml:space="preserve">
+    <value>Profile '{0}' not found.</value>
+  </data>
+  <data name="App_ConfigReloaded" xml:space="preserve">
+    <value>Configuration reloaded.</value>
+  </data>
+  <data name="App_ConfigInvalid" xml:space="preserve">
+    <value>Invalid configuration, the last valid one stays active:
+{0}</value>
+  </data>
+  <data name="App_EditorFailed" xml:space="preserve">
+    <value>Editor '{0}' could not be started: {1}</value>
+  </data>
+  <data name="Update_NotInstalled" xml:space="preserve">
+    <value>Updates are only available in the installed version (Setup.exe from the GitHub releases).</value>
+  </data>
+  <data name="Update_UpToDate" xml:space="preserve">
+    <value>Edge Profile Manager {0} is up to date.</value>
+  </data>
+  <data name="Update_Available" xml:space="preserve">
+    <value>Version {0} is available. Click here to install it.</value>
+  </data>
+  <data name="Update_InstallPrompt" xml:space="preserve">
+    <value>Install Edge Profile Manager {0} now (currently {1})?
+
+The app restarts in the tray afterwards.</value>
+  </data>
+  <data name="Update_Downloading" xml:space="preserve">
+    <value>Downloading version {0} …</value>
+  </data>
+  <data name="Update_Failed" xml:space="preserve">
+    <value>Update failed: {0}</value>
+  </data>
+  <data name="Tray_NoProfiles" xml:space="preserve">
+    <value>No Edge profiles found</value>
+  </data>
+  <data name="Tray_ManageProfiles" xml:space="preserve">
+    <value>Manage profiles and menu…</value>
+  </data>
+  <data name="Tray_Exit" xml:space="preserve">
+    <value>Exit</value>
+  </data>
+  <data name="Tray_ProfileToolTip" xml:space="preserve">
+    <value>Edge {0} – {1}</value>
+  </data>
+  <data name="Tray_ProfileDesktop" xml:space="preserve">
+    <value>Desktop: {0}</value>
+  </data>
+  <data name="Tray_ProfileRunning" xml:space="preserve">
+    <value>Running – click switches to the window, Shift+click opens a new one.</value>
+  </data>
+  <data name="Settings_Menu" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Settings_EditConfiguration" xml:space="preserve">
+    <value>Edit configuration</value>
+  </data>
+  <data name="Settings_OpenConfigurationFolder" xml:space="preserve">
+    <value>Open configuration folder</value>
+  </data>
+  <data name="Settings_Reload" xml:space="preserve">
+    <value>Reload</value>
+  </data>
+  <data name="Settings_StartWithWindows" xml:space="preserve">
+    <value>Start with Windows</value>
+  </data>
+  <data name="Settings_PinToStart" xml:space="preserve">
+    <value>Pin to Start…</value>
+  </data>
+  <data name="Settings_PinToTaskbar" xml:space="preserve">
+    <value>Pin to taskbar…</value>
+  </data>
+  <data name="Settings_WindowDiagnostics" xml:space="preserve">
+    <value>Window diagnostics</value>
+  </data>
+  <data name="Settings_OpenLog" xml:space="preserve">
+    <value>Open log</value>
+  </data>
+  <data name="Settings_VirtualDesktops" xml:space="preserve">
+    <value>Virtual desktops: {0} (current {1})</value>
+  </data>
+  <data name="Settings_VirtualDesktopsUnavailable" xml:space="preserve">
+    <value>Virtual desktops: not available</value>
+  </data>
+  <data name="Settings_CheckForUpdates" xml:space="preserve">
+    <value>Check for updates…</value>
+  </data>
+  <data name="Settings_CheckForUpdatesAutomatically" xml:space="preserve">
+    <value>Check for updates automatically</value>
+  </data>
+  <data name="Settings_Version" xml:space="preserve">
+    <value>Version {0}</value>
+  </data>
+  <data name="Settings_VersionNotInstalled" xml:space="preserve">
+    <value>Version {0} (not installed)</value>
+  </data>
+  <data name="Pin_Title" xml:space="preserve">
+    <value>Pin</value>
+  </data>
+  <data name="Pin_StartInstruction" xml:space="preserve">
+    <value>Right-click "Edge Profile Manager" → "Pin to Start".</value>
+  </data>
+  <data name="Pin_TaskbarInstruction" xml:space="preserve">
+    <value>Right-click "Edge Profile Manager" → "Show more options" → "Pin to taskbar".</value>
+  </data>
+  <data name="CommandLine_OpenExpectsProfile" xml:space="preserve">
+    <value>--open expects a profile reference such as "Stable/Profile 1".</value>
+  </data>
+  <data name="CommandLine_UnknownArgument" xml:space="preserve">
+    <value>Unknown argument: {0}</value>
+  </data>
+  <data name="CommandLine_Usage" xml:space="preserve">
+    <value>EdgeProfileManager.exe                     Show the profile menu (starts in the tray if needed)
+EdgeProfileManager.exe --background        Start in the tray only (autostart)
+EdgeProfileManager.exe --open "Stable/Profile 1" [--new-window]
+EdgeProfileManager.exe --manage            Open the management window
+EdgeProfileManager.exe --dump-windows      List Edge windows with profile and AUMID
+EdgeProfileManager.exe --reload | --exit</value>
+  </data>
+  <data name="JumpList_Profiles" xml:space="preserve">
+    <value>Profiles</value>
+  </data>
+  <data name="JumpList_Description" xml:space="preserve">
+    <value>Edge {0} – {1} ({2})</value>
+  </data>
+  <data name="Shortcut_Description" xml:space="preserve">
+    <value>Launch Edge profiles or switch to their windows</value>
+  </data>
+  <data name="Color_Title" xml:space="preserve">
+    <value>Color for {0}</value>
+  </data>
+  <data name="Color_Explanation" xml:space="preserve">
+    <value>Sets the color theme and profile color in Edge, or removes them with "No color". Edge must be closed for this.</value>
+  </data>
+  <data name="Color_SwatchToolTip" xml:space="preserve">
+    <value>{0} (#{1:X6})</value>
+  </data>
+  <data name="Color_Custom" xml:space="preserve">
+    <value>Custom color…</value>
+  </data>
+  <data name="Color_None" xml:space="preserve">
+    <value>No color</value>
+  </data>
+  <data name="Color_NoneToolTip" xml:space="preserve">
+    <value>Remove the color theme and return to the default Edge theme</value>
+  </data>
+  <data name="Color_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Color_Blue" xml:space="preserve">
+    <value>Blue</value>
+  </data>
+  <data name="Color_Indigo" xml:space="preserve">
+    <value>Indigo</value>
+  </data>
+  <data name="Color_Purple" xml:space="preserve">
+    <value>Purple</value>
+  </data>
+  <data name="Color_Pink" xml:space="preserve">
+    <value>Pink</value>
+  </data>
+  <data name="Color_Red" xml:space="preserve">
+    <value>Red</value>
+  </data>
+  <data name="Color_Orange" xml:space="preserve">
+    <value>Orange</value>
+  </data>
+  <data name="Color_Yellow" xml:space="preserve">
+    <value>Yellow</value>
+  </data>
+  <data name="Color_Lime" xml:space="preserve">
+    <value>Lime</value>
+  </data>
+  <data name="Color_Green" xml:space="preserve">
+    <value>Green</value>
+  </data>
+  <data name="Color_Teal" xml:space="preserve">
+    <value>Teal</value>
+  </data>
+  <data name="Color_Gray" xml:space="preserve">
+    <value>Gray</value>
+  </data>
+  <data name="Color_Navy" xml:space="preserve">
+    <value>Navy</value>
+  </data>
+  <data name="Fields_Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Fields_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Fields_AllFiles" xml:space="preserve">
+    <value>All files</value>
+  </data>
+  <data name="Fields_FillIn" xml:space="preserve">
+    <value>Please fill in "{0}".</value>
+  </data>
+</root>

@@ -1,6 +1,8 @@
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
 using EdgeProfileManager.Core.Config;
+using EdgeProfileManager.Core.Resources;
 
 namespace EdgeProfileManager.Core.Desktops;
 
@@ -72,18 +74,18 @@ public sealed unsafe class VdaVirtualDesktopService : IVirtualDesktopService
         var path = Path.Combine(AppContext.BaseDirectory, LibraryName);
         if (!File.Exists(path))
         {
-            error = $"{LibraryName} not found ({path}). Desktop assignment is disabled.";
+            error = string.Format(CultureInfo.CurrentCulture, Strings.Desktops_DllNotFound, LibraryName, path);
             return new NullVirtualDesktopService();
         }
         try
         {
             var service = new VdaVirtualDesktopService(NativeLibrary.Load(path));
-            if (service.DesktopCount < 1) throw new InvalidOperationException("GetDesktopCount returned no desktop.");
+            if (service.DesktopCount < 1) throw new InvalidOperationException(Strings.Desktops_NoDesktop);
             return service;
         }
         catch (Exception ex)
         {
-            error = $"{LibraryName} could not be loaded: {ex.Message}";
+            error = string.Format(CultureInfo.CurrentCulture, Strings.Desktops_LoadFailed, LibraryName, ex.Message);
             return new NullVirtualDesktopService();
         }
     }

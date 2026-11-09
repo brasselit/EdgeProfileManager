@@ -31,6 +31,24 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- User-visible texts; translations in <name>.<culture>.resx. The classes are generated during the build. -->
+    <EmbeddedResource Update="Resources\Strings.resx">
+      <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+      <StronglyTypedNamespace>EdgeProfileManager.Resources</StronglyTypedNamespace>
+      <StronglyTypedClassName>Strings</StronglyTypedClassName>
+      <StronglyTypedFileName>$(IntermediateOutputPath)Strings.g.cs</StronglyTypedFileName>
+      <PublicClass>true</PublicClass>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\BoardStrings.resx">
+      <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+      <StronglyTypedNamespace>EdgeProfileManager.Resources</StronglyTypedNamespace>
+      <StronglyTypedClassName>BoardStrings</StronglyTypedClassName>
+      <StronglyTypedFileName>$(IntermediateOutputPath)BoardStrings.g.cs</StronglyTypedFileName>
+      <PublicClass>true</PublicClass>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Include="Assets\app.ico" LogicalName="app.ico" />
     <!-- Optional: VirtualDesktopAccessor.dll for desktop assignment (see README). -->
     <None Include="..\..\lib\VirtualDesktopAccessor.dll" Condition="Exists('..\..\lib\VirtualDesktopAccessor.dll')">
